@@ -7,5 +7,5 @@ mod data;
 mod utils;
 
 fn main() {
-    println!("Hello, world! again");
+    println!("Hello, world!");
 }
