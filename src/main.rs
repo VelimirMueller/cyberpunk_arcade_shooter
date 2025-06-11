@@ -5,7 +5,8 @@ mod ui;
 mod blockchain;
 mod data;
 mod utils;
+mod env;
 
 fn main() {
-    println!("Hello, world!");
+    app::main();
 }
