@@ -3,6 +3,8 @@ use crate::core::player::components::Player;
 use crate::env::{
     GROUND_Y,
     CEILING_Y,
+    LEFT_BOUND,
+    RIGHT_BOUND,
     MOVE_SPEED,
     ROTATE_SPEED,
     TIME_STEP
@@ -44,8 +46,12 @@ fn get_input_direction(input: &ButtonInput<KeyCode>) -> Vec3 {
 }
 
 fn apply_movement(transform: &mut Transform, direction: Vec3) -> () {
+    with_boundaries(transform, direction);
+}
+
+fn with_boundaries(transform: &mut Transform, direction: Vec3) -> () {
+
     let mut new_translation = transform.translation + direction.normalize_or_zero() * MOVE_SPEED * TIME_STEP;
-    // Clamp the position within bounds
     if new_translation.y < GROUND_Y {
         new_translation.y = GROUND_Y;
     }
@@ -53,6 +59,15 @@ fn apply_movement(transform: &mut Transform, direction: Vec3) -> () {
     if new_translation.y > CEILING_Y {
         new_translation.y = CEILING_Y;
     }
+
+    if new_translation.x < LEFT_BOUND {
+        new_translation.x = LEFT_BOUND;
+    }
+
+    if new_translation.x > RIGHT_BOUND {
+        new_translation.x = RIGHT_BOUND;
+    }
+
     transform.translation = new_translation;
 }
 
