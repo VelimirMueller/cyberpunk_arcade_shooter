@@ -85,8 +85,8 @@ pub(crate) fn spawn_player(
     mut commands: Commands,
 ) -> () {
     commands.spawn((
-        Player,
-        Transform::default(),
+        Player { current: 100, max: 100 },
+        Transform::from_xyz(-250.0, 0.0, 0.0),
         GlobalTransform::default(),
         Sprite {
             color: Color::srgb(1.2, 2.8, 1.2),
