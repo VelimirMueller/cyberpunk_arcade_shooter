@@ -9,7 +9,7 @@ pub(crate) fn spawn_barriers(
 ) -> () {
     // Spawn upper Barrier
     commands.spawn((Sprite {
-        color: Color::srgb(7.9, 0.2, 0.3),
+        color: Color::srgb(4.9, 0.2, 1.3),
         custom_size: Some(Vec2::new(3000.0, 10.0)),
         ..default()
     },
@@ -17,7 +17,7 @@ pub(crate) fn spawn_barriers(
     Barrier));
 
     commands.spawn((Sprite {
-        color: Color::srgb(7.9, 0.2, 0.3),
+        color: Color::srgb(4.9, 0.2, 1.3),
         custom_size: Some(Vec2::new(3000.0, 10.0)),
         ..default()
     },
