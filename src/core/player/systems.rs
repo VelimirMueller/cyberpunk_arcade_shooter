@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::app::GameEntity;
 use crate::core::player::components::Player;
 use crate::env::{
     GROUND_Y,
@@ -85,7 +86,8 @@ pub(crate) fn spawn_player(
     mut commands: Commands,
 ) -> () {
     commands.spawn((
-        Player { current: 100, max: 100 },
+        Player { current: 100, max: 100, last_collision_time: None },
+        GameEntity,
         Transform::from_xyz(-250.0, 0.0, 0.0),
         GlobalTransform::default(),
         Sprite {

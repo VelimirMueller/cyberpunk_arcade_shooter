@@ -1,6 +1,4 @@
-mod crafting;
-mod hacking;
-mod trading;
-mod combat;
+pub(crate) mod combat;
 mod inventory;
 pub(crate) mod collision;
+pub mod game_over;
