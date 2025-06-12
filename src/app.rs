@@ -3,22 +3,38 @@ use bevy::core_pipeline::core_2d::Camera2d;
 use crate::core::player::systems::*;
 use crate::core::player::components::Player;
 use crate::core::world::barriers::systems::spawn_barriers;
-use crate::core::enemies::systems::{create_enemies, enemy_rotation};
+use crate::core::enemies::systems::{create_enemies, enemy_movement_system, enemy_rotation};
 use crate::systems::collision::detect_collisions;
 use bevy::core_pipeline::{bloom::{Bloom}, tonemapping::{DebandDither, Tonemapping}};
+use crate::systems::combat::{particle_movement_system, particle_cleanup_system, boss_shoot_system};
+use crate::systems::game_over::{game_over_system, restart_listener, despawn_game_over_text};
 
 #[derive(Component)]
-struct AnimatedText;
+pub struct AnimatedText;
+
+
+#[derive(Component)]
+pub struct GameEntity;
+
+#[derive(States, Debug, Clone, Copy, Eq, PartialEq, Hash, Default)]
+pub enum GameState {
+    #[default]
+    Playing,
+    GameOver,
+}
 
 pub(crate) fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_systems(Startup, (setup, spawn_player, spawn_barriers, create_enemies))
-        .add_systems(Update, (player_movement, enemy_rotation, detect_collisions, update_health_ui))
+        .init_state::<GameState>()
+        .add_systems(Startup, setup)
+        .add_systems(Startup, (spawn_player, spawn_barriers, create_enemies))
+        .add_systems(Update, (despawn_game_over_text, player_movement, enemy_movement_system, enemy_rotation, detect_collisions, update_health_ui, particle_movement_system, particle_cleanup_system, boss_shoot_system).run_if(in_state(GameState::Playing)))
+        .add_systems(Update, (game_over_system, restart_listener).run_if(in_state(GameState::GameOver)))
         .run();
 }
 
-fn setup(mut commands: Commands) {
+fn setup(mut commands: Commands, mut next_state: ResMut<NextState<GameState>>) {
     commands.spawn((
         Camera2d,
         Transform::default(),
@@ -54,14 +70,14 @@ fn setup(mut commands: Commands) {
         AnimatedText,
     ))
         .with_child((
-            TextSpan::from("100"),
+            TextSpan::from(""),
             TextFont {
                 font_size: 17.0,
                 ..default()
             },
             TextColor(Color::WHITE),
             AnimatedText,
-        ));;
+        ));
 }
 
 pub fn update_health_ui(
