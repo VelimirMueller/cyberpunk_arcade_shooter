@@ -2,13 +2,14 @@ use bevy::prelude::*;
 use bevy::core_pipeline::core_2d::Camera2d;
 use crate::core::player::systems::*;
 use crate::core::world::barriers::systems::spawn_barriers;
+use crate::core::enemies::systems::{create_enemies, enemy_rotation};
 use bevy::core_pipeline::{bloom::{Bloom}, tonemapping::{DebandDither, Tonemapping}};
 
 pub(crate) fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_systems(Startup, (setup, spawn_player, spawn_barriers))
-        .add_systems(Update, player_movement)
+        .add_systems(Startup, (setup, spawn_player, spawn_barriers, create_enemies))
+        .add_systems(Update, (player_movement, enemy_rotation))
         .run();
 }
 
