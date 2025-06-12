@@ -19,7 +19,7 @@ fn spawn_enemy(
 
     for color in enemy_colors {
         commands.spawn((
-            Enemy,
+            Enemy { current: 100, max: 100 },
             Sprite {
                 color,
                 custom_size: Some(Vec2::new(50.0, 50.0 * (count+0.85)/1.25)),
