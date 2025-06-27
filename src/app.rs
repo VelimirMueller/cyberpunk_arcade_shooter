@@ -16,6 +16,9 @@ pub struct AnimatedText;
 
 
 #[derive(Component)]
+pub struct EnergyText;
+
+#[derive(Component)]
 pub struct GameEntity;
 
 
@@ -26,7 +29,7 @@ pub(crate) fn main() {
         .init_state::<GameState>()
         .add_systems(Startup, setup)
         .add_systems(Startup, (spawn_player, spawn_barriers, create_enemies))
-        .add_systems(Update, (despawn_game_over_text, player_movement, enemy_movement_system, enemy_rotation, detect_collisions, update_health_ui, update_enemy_health_ui, particle_movement_system, particle_cleanup_system, boss_shoot_system, player_shoot_system,player_particle_movement_system).run_if(in_state(GameState::Playing)))
+        .add_systems(Update, (despawn_game_over_text, player_movement, enemy_movement_system, enemy_rotation, detect_collisions, update_health_ui, update_enemy_health_ui, particle_movement_system, particle_cleanup_system, boss_shoot_system, player_shoot_system,player_particle_movement_system, update_energy_ui).run_if(in_state(GameState::Playing)))
         .add_systems(Update, (game_over_system, restart_listener).run_if(in_state(GameState::GameOver)))
         .add_systems(Update, (game_won_system, restart_listener).run_if(in_state(GameState::Won)))
         .run();
@@ -82,6 +85,36 @@ fn setup(mut commands: Commands, mut next_state: ResMut<NextState<GameState>>) {
 
     commands.spawn((
         // Accepts a `String` or any type that converts into a `String`, such as `&str`
+        Text::new("Player Energy: "),
+        TextFont {
+            // This font is loaded and will be used instead of the default font.
+            font_size: 17.0,
+            ..default()
+        },
+        TextShadow::default(),
+        // Set the justification of the Text
+        TextLayout::new_with_justify(JustifyText::Center),
+        // Set the style of the Node itself.
+        Node {
+            position_type: PositionType::Absolute,
+            top: Val::Px(35.0),
+            left: Val::Px(10.0),
+            ..default()
+        },
+        EnergyText,
+    ))
+        .with_child((
+            TextSpan::from("\n press [Space] to restart."),
+            TextFont {
+                font_size: 17.0,
+                ..default()
+            },
+            TextColor(Color::WHITE),
+            EnergyText,
+        ));
+
+    commands.spawn((
+        // Accepts a `String` or any type that converts into a `String`, such as `&str`
         Text::new("Boss HP: "),
         TextFont {
             // This font is loaded and will be used instead of the default font.
@@ -118,6 +151,17 @@ pub fn update_health_ui(
     if let Some(player) = player_query.iter().next() {
         for mut span in &mut span_query {
             **span = format!("{} %", player.current);
+        }
+    }
+}
+
+pub fn update_energy_ui(
+    player_query: Query<&Player>,
+    mut span_query: Query<&mut TextSpan, With<EnergyText>>,
+) {
+    if let Some(player) = player_query.iter().next() {
+        for mut span in &mut span_query {
+            **span = format!("{} %", player.energy);
         }
     }
 }

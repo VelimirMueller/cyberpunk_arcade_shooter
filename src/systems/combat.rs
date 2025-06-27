@@ -104,6 +104,7 @@ pub fn player_particle_movement_system(
 pub(crate) fn player_shoot_system(
     mut commands: Commands,
     mut query: Query<(&Transform, &mut PlayerRotationTracker)>,
+    mut player: Query<(&mut Player, &Transform, &Sprite)>,
     input: Res<ButtonInput<KeyCode>>,
 ) {
     if !input.pressed(KeyCode::Space) {
@@ -135,16 +136,21 @@ pub(crate) fn player_shoot_system(
             let rotated = transform.rotation * dir.extend(0.0);
             let pos = transform.translation + rotated;
 
-            commands.spawn((
-                Sprite {
-                    color: Color::srgb(1.0, 7.3, 0.7),
-                    custom_size: Some(Vec2::splat(3.0)),
-                    ..default()
-                },
-                Transform::from_translation(pos),
-                Velocity(rotated.truncate().normalize() * 500.0),
-                PlayerParticle,
-            ));
+            if let Ok((mut player, _transform, _sprite)) = player.single_mut() {
+                if let Some(energy) = player.energy.checked_sub(3) {
+                    player.energy = energy;
+                    commands.spawn((
+                        Sprite {
+                            color: Color::srgb(1.0, 7.3, 0.7),
+                            custom_size: Some(Vec2::splat(3.0)),
+                            ..default()
+                        },
+                        Transform::from_translation(pos),
+                        Velocity(rotated.truncate().normalize() * 500.0),
+                        PlayerParticle,
+                    ));
+                }
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ use bevy::prelude::*;
 pub struct Player {
     pub current: u32,
     pub max: u32,
+    pub energy: u32,
     pub last_collision_time: Option<std::time::Instant>,
 }
 
