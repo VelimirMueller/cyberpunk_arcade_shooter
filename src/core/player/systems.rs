@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::app::GameEntity;
-use crate::core::player::components::{Player, PlayerRotationTracker};
+use crate::core::player::components::{Player, PlayerParticle, PlayerRotationTracker};
 use crate::env::{
     GROUND_Y,
     CEILING_Y,
@@ -11,21 +11,25 @@ use crate::env::{
     TIME_STEP
 };
 
+fn add_energy(player: &mut Player) {
+    player.energy += 1;
+}
 pub(crate) fn player_movement(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut query: Query<&mut Transform, With<Player>>,
-) -> () {
-
-    for mut transform in &mut query {
-        // Check for input and calculate direction
+    mut query: Query<(&mut Player, &mut Transform), With<Player>>,
+) {
+    for (mut player, mut transform) in &mut query {
         let direction = get_input_direction(&keyboard_input);
+
         if direction != Vec3::ZERO {
-            // Normalize the direction vector to ensure consistent speed
+            // Add energy if moving
+            add_energy(&mut player); // or any value you prefer
+
             apply_movement(&mut transform, direction);
             apply_rotation(&mut transform, &keyboard_input);
 
             if keyboard_input.pressed(KeyCode::Space) {
-                println!("Keyboard input: Space")
+                println!("Keyboard input: Space");
             }
         }
     }
@@ -90,7 +94,7 @@ pub(crate) fn spawn_player(
     mut commands: Commands,
 ) -> () {
     commands.spawn((
-        Player { current: 100, max: 100, last_collision_time: None },
+        Player { current: 100, max: 100, last_collision_time: None, energy: 100 },
         PlayerRotationTracker { last_angle_index: 0 },
         GameEntity,
         Transform::from_xyz(-250.0, 0.0, 0.0),
