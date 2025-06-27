@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::core::enemies::components::Enemy;
-use crate::env::{ROTATE_SPEED, TIME_STEP};
 use crate::app::GameEntity;
+use crate::core::player::components::{Player, PlayerRotationTracker, PlayerParticle};
 
 #[derive(Component)]
 pub struct EnemyParticle;
@@ -38,10 +38,18 @@ pub fn particle_movement_system(
 pub fn particle_cleanup_system(
     mut commands: Commands,
     query: Query<(Entity, &Transform), With<EnemyParticle>>,
+    player_query: Query<(Entity, &Transform), With<PlayerParticle>>
 ) {
     const SCREEN_BOUNDS: f32 = 600.0; // adjust to your camera view
 
     for (entity, transform) in &query {
+        let pos = transform.translation;
+        if pos.x.abs() > SCREEN_BOUNDS || pos.y.abs() > SCREEN_BOUNDS {
+            commands.entity(entity).despawn();
+        }
+    }
+
+    for (entity, transform) in &player_query {
         let pos = transform.translation;
         if pos.x.abs() > SCREEN_BOUNDS || pos.y.abs() > SCREEN_BOUNDS {
             commands.entity(entity).despawn();
@@ -77,6 +85,66 @@ pub(crate) fn boss_shoot_system(
 
                 spawn_enemy_particle_sprite(commands.reborrow(), corner_world, velocity);
             }
+        }
+    }
+}
+
+pub fn player_particle_movement_system(
+    time: Res<Time>,
+    mut query: Query<(&Velocity, &mut Transform), With<PlayerParticle>>,
+) {
+    let dt = time.delta().as_secs_f32();
+
+    for (velocity, mut transform) in &mut query {
+        transform.translation.x += velocity.0.x * dt;
+        transform.translation.y += velocity.0.y * dt;
+    }
+}
+
+pub(crate) fn player_shoot_system(
+    mut commands: Commands,
+    mut query: Query<(&Transform, &mut PlayerRotationTracker)>,
+    input: Res<ButtonInput<KeyCode>>,
+) {
+    if !input.pressed(KeyCode::Space) {
+        return;
+    }
+
+    for (transform, mut tracker) in &mut query {
+        let rotation_z = transform.rotation.to_euler(EulerRot::XYZ).2;
+
+        // Normalisiere Rotation auf 0-360° in Radiant
+        let angle = (rotation_z.rem_euclid(std::f32::consts::TAU)).to_degrees();
+
+        // Snap auf die nächste 90°
+        let index = (angle / 42.50).round() as i32 % 4;
+
+        tracker.last_angle_index = index;
+
+        // Schieße von 4 Ecken (relativ zur Würfelgröße)
+        let offset = 16.0; // an Sprite-Größe anpassen
+        let directions = [
+            Vec2::new( offset,  offset),
+            Vec2::new(-offset,  offset),
+            Vec2::new(-offset, -offset),
+            Vec2::new( offset, -offset),
+        ];
+
+        for dir in directions {
+            // Drehe Ecken-Offset mit Spielerrotation
+            let rotated = transform.rotation * dir.extend(0.0);
+            let pos = transform.translation + rotated;
+
+            commands.spawn((
+                Sprite {
+                    color: Color::srgb(1.0, 7.3, 0.7),
+                    custom_size: Some(Vec2::splat(3.0)),
+                    ..default()
+                },
+                Transform::from_translation(pos),
+                Velocity(rotated.truncate().normalize() * 500.0),
+                PlayerParticle,
+            ));
         }
     }
 }

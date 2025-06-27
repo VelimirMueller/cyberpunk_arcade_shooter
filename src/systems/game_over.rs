@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use crate::core::enemies::systems::create_enemies;
 use crate::core::player::systems::spawn_player;
-use crate::app::{GameState, GameEntity};
+use crate::app::GameEntity;
+use crate::data::game_state::GameState;
 
 #[derive(Component)]
 pub struct AnimatedGameOverText;
@@ -21,7 +22,31 @@ pub(crate) fn game_over_system(mut commands: Commands) {
         // Set the style of the Node itself.
         Node {
             position_type: PositionType::Absolute,
-            left: Val::Percent(40.0),
+            left: Val::Percent(35.0),
+            top: Val::Percent(45.0),
+            ..default()
+        },
+        AnimatedGameOverText,
+        GameEntity
+    ));
+}
+
+pub(crate) fn game_won_system(mut commands: Commands) {
+    commands.spawn((
+        // Accepts a `String` or any type that converts into a `String`, such as `&str`
+        Text::new("GAME WON"),
+        TextFont {
+            // This font is loaded and will be used instead of the default font.
+            font_size: 97.0,
+            ..default()
+        },
+        TextShadow::default(),
+        // Set the justification of the Text
+        TextLayout::new_with_justify(JustifyText::Center),
+        // Set the style of the Node itself.
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Percent(35.0),
             top: Val::Percent(45.0),
             ..default()
         },
