@@ -22,10 +22,10 @@ fn spawn_enemy(
     for color in enemy_colors {
         commands.spawn((
             Enemy { current: 100, max: 100, fire_timer: if count == 0.0 {
-                Some(Timer::from_seconds(0.42, TimerMode::Repeating))
+                Some(Timer::from_seconds(0.25, TimerMode::Repeating))
             } else {
                 None
-            }, },
+            }, last_collision_time: None },
             Sprite {
                 color,
                 custom_size: Some(Vec2::new(50.0, 50.0 * (count+0.85)/1.25)),
@@ -50,7 +50,7 @@ fn spawn_enemy(
                     Vec3::new(-arena_size.x / 2.2,  arena_size.y / 5.9, 0.0),
                 ],
                 current_target: 1,
-                speed: 150.0,
+                speed: 250.0,
             },
         ));
 

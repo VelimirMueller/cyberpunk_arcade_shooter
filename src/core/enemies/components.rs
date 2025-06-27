@@ -3,7 +3,8 @@ use bevy::prelude::*;
 pub struct Enemy {
     pub current: u32,
     pub max: u32,
-    pub fire_timer:  Option<Timer>
+    pub fire_timer:  Option<Timer>,
+    pub last_collision_time: Option<std::time::Instant>,
 }
 
 #[derive(Component)]

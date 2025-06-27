@@ -6,8 +6,10 @@ use crate::core::world::barriers::systems::spawn_barriers;
 use crate::core::enemies::systems::{create_enemies, enemy_movement_system, enemy_rotation};
 use crate::systems::collision::detect_collisions;
 use bevy::core_pipeline::{bloom::{Bloom}, tonemapping::{DebandDither, Tonemapping}};
-use crate::systems::combat::{particle_movement_system, particle_cleanup_system, boss_shoot_system};
-use crate::systems::game_over::{game_over_system, restart_listener, despawn_game_over_text};
+use crate::core::enemies::components::Enemy;
+use crate::systems::combat::{particle_movement_system, particle_cleanup_system, boss_shoot_system, player_shoot_system, player_particle_movement_system};
+use crate::systems::game_over::{game_won_system, game_over_system, restart_listener, despawn_game_over_text};
+use crate::data::game_state::GameState;
 
 #[derive(Component)]
 pub struct AnimatedText;
@@ -16,12 +18,7 @@ pub struct AnimatedText;
 #[derive(Component)]
 pub struct GameEntity;
 
-#[derive(States, Debug, Clone, Copy, Eq, PartialEq, Hash, Default)]
-pub enum GameState {
-    #[default]
-    Playing,
-    GameOver,
-}
+
 
 pub(crate) fn main() {
     App::new()
@@ -29,11 +26,14 @@ pub(crate) fn main() {
         .init_state::<GameState>()
         .add_systems(Startup, setup)
         .add_systems(Startup, (spawn_player, spawn_barriers, create_enemies))
-        .add_systems(Update, (despawn_game_over_text, player_movement, enemy_movement_system, enemy_rotation, detect_collisions, update_health_ui, particle_movement_system, particle_cleanup_system, boss_shoot_system).run_if(in_state(GameState::Playing)))
+        .add_systems(Update, (despawn_game_over_text, player_movement, enemy_movement_system, enemy_rotation, detect_collisions, update_health_ui, update_enemy_health_ui, particle_movement_system, particle_cleanup_system, boss_shoot_system, player_shoot_system,player_particle_movement_system).run_if(in_state(GameState::Playing)))
         .add_systems(Update, (game_over_system, restart_listener).run_if(in_state(GameState::GameOver)))
+        .add_systems(Update, (game_won_system, restart_listener).run_if(in_state(GameState::Won)))
         .run();
 }
 
+#[derive(Component)]
+struct EnemyHpText;
 fn setup(mut commands: Commands, mut next_state: ResMut<NextState<GameState>>) {
     commands.spawn((
         Camera2d,
@@ -48,6 +48,7 @@ fn setup(mut commands: Commands, mut next_state: ResMut<NextState<GameState>>) {
         Bloom::default(),           // 3. Enable bloom for the camera
         DebandDither::Enabled,
     ));
+
 
     commands.spawn((
         // Accepts a `String` or any type that converts into a `String`, such as `&str`
@@ -64,19 +65,49 @@ fn setup(mut commands: Commands, mut next_state: ResMut<NextState<GameState>>) {
         Node {
             position_type: PositionType::Absolute,
             top: Val::Px(15.0),
-            left: Val::Px(5.0),
+            left: Val::Px(10.0),
             ..default()
         },
         AnimatedText,
     ))
         .with_child((
-            TextSpan::from(""),
+            TextSpan::from("\n press [Space] to restart."),
             TextFont {
                 font_size: 17.0,
                 ..default()
             },
             TextColor(Color::WHITE),
             AnimatedText,
+        ));
+
+    commands.spawn((
+        // Accepts a `String` or any type that converts into a `String`, such as `&str`
+        Text::new("Boss HP: "),
+        TextFont {
+            // This font is loaded and will be used instead of the default font.
+            font_size: 17.0,
+            ..default()
+        },
+        TextShadow::default(),
+        // Set the justification of the Text
+        TextLayout::new_with_justify(JustifyText::Center),
+        // Set the style of the Node itself.
+        Node {
+            position_type: PositionType::Absolute,
+            top: Val::Px(15.0),
+            right: Val::Px(5.0),
+            ..default()
+        },
+        EnemyHpText
+    ))
+        .with_child((
+            TextSpan::from("\n press [Space] to restart."),
+            TextFont {
+                font_size: 17.0,
+                ..default()
+            },
+            TextColor(Color::WHITE),
+            EnemyHpText
         ));
 }
 
@@ -86,7 +117,22 @@ pub fn update_health_ui(
 ) {
     if let Some(player) = player_query.iter().next() {
         for mut span in &mut span_query {
-            **span = format!("{} %", player.max);
+            **span = format!("{} %", player.current);
+        }
+    }
+}
+
+pub fn update_enemy_health_ui(
+    enemy_query: Query<&Enemy>,
+    mut span_query: Query<&mut TextSpan, With<EnemyHpText>>,
+    mut next_state: ResMut<NextState<GameState>>
+) {
+    let total_hp: u32 = enemy_query.iter().map(|enemy| enemy.current).sum();
+    for mut span in &mut span_query {
+        **span = format!("{} %", total_hp);
+
+        if total_hp == 0 {
+            next_state.set(GameState::Won);
         }
     }
 }
