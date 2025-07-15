@@ -1,5 +1,5 @@
 # **Cyberpunk Arcade Shooter**
-_A cyberpunk arcade shooter built in Rust using the Bevy engine._
+_A cyberpunk arcade shooter built in Rust using the Bevy engine **https://bevy.org**._
 
 Step into a minimalist, glowing world where every shape pulses with danger. **cyberpunk_arcade_shooter** combines sleek visuals with brutal intensity. Engage in multi-stage **boss battles**, dodge through bullet hells, and unleash chaos in a realm of bloom-soaked geometry.
 
