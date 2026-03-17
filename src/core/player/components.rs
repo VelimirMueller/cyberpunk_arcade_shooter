@@ -5,6 +5,7 @@ pub struct Player {
     pub max: u32,
     pub energy: u32,
     pub last_collision_time: Option<std::time::Instant>,
+    pub last_shot_time: Option<std::time::Instant>,
 }
 
 #[derive(Component)]

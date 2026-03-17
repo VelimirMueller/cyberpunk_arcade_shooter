@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use crate::core::enemies::components::Enemy;
 use crate::app::GameEntity;
 use crate::core::player::components::{Player, PlayerRotationTracker, PlayerParticle};
+use crate::systems::audio::{play_sound, SoundEffect};
 
 #[derive(Component)]
 pub struct EnemyParticle;
@@ -61,6 +62,7 @@ pub(crate) fn boss_shoot_system(
     time: Res<Time>,
     mut commands: Commands,
     mut query: Query<(&mut Enemy, &GlobalTransform, &Transform)>,
+    audio: Res<crate::systems::audio::AudioManager>,
 ) {
     for (mut boss, global_transform, local_transform) in &mut query {
         if let Some(timer) = boss.fire_timer.as_mut() {
@@ -68,6 +70,7 @@ pub(crate) fn boss_shoot_system(
         }
 
         if boss.fire_timer.as_ref().map_or(false, |t| t.just_finished()) {
+            play_sound(&audio, SoundEffect::EnemyShoot);
             let scale = local_transform.scale.xy(); // assume uniform scale for cube
             let half_width = 0.5 * scale.x;
             let half_height = 0.5 * scale.y;
@@ -106,10 +109,15 @@ pub(crate) fn player_shoot_system(
     mut query: Query<(&Transform, &mut PlayerRotationTracker)>,
     mut player: Query<(&mut Player, &Transform, &Sprite)>,
     input: Res<ButtonInput<KeyCode>>,
+    audio: Res<crate::systems::audio::AudioManager>,
 ) {
     if !input.pressed(KeyCode::Space) {
         return;
     }
+
+    const SHOT_COOLDOWN: f32 = 0.15; // Seconds between shots
+    const ENERGY_COST_PER_CORNER: u32 = 1; // Reduced from 3
+    const MIN_ENERGY: u32 = 4; // Need at least this much to shoot (4 corners)
 
     for (transform, mut tracker) in &mut query {
         let rotation_z = transform.rotation.to_euler(EulerRot::XYZ).2;
@@ -122,33 +130,43 @@ pub(crate) fn player_shoot_system(
 
         tracker.last_angle_index = index;
 
-        // Schieße von 4 Ecken (relativ zur Würfelgröße)
-        let offset = 16.0; // an Sprite-Größe anpassen
-        let directions = [
-            Vec2::new( offset,  offset),
-            Vec2::new(-offset,  offset),
-            Vec2::new(-offset, -offset),
-            Vec2::new( offset, -offset),
-        ];
+        if let Ok((mut player_data, _transform, _sprite)) = player.single_mut() {
+            // Check cooldown
+            let can_shoot = player_data.last_shot_time.map_or(true, |t| t.elapsed().as_secs_f32() >= SHOT_COOLDOWN);
 
-        for dir in directions {
-            // Drehe Ecken-Offset mit Spielerrotation
-            let rotated = transform.rotation * dir.extend(0.0);
-            let pos = transform.translation + rotated;
+            if can_shoot && player_data.energy >= MIN_ENERGY {
+                player_data.last_shot_time = Some(std::time::Instant::now());
 
-            if let Ok((mut player, _transform, _sprite)) = player.single_mut() {
-                if let Some(energy) = player.energy.checked_sub(3) {
-                    player.energy = energy;
-                    commands.spawn((
-                        Sprite {
-                            color: Color::srgb(1.0, 7.3, 0.7),
-                            custom_size: Some(Vec2::splat(3.0)),
-                            ..default()
-                        },
-                        Transform::from_translation(pos),
-                        Velocity(rotated.truncate().normalize() * 500.0),
-                        PlayerParticle,
-                    ));
+                // Schieße von 4 Ecken (relativ zur Würfelgröße)
+                let offset = 16.0; // an Sprite-Größe anpassen
+                let directions = [
+                    Vec2::new( offset,  offset),
+                    Vec2::new(-offset,  offset),
+                    Vec2::new(-offset, -offset),
+                    Vec2::new( offset, -offset),
+                ];
+
+                let total_cost = ENERGY_COST_PER_CORNER * directions.len() as u32;
+                if let Some(energy) = player_data.energy.checked_sub(total_cost) {
+                    player_data.energy = energy;
+                    play_sound(&audio, SoundEffect::PlayerShoot);
+
+                    for dir in directions {
+                        // Drehe Ecken-Offset mit Spielerrotation
+                        let rotated = transform.rotation * dir.extend(0.0);
+                        let pos = transform.translation + rotated;
+
+                        commands.spawn((
+                            Sprite {
+                                color: Color::srgb(1.0, 7.3, 0.7),
+                                custom_size: Some(Vec2::splat(3.0)),
+                                ..default()
+                            },
+                            Transform::from_translation(pos),
+                            Velocity(rotated.truncate().normalize() * 500.0),
+                            PlayerParticle,
+                        ));
+                    }
                 }
             }
         }

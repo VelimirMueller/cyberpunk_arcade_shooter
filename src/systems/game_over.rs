@@ -1,8 +1,13 @@
 use bevy::prelude::*;
 use crate::core::enemies::systems::create_enemies;
 use crate::core::player::systems::spawn_player;
-use crate::app::GameEntity;
+use crate::core::enemies::components::Enemy;
+use crate::core::player::components::{Player, PlayerParticle};
+use crate::systems::combat::EnemyParticle;
+use crate::app::{GameEntity, ScoreText, WaveText};
 use crate::data::game_state::GameState;
+use crate::core::world::barriers::components::Barrier;
+use crate::core::world::barriers::systems::spawn_barriers;
 
 #[derive(Component)]
 pub struct AnimatedGameOverText;
@@ -58,16 +63,83 @@ pub(crate) fn game_won_system(mut commands: Commands) {
 pub fn restart_listener(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<GameState>>,
-    query: Query<Entity, With<GameEntity>>,
-    mut commands: Commands
+    game_entity_query: Query<Entity, With<GameEntity>>,
+    enemy_query: Query<Entity, With<Enemy>>,
+    player_query: Query<Entity, With<Player>>,
+    enemy_particle_query: Query<Entity, With<EnemyParticle>>,
+    player_particle_query: Query<Entity, With<PlayerParticle>>,
+    barrier_query: Query<Entity, With<Barrier>>,
+    ui_query: Query<Entity, Or<(With<ScoreText>, With<WaveText>)>>,
+    mut commands: Commands,
+    mut game_data: ResMut<crate::app::GameData>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Space) {
-        for entity in &query {
+        // Update high score if current score is higher
+        if game_data.score > game_data.high_score {
+            game_data.high_score = game_data.score;
+        }
+
+        // Reset game data for new game
+        game_data.score = 0;
+        game_data.wave = 1;
+        game_data.total_play_time = 0.0;
+
+        // Despawn all game entities
+        for entity in &game_entity_query {
+            commands.entity(entity).despawn();
+        }
+        for entity in &enemy_query {
+            commands.entity(entity).despawn();
+        }
+        for entity in &player_query {
+            commands.entity(entity).despawn();
+        }
+        for entity in &enemy_particle_query {
+            commands.entity(entity).despawn();
+        }
+        for entity in &player_particle_query {
+            commands.entity(entity).despawn();
+        }
+        for entity in &barrier_query {
+            commands.entity(entity).despawn();
+        }
+        for entity in &ui_query {
             commands.entity(entity).despawn();
         }
 
+        // Spawn fresh game entities
+        spawn_player(commands.reborrow());
+        spawn_barriers(commands.reborrow());
         create_enemies(commands.reborrow());
-        spawn_player(commands);
+
+        // Respawn score UI
+        commands.spawn((
+            Text::new("Score: 0"),
+            TextFont { font_size: 17.0, ..default() },
+            TextShadow::default(),
+            TextLayout::new_with_justify(JustifyText::Center),
+            Node {
+                position_type: PositionType::Absolute,
+                top: Val::Px(55.0),
+                left: Val::Px(10.0),
+                ..default()
+            },
+            ScoreText,
+        ));
+
+        commands.spawn((
+            Text::new("Wave: 1"),
+            TextFont { font_size: 17.0, ..default() },
+            TextShadow::default(),
+            TextLayout::new_with_justify(JustifyText::Center),
+            Node {
+                position_type: PositionType::Absolute,
+                top: Val::Px(75.0),
+                left: Val::Px(10.0),
+                ..default()
+            },
+            WaveText,
+        ));
 
         next_state.set(GameState::Playing);
     }

@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="CargoProjects">
+    <cargoProject FILE="$PROJECT_DIR$/Cargo.toml">
+      <package file="$PROJECT_DIR$">
+        <feature name="default" enabled="true" />
+      </package>
+    </cargoProject>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c7bf7c83-c036-4727-b202-11f9ea52bec0" name="Changes" comment="add energy system to make game more fun and ad restore energy on movement">
+      <change beforePath="$PROJECT_DIR$/src/app.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data/game_state.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/game_state.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/systems/collision.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/collision.rs" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_/home/velimir/dev/cyberpunk_the_incedible_bloom_cube" value="2yJUE5VWPy1gkIYuKPnSp7ug2fC" />
+    </persistenceIdMap>
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="RsBuildProfile:dev" />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Rust File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;VelimirMueller&quot;
+  }
+}</component>
+  <component name="GitToolBoxStore">
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="main" />
+                    <option name="lastUsedInstant" value="1749554589" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="master" />
+                    <option name="lastUsedInstant" value="1749554588" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
+  </component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/VelimirMueller/cyberpunk_rpg.git&quot;,
+    &quot;accountId&quot;: &quot;99f745e0-8226-4053-8bb5-e788cac4956b&quot;
+  }
+}</component>
+  <component name="MacroExpansionManager">
+    <option name="directoryName" value="uXMcSdgk" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="2yJUE5VWPy1gkIYuKPnSp7ug2fC" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.rust.reset.selective.auto.import": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "/home/velimir/dev/cyberpunk_the_incedible_bloom_cube",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
+    "org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon": "",
+    "org.rust.disableDetachedFileInspection/home/velimir/cyberpunk_rpg/src/core/world/barriers/systems.rs": "true",
+    "org.rust.first.attach.projects": "true",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/core/world/barriers" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Cargo.Run cyberpunk_rpg">
+    <configuration name="Run cyberpunk_rpg" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="buildProfileId" value="dev" />
+      <option name="command" value="run --package cyberpunk_rpg --bin cyberpunk_rpg" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <option name="emulateTerminal" value="true" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test cyberpunk_rpg" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="command" value="test --workspace" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <option name="emulateTerminal" value="true" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="RustProjectSettings">
+    <option name="toolchainHomeDirectory" value="$PROJECT_DIR$/../.cargo/bin" />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c7bf7c83-c036-4727-b202-11f9ea52bec0" name="Changes" comment="" />
+      <created>1749552054824</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1749552054824</updated>
+      <workItem from="1749552056173" duration="34000" />
+      <workItem from="1749553054371" duration="1452000" />
+      <workItem from="1749557103759" duration="25000" />
+      <workItem from="1749566241789" duration="5378000" />
+      <workItem from="1749578345833" duration="321000" />
+      <workItem from="1749626733060" duration="204000" />
+      <workItem from="1749635545631" duration="2056000" />
+      <workItem from="1749642966242" duration="768000" />
+      <workItem from="1749649169230" duration="2750000" />
+      <workItem from="1749654702316" duration="189000" />
+      <workItem from="1749654979167" duration="306000" />
+      <workItem from="1749661466024" duration="5381000" />
+      <workItem from="1749671894765" duration="8361000" />
+      <workItem from="1749681052820" duration="6177000" />
+      <workItem from="1749715701777" duration="10502000" />
+      <workItem from="1749754535339" duration="2676000" />
+      <workItem from="1749758975400" duration="7199000" />
+      <workItem from="1749838803642" duration="3586000" />
+      <workItem from="1749919182075" duration="5235000" />
+      <workItem from="1749927184639" duration="4469000" />
+      <workItem from="1749973520428" duration="621000" />
+      <workItem from="1750073226892" duration="49000" />
+      <workItem from="1750942460080" duration="122000" />
+      <workItem from="1750944301120" duration="368000" />
+      <workItem from="1751016427634" duration="680000" />
+      <workItem from="1751033838839" duration="2145000" />
+      <workItem from="1751036515766" duration="498000" />
+      <workItem from="1773776598439" duration="1343000" />
+    </task>
+    <task id="LOCAL-00001" summary="add basic game with a player, barriers and basic movements">
+      <option name="closed" value="true" />
+      <created>1749677437370</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1749677437370</updated>
+    </task>
+    <task id="LOCAL-00002" summary="add left and right boundaries to player to prevent from moving outside of the visible game">
+      <option name="closed" value="true" />
+      <created>1749679665953</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1749679665953</updated>
+    </task>
+    <task id="LOCAL-00003" summary="added rotating enemies and spawn them">
+      <option name="closed" value="true" />
+      <created>1749686567723</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1749686567723</updated>
+    </task>
+    <task id="LOCAL-00004" summary="unify barrier styles">
+      <option name="closed" value="true" />
+      <created>1749717354611</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1749717354611</updated>
+    </task>
+    <task id="LOCAL-00005" summary="unify barrier styles better">
+      <option name="closed" value="true" />
+      <created>1749718011277</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1749718011277</updated>
+    </task>
+    <task id="LOCAL-00006" summary="add colision and hp systems">
+      <option name="closed" value="true" />
+      <created>1749728922353</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1749728922353</updated>
+    </task>
+    <task id="LOCAL-00007" summary="tweak current systems and improve game experience by shooting particles on space enter">
+      <option name="closed" value="true" />
+      <created>1751017027649</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1751017027649</updated>
+    </task>
+    <task id="LOCAL-00008" summary="add energy system to make game more fun and ad restore energy on movement">
+      <option name="closed" value="true" />
+      <created>1751037002911</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1751037002911</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="add basic game with a player, barriers and basic movements" />
+    <MESSAGE value="add left and right boundaries to player to prevent from moving outside of the visible game" />
+    <MESSAGE value="added rotating enemies and spawn them" />
+    <MESSAGE value="unify barrier styles" />
+    <MESSAGE value="unify barrier styles better" />
+    <MESSAGE value="add colision and hp systems" />
+    <MESSAGE value="tweak current systems and improve game experience by shooting particles on space enter" />
+    <MESSAGE value="add energy system to make game more fun and ad restore energy on movement" />
+    <option name="LAST_COMMIT_MESSAGE" value="add energy system to make game more fun and ad restore energy on movement" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/ui/market_ui.rs</url>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
+  </component>
+</project>
