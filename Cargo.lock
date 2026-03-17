@@ -1782,6 +1782,7 @@ name = "cyberpunk_rpg"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "rand",
 ]
 
 [[package]]

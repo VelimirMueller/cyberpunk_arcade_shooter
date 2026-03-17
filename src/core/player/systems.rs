@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::app::GameEntity;
-use crate::core::player::components::{Player, PlayerParticle, PlayerRotationTracker};
+use crate::core::player::components::{Player, PlayerRotationTracker};
 use crate::env::{
     GROUND_Y,
     CEILING_Y,
@@ -94,7 +94,7 @@ pub(crate) fn spawn_player(
     mut commands: Commands,
 ) -> () {
     commands.spawn((
-        Player { current: 100, max: 100, last_collision_time: None, energy: 100 },
+        Player { current: 100, max: 100, last_collision_time: None, energy: 100, last_shot_time: None },
         PlayerRotationTracker { last_angle_index: 0 },
         GameEntity,
         Transform::from_xyz(-250.0, 0.0, 0.0),
