@@ -10,7 +10,7 @@ use crate::core::enemies::components::Enemy;
 use crate::systems::combat::{particle_movement_system, particle_cleanup_system, boss_shoot_system, player_shoot_system, player_particle_movement_system};
 use crate::systems::game_over::{game_won_system, game_over_system, restart_listener, despawn_game_over_text};
 use crate::data::game_state::GameState;
-use crate::systems::audio::toggle_sound;
+use crate::systems::audio::{toggle_sound, SoundEvent};
 use crate::systems::background::{spawn_background_stars, animate_stars, draw_background_grid};
 use crate::systems::collision::DeathEvent;
 use crate::systems::particles::{
@@ -88,12 +88,13 @@ pub(crate) fn main() {
         .init_state::<GameState>()
         .init_resource::<GameData>()
         .init_resource::<ScreenShake>()
-        .init_resource::<crate::systems::audio::AudioManager>()
+        .add_event::<SoundEvent>()
         .init_resource::<AfterimageTimer>()
         .init_resource::<AmbientParticleTimer>()
         .add_event::<DeathEvent>()
-        .add_systems(Startup, (setup, setup_menu, crate::systems::audio::setup_audio, spawn_background_stars, setup_shockwave_assets))
-        .add_systems(Update, (animate_stars, draw_background_grid))
+        .add_systems(Startup, (setup, setup_menu, spawn_background_stars, setup_shockwave_assets))
+        .add_systems(Startup, crate::systems::audio::setup_synth_audio)
+        .add_systems(Update, (animate_stars, draw_background_grid, crate::systems::audio::play_sounds))
         .add_systems(Update, menu_input_system.run_if(in_state(GameState::Menu)))
         .add_systems(Update, pause_toggle_system.run_if(in_state(GameState::Playing)))
         .add_systems(Update, (despawn_game_over_text, player_movement, enemy_movement_system, enemy_rotation, detect_collisions, update_health_ui, update_enemy_health_ui, particle_movement_system, particle_cleanup_system, boss_shoot_system, player_shoot_system,player_particle_movement_system, update_energy_ui, screen_shake_system, damage_flash_system, update_game_data, update_score_ui).run_if(in_state(GameState::Playing)))
@@ -381,7 +382,7 @@ pub fn pause_menu_system(
     mut next_state: ResMut<NextState<GameState>>,
     mut commands: Commands,
     mut game_data: ResMut<GameData>,
-    mut audio: ResMut<crate::systems::audio::AudioManager>,
+    mut audio: NonSendMut<crate::systems::audio::SynthAudio>,
     pause_query: Query<Entity, With<PauseText>>,
 ) {
     // Spawn pause menu if not exists

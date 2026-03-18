@@ -4,7 +4,7 @@ use crate::core::enemies::components::Enemy;
 use crate::systems::combat::EnemyParticle;
 use crate::data::game_state::GameState;
 use crate::app::{GameData, trigger_screen_shake, trigger_damage_flash};
-use crate::systems::audio::{play_sound, SoundEffect};
+use crate::systems::audio::{SoundEvent, SoundEffect};
 
 #[derive(Event)]
 pub struct DeathEvent {
@@ -22,7 +22,7 @@ pub fn detect_collisions(
     mut next_state: ResMut<NextState<GameState>>,
     mut game_data: ResMut<GameData>,
     mut screen_shake: ResMut<crate::app::ScreenShake>,
-    audio: Res<crate::systems::audio::AudioManager>,
+    mut sound_events: EventWriter<SoundEvent>,
     mut death_events: EventWriter<DeathEvent>,
 ) {
     for (player_entity, mut player, player_transform, player_sprite) in &mut player_query {
@@ -42,7 +42,7 @@ pub fn detect_collisions(
                         player.last_collision_time = Some(std::time::Instant::now());
                         trigger_screen_shake(&mut screen_shake);
                         trigger_damage_flash(player_entity, commands.reborrow());
-                        play_sound(&audio, SoundEffect::PlayerHit);
+                        sound_events.write(SoundEvent(SoundEffect::PlayerHit));
                         info!("Collision! with Enemy HP {}", player.current);
                     }
                 }
@@ -92,14 +92,14 @@ pub fn detect_collisions(
                             enemy.current -= 1;
                             enemy.last_collision_time = Some(std::time::Instant::now());
                             game_data.score += 10;
-                            play_sound(&audio, SoundEffect::EnemyHit);
+                            sound_events.write(SoundEvent(SoundEffect::EnemyHit));
                             info!("You hit the Enemy HP: {}", enemy.current);
 
                             if enemy.current == 0 {
                                 enemy.is_dead = true;
                                 game_data.score += 100;
                                 game_data.enemies_killed += 1;
-                                play_sound(&audio, SoundEffect::Explosion);
+                                sound_events.write(SoundEvent(SoundEffect::Explosion));
                                 death_events.write(DeathEvent {
                                     position: enemy_transform.translation,
                                     color: enemy_sprite.color,
