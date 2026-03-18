@@ -16,6 +16,8 @@ use crate::systems::collision::DeathEvent;
 use crate::systems::particles::{
     setup_shockwave_assets, handle_death_events,
     animate_shatter, animate_shockwave,
+    AfterimageTimer, spawn_afterimages, animate_afterimages,
+    AmbientParticleTimer, spawn_ambient_particles, animate_ambient_particles,
 };
 
 #[derive(Resource)]
@@ -86,6 +88,8 @@ pub(crate) fn main() {
         .init_resource::<GameData>()
         .init_resource::<ScreenShake>()
         .init_resource::<crate::systems::audio::AudioManager>()
+        .init_resource::<AfterimageTimer>()
+        .init_resource::<AmbientParticleTimer>()
         .add_event::<DeathEvent>()
         .add_systems(Startup, (setup, setup_menu, crate::systems::audio::setup_audio, spawn_background_stars, setup_shockwave_assets))
         .add_systems(Update, (animate_stars, draw_background_grid))
@@ -94,6 +98,7 @@ pub(crate) fn main() {
         .add_systems(Update, (despawn_game_over_text, player_movement, enemy_movement_system, enemy_rotation, detect_collisions, update_health_ui, update_enemy_health_ui, particle_movement_system, particle_cleanup_system, boss_shoot_system, player_shoot_system,player_particle_movement_system, update_energy_ui, screen_shake_system, damage_flash_system, update_game_data, update_score_ui).run_if(in_state(GameState::Playing)))
         .add_systems(Update, handle_death_events.after(detect_collisions).run_if(in_state(GameState::Playing)))
         .add_systems(Update, (animate_shatter, animate_shockwave).run_if(in_state(GameState::Playing)))
+        .add_systems(Update, (spawn_afterimages, animate_afterimages, spawn_ambient_particles, animate_ambient_particles).run_if(in_state(GameState::Playing)))
         .add_systems(Update, (game_over_system, restart_listener).run_if(in_state(GameState::GameOver)))
         .add_systems(Update, (game_won_system, restart_listener).run_if(in_state(GameState::Won)))
         .add_systems(Update, pause_menu_system.run_if(in_state(GameState::Paused)))
