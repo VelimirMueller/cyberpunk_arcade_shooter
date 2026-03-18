@@ -59,3 +59,30 @@ pub fn animate_stars(
         }
     }
 }
+
+pub fn draw_background_grid(mut gizmos: Gizmos) {
+    let grid_color = Color::srgba(0.0, 1.0, 0.25, 0.04);
+    let cell_size = 40.0;
+
+    // Vertical lines
+    let mut x = LEFT_BOUND;
+    while x <= RIGHT_BOUND {
+        gizmos.line_2d(
+            Vec2::new(x, GROUND_Y),
+            Vec2::new(x, CEILING_Y),
+            grid_color,
+        );
+        x += cell_size;
+    }
+
+    // Horizontal lines
+    let mut y = GROUND_Y;
+    while y <= CEILING_Y {
+        gizmos.line_2d(
+            Vec2::new(LEFT_BOUND, y),
+            Vec2::new(RIGHT_BOUND, y),
+            grid_color,
+        );
+        y += cell_size;
+    }
+}
