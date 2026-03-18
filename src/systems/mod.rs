@@ -5,3 +5,4 @@ pub mod game_over;
 pub mod audio;
 pub mod background;
 pub mod particles;
+pub mod post_processing;

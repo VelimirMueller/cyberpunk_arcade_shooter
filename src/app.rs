@@ -19,6 +19,7 @@ use crate::systems::particles::{
     AfterimageTimer, spawn_afterimages, animate_afterimages,
     AmbientParticleTimer, spawn_ambient_particles, animate_ambient_particles,
 };
+use crate::systems::post_processing::{CrtPostProcessPlugin, CrtSettings};
 
 #[derive(Resource)]
 pub struct GameData {
@@ -83,7 +84,7 @@ pub struct GameEntity;
 
 pub(crate) fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins((DefaultPlugins, CrtPostProcessPlugin))
         .init_state::<GameState>()
         .init_resource::<GameData>()
         .init_resource::<ScreenShake>()
@@ -120,6 +121,7 @@ fn setup(mut commands: Commands, _next_state: ResMut<NextState<GameState>>) {
         Tonemapping::TonyMcMapface, // 2. Using a tonemapper that desaturates to white is recommended
         Bloom::default(),           // 3. Enable bloom for the camera
         DebandDither::Enabled,
+        CrtSettings::default(),
     ));
 
 
