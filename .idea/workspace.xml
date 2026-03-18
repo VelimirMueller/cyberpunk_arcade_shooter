@@ -12,9 +12,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c7bf7c83-c036-4727-b202-11f9ea52bec0" name="Changes" comment="add energy system to make game more fun and ad restore energy on movement">
-      <change beforePath="$PROJECT_DIR$/src/app.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data/game_state.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/game_state.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/systems/collision.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/collision.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,12 +71,12 @@
       </RecentBranches>
     </option>
   </component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/VelimirMueller/cyberpunk_rpg.git&quot;,
-    &quot;accountId&quot;: &quot;99f745e0-8226-4053-8bb5-e788cac4956b&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/VelimirMueller/cyberpunk_rpg.git",
+    "accountId": "1e38d71b-3309-42e9-8af6-91f10f8b0268"
   }
-}</component>
+}]]></component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="uXMcSdgk" />
   </component>
@@ -194,7 +192,8 @@
       <workItem from="1751016427634" duration="680000" />
       <workItem from="1751033838839" duration="2145000" />
       <workItem from="1751036515766" duration="498000" />
-      <workItem from="1773776598439" duration="1343000" />
+      <workItem from="1773776598439" duration="3438000" />
+      <workItem from="1773842293505" duration="7531000" />
     </task>
     <task id="LOCAL-00001" summary="add basic game with a player, barriers and basic movements">
       <option name="closed" value="true" />

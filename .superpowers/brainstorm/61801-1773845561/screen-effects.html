@@ -1,0 +1,50 @@
+<h2>Which screen-space effect vibe do you want?</h2>
+<p class="subtitle">These layer on top of your existing bloom. Click the one that fits your vision.</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #0a0a0a; height: 220px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+      <div style="position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,0,0.03) 2px, rgba(0,255,0,0.03) 4px); pointer-events: none;"></div>
+      <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%); pointer-events: none;"></div>
+      <div style="font-family: monospace; color: #00ff41; font-size: 28px; text-shadow: 0 0 10px #00ff41, 0 0 30px #00ff41, 0 0 60px #00ff41; letter-spacing: 4px;">BLOOM CUBE</div>
+      <div style="position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; font-size: 11px; color: #555; font-family: monospace;">scanlines + vignette + slight curvature feel</div>
+    </div>
+    <div class="card-body">
+      <h3>A — CRT Retro</h3>
+      <p>Scanlines, vignette darkening at edges, subtle phosphor glow. Like playing on an old arcade monitor. Leans into the retro-cyberpunk aesthetic hard.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #0a0a0a; height: 220px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+      <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%); pointer-events: none;"></div>
+      <div style="font-family: sans-serif; font-weight: 900; color: #fff; font-size: 28px; letter-spacing: 6px; position: relative;">
+        <span style="position: absolute; left: -2px; top: 0; color: #ff0040; opacity: 0.7; clip-path: inset(0 0 50% 0);">BLOOM CUBE</span>
+        <span style="position: absolute; left: 2px; top: 0; color: #00d4ff; opacity: 0.7; clip-path: inset(50% 0 0 0);">BLOOM CUBE</span>
+        BLOOM CUBE
+      </div>
+      <div style="position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; font-size: 11px; color: #555; font-family: monospace;">chromatic aberration + vignette + clean</div>
+    </div>
+    <div class="card-body">
+      <h3>B — Modern Neon</h3>
+      <p>Chromatic aberration (RGB split) on hits, subtle vignette, clean look. Think Cyberpunk 2077 photo mode or Transistor. Premium and modern, less retro.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #0a0a0a; height: 220px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+      <div style="position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,255,65,0.015) 3px, rgba(0,255,65,0.015) 6px); pointer-events: none;"></div>
+      <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.6) 100%); pointer-events: none;"></div>
+      <div style="font-family: sans-serif; font-weight: 900; color: #fff; font-size: 28px; letter-spacing: 6px; position: relative;">
+        <span style="position: absolute; left: -1px; top: 0; color: #ff0040; opacity: 0.5; clip-path: inset(0 0 50% 0);">BLOOM CUBE</span>
+        <span style="position: absolute; left: 1px; top: 0; color: #00d4ff; opacity: 0.5; clip-path: inset(50% 0 0 0);">BLOOM CUBE</span>
+        <span style="text-shadow: 0 0 15px rgba(0,255,65,0.5), 0 0 40px rgba(0,255,65,0.2);">BLOOM CUBE</span>
+      </div>
+      <div style="position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; font-size: 11px; color: #555; font-family: monospace;">subtle scanlines + chromatic aberration + vignette</div>
+    </div>
+    <div class="card-body">
+      <h3>C — Hybrid</h3>
+      <p>Best of both: very subtle scanlines (barely visible), chromatic aberration on damage, vignette. The scanlines add texture without going full retro. Most versatile.</p>
+    </div>
+  </div>
+</div>

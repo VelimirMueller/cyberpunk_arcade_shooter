@@ -1,0 +1,53 @@
+<h2>What background should the arena have?</h2>
+<p class="subtitle">This sits behind all gameplay. Should add depth without distracting from the neon action.</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #050505; height: 200px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+      <!-- Grid -->
+      <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(0,255,65,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,65,0.06) 1px, transparent 1px); background-size: 40px 40px;"></div>
+      <div style="position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, rgba(0,255,65,0.03) 100%);"></div>
+      <div style="width: 30px; height: 30px; background: rgba(0,255,65,0.8); box-shadow: 0 0 15px #00ff41, 0 0 30px #00ff41; transform: rotate(15deg);"></div>
+      <div style="position: absolute; bottom: 8px; font-size: 11px; color: #444; font-family: monospace;">perspective grid — Tron / synthwave</div>
+    </div>
+    <div class="card-body">
+      <h3>A — Cyberpunk Grid</h3>
+      <p>Faint green grid lines on black. Classic synthwave/Tron aesthetic. Can slowly scroll or pulse. Simple, iconic, very cyberpunk.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #030308; height: 200px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+      <!-- Starfield -->
+      <div style="position: absolute; width: 2px; height: 2px; background: #fff; border-radius: 50%; top: 20%; left: 15%; box-shadow: 0 0 3px #fff;"></div>
+      <div style="position: absolute; width: 1px; height: 1px; background: rgba(255,255,255,0.6); border-radius: 50%; top: 40%; left: 65%;"></div>
+      <div style="position: absolute; width: 2px; height: 2px; background: rgba(0,255,65,0.5); border-radius: 50%; top: 70%; left: 35%; box-shadow: 0 0 4px rgba(0,255,65,0.3);"></div>
+      <div style="position: absolute; width: 1px; height: 1px; background: rgba(255,255,255,0.4); border-radius: 50%; top: 55%; left: 80%;"></div>
+      <div style="position: absolute; width: 1px; height: 1px; background: rgba(255,0,100,0.4); border-radius: 50%; top: 25%; left: 50%; box-shadow: 0 0 3px rgba(255,0,100,0.2);"></div>
+      <div style="position: absolute; width: 2px; height: 2px; background: rgba(255,255,255,0.3); border-radius: 50%; top: 80%; left: 20%;"></div>
+      <div style="width: 30px; height: 30px; background: rgba(0,255,65,0.8); box-shadow: 0 0 15px #00ff41, 0 0 30px #00ff41; transform: rotate(15deg);"></div>
+      <div style="position: absolute; bottom: 8px; font-size: 11px; color: #444; font-family: monospace;">sparse colored particles — deep space</div>
+    </div>
+    <div class="card-body">
+      <h3>B — Deep Space</h3>
+      <p>Sparse, slowly drifting star particles. Some white, some tinted green/magenta to match the game palette. Subtle parallax depth. Minimal but atmospheric.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #050505; height: 200px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+      <!-- Grid + Stars -->
+      <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(0,255,65,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,65,0.04) 1px, transparent 1px); background-size: 40px 40px;"></div>
+      <div style="position: absolute; width: 2px; height: 2px; background: rgba(255,255,255,0.5); border-radius: 50%; top: 25%; left: 20%; box-shadow: 0 0 3px rgba(255,255,255,0.3);"></div>
+      <div style="position: absolute; width: 1px; height: 1px; background: rgba(0,255,65,0.4); border-radius: 50%; top: 60%; left: 70%;"></div>
+      <div style="position: absolute; width: 1px; height: 1px; background: rgba(255,0,100,0.3); border-radius: 50%; top: 45%; left: 45%;"></div>
+      <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.4) 100%);"></div>
+      <div style="width: 30px; height: 30px; background: rgba(0,255,65,0.8); box-shadow: 0 0 15px #00ff41, 0 0 30px #00ff41; transform: rotate(15deg);"></div>
+      <div style="position: absolute; bottom: 8px; font-size: 11px; color: #444; font-family: monospace;">grid + floating particles — layered depth</div>
+    </div>
+    <div class="card-body">
+      <h3>C — Grid + Stars Combo</h3>
+      <p>Faint grid for structure plus sparse floating particles for depth. The grid anchors the space, the particles add life. Richest visual but needs careful opacity tuning to not distract.</p>
+    </div>
+  </div>
+</div>
