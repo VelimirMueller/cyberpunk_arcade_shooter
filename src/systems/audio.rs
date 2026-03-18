@@ -1,23 +1,7 @@
 use bevy::prelude::*;
-
-/// Placeholder sound system for cyberpunk game
-/// In a full implementation, you would load actual audio files
-/// This version provides hooks for adding sounds later
-
-#[derive(Resource)]
-pub struct AudioManager {
-    pub sound_enabled: bool,
-    pub volume: f32,
-}
-
-impl Default for AudioManager {
-    fn default() -> Self {
-        Self {
-            sound_enabled: true,
-            volume: 0.7,
-        }
-    }
-}
+use kira::manager::{AudioManager, AudioManagerSettings, backend::DefaultBackend};
+use kira::sound::static_sound::StaticSoundData;
+use std::io::Cursor;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum SoundEffect {
@@ -31,76 +15,162 @@ pub enum SoundEffect {
     MenuSelect,
 }
 
-pub struct SoundPlugin;
+#[derive(Event)]
+pub struct SoundEvent(pub SoundEffect);
 
-impl Plugin for SoundPlugin {
-    fn build(&self, app: &mut App) {
-        app.init_resource::<AudioManager>()
-            .add_systems(Startup, setup_audio);
-    }
+pub struct SynthAudio {
+    pub manager: AudioManager<DefaultBackend>,
+    pub sound_enabled: bool,
+    pub volume: f32,
 }
 
-/// Play a sound effect (placeholder implementation)
-pub fn play_sound(audio: &AudioManager, effect: SoundEffect) {
+pub fn setup_synth_audio(world: &mut World) {
+    let manager = AudioManager::<DefaultBackend>::new(AudioManagerSettings::default())
+        .expect("Failed to initialize audio manager");
+    world.insert_non_send_resource(SynthAudio {
+        manager,
+        sound_enabled: true,
+        volume: 0.7,
+    });
+}
+
+pub fn play_sounds(
+    mut audio: NonSendMut<SynthAudio>,
+    mut events: EventReader<SoundEvent>,
+) {
     if !audio.sound_enabled {
+        events.clear();
         return;
     }
 
-    // TODO: Load and play actual sound files
-    // For now, we'll just log which sound would play
-    match effect {
-        SoundEffect::PlayerShoot => {
-            info!("🔊 Sound: PlayerShoot (pew_pew.wav)");
-        }
-        SoundEffect::PlayerHit => {
-            info!("🔊 Sound: PlayerHit (damage.wav)");
-        }
-        SoundEffect::EnemyShoot => {
-            info!("🔊 Sound: EnemyShoot (laser.wav)");
-        }
-        SoundEffect::EnemyHit => {
-            info!("🔊 Sound: EnemyHit (hit.wav)");
-        }
-        SoundEffect::Explosion => {
-            info!("🔊 Sound: Explosion (boom.wav)");
-        }
-        SoundEffect::GameOver => {
-            info!("🔊 Sound: GameOver (game_over.wav)");
-        }
-        SoundEffect::GameWon => {
-            info!("🔊 Sound: GameWon (victory.wav)");
-        }
-        SoundEffect::MenuSelect => {
-            info!("🔊 Sound: MenuSelect (select.wav)");
+    for event in events.read() {
+        let samples = generate_sound(event.0, audio.volume);
+        let data = samples_to_sound_data(samples, 44100);
+        if let Ok(data) = data {
+            let _ = audio.manager.play(data);
         }
     }
 }
 
-/// Set up the audio system
-pub fn setup_audio(mut commands: Commands) {
-    commands.init_resource::<AudioManager>();
-    info!("🔊 Audio system initialized (placeholder - no actual sounds loaded)");
+fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
+    let sample_rate = 44100.0;
+    match effect {
+        SoundEffect::PlayerShoot => {
+            let duration = 0.08;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let freq = 800.0 - (400.0 * t / duration);
+                let envelope = 1.0 - (t / duration);
+                (t * freq * std::f32::consts::TAU).sin() * envelope * volume * 0.3
+            }).collect()
+        }
+        SoundEffect::EnemyShoot => {
+            let duration = 0.12;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let freq = 400.0 - (200.0 * t / duration);
+                let envelope = 1.0 - (t / duration);
+                (t * freq * std::f32::consts::TAU).sin() * envelope * volume * 0.25
+            }).collect()
+        }
+        SoundEffect::PlayerHit => {
+            let duration = 0.15;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let envelope = 1.0 - (t / duration);
+                let noise = (rand::random::<f32>() * 2.0 - 1.0) * 0.3;
+                let thump = (t * 150.0 * std::f32::consts::TAU).sin() * 0.7;
+                (noise + thump) * envelope * volume * 0.4
+            }).collect()
+        }
+        SoundEffect::EnemyHit => {
+            let duration = 0.1;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let envelope = 1.0 - (t / duration);
+                let click = (rand::random::<f32>() * 2.0 - 1.0) * 0.2;
+                let tone = (t * 500.0 * std::f32::consts::TAU).sin() * 0.5;
+                (click + tone) * envelope * volume * 0.3
+            }).collect()
+        }
+        SoundEffect::Explosion => {
+            let duration = 0.4;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let envelope = (1.0 - (t / duration)).powf(0.5);
+                let noise = (rand::random::<f32>() * 2.0 - 1.0) * 0.4;
+                let freq = 200.0 - (150.0 * t / duration);
+                let sweep = (t * freq * std::f32::consts::TAU).sin() * 0.8;
+                let mixed = (noise + sweep) * envelope;
+                (mixed * 1.5).tanh() * volume * 0.5
+            }).collect()
+        }
+        SoundEffect::GameOver => {
+            let duration = 0.8;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let freq = 600.0 - (500.0 * t / duration);
+                let envelope = 1.0 - (t / duration);
+                (t * freq * std::f32::consts::TAU).sin() * envelope * volume * 0.4
+            }).collect()
+        }
+        SoundEffect::GameWon => {
+            let duration = 0.5;
+            let num_samples = (sample_rate * duration) as usize;
+            let notes = [261.63, 329.63, 392.0];
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let note_idx = ((t / duration) * 3.0) as usize;
+                let note_idx = note_idx.min(2);
+                let freq = notes[note_idx];
+                let local_t = t - (note_idx as f32 * duration / 3.0);
+                let envelope = (1.0 - (local_t / (duration / 3.0)).min(1.0)) * 0.8;
+                (t * freq * std::f32::consts::TAU).sin() * envelope * volume * 0.3
+            }).collect()
+        }
+        SoundEffect::MenuSelect => {
+            let duration = 0.05;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let envelope = 1.0 - (t / duration);
+                (t * 1000.0 * std::f32::consts::TAU).sin() * envelope * volume * 0.2
+            }).collect()
+        }
+    }
 }
 
-/// Toggle sound on/off
-pub fn toggle_sound(audio: &mut AudioManager) {
+fn samples_to_sound_data(samples: Vec<f32>, sample_rate: u32) -> Result<StaticSoundData, Box<dyn std::error::Error>> {
+    let spec = hound::WavSpec {
+        channels: 1,
+        sample_rate,
+        bits_per_sample: 32,
+        sample_format: hound::SampleFormat::Float,
+    };
+
+    let mut buffer = Cursor::new(Vec::new());
+    {
+        let mut writer = hound::WavWriter::new(&mut buffer, spec)?;
+        for sample in &samples {
+            writer.write_sample(*sample)?;
+        }
+        writer.finalize()?;
+    }
+
+    let data = StaticSoundData::from_cursor(
+        Cursor::new(buffer.into_inner()),
+    )?;
+
+    Ok(data)
+}
+
+pub fn toggle_sound(audio: &mut SynthAudio) {
     audio.sound_enabled = !audio.sound_enabled;
-    info!("🔊 Sound toggled: {}", if audio.sound_enabled { "ON" } else { "OFF" });
-}
-
-/// Example system integration - call this from collision.rs
-pub fn on_player_hit(audio: Res<AudioManager>) {
-    play_sound(&audio, SoundEffect::PlayerHit);
-}
-
-pub fn on_player_shoot(audio: Res<AudioManager>) {
-    play_sound(&audio, SoundEffect::PlayerShoot);
-}
-
-pub fn on_enemy_hit(audio: Res<AudioManager>) {
-    play_sound(&audio, SoundEffect::EnemyHit);
-}
-
-pub fn on_enemy_shoot(audio: Res<AudioManager>) {
-    play_sound(&audio, SoundEffect::EnemyShoot);
+    info!("Sound toggled: {}", if audio.sound_enabled { "ON" } else { "OFF" });
 }

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use crate::core::enemies::components::Enemy;
 use crate::app::GameEntity;
 use crate::core::player::components::{Player, PlayerRotationTracker, PlayerParticle};
-use crate::systems::audio::{play_sound, SoundEffect};
+use crate::systems::audio::{SoundEvent, SoundEffect};
 
 #[derive(Component)]
 pub struct EnemyParticle;
@@ -62,7 +62,7 @@ pub(crate) fn boss_shoot_system(
     time: Res<Time>,
     mut commands: Commands,
     mut query: Query<(&mut Enemy, &GlobalTransform, &Transform)>,
-    audio: Res<crate::systems::audio::AudioManager>,
+    mut sound_events: EventWriter<SoundEvent>,
 ) {
     for (mut boss, global_transform, local_transform) in &mut query {
         if let Some(timer) = boss.fire_timer.as_mut() {
@@ -70,7 +70,7 @@ pub(crate) fn boss_shoot_system(
         }
 
         if boss.fire_timer.as_ref().map_or(false, |t| t.just_finished()) {
-            play_sound(&audio, SoundEffect::EnemyShoot);
+            sound_events.write(SoundEvent(SoundEffect::EnemyShoot));
             let scale = local_transform.scale.xy(); // assume uniform scale for cube
             let half_width = 0.5 * scale.x;
             let half_height = 0.5 * scale.y;
@@ -109,7 +109,7 @@ pub(crate) fn player_shoot_system(
     mut query: Query<(&Transform, &mut PlayerRotationTracker)>,
     mut player: Query<(&mut Player, &Transform, &Sprite)>,
     input: Res<ButtonInput<KeyCode>>,
-    audio: Res<crate::systems::audio::AudioManager>,
+    mut sound_events: EventWriter<SoundEvent>,
 ) {
     if !input.pressed(KeyCode::Space) {
         return;
@@ -149,7 +149,7 @@ pub(crate) fn player_shoot_system(
                 let total_cost = ENERGY_COST_PER_CORNER * directions.len() as u32;
                 if let Some(energy) = player_data.energy.checked_sub(total_cost) {
                     player_data.energy = energy;
-                    play_sound(&audio, SoundEffect::PlayerShoot);
+                    sound_events.write(SoundEvent(SoundEffect::PlayerShoot));
 
                     for dir in directions {
                         // Drehe Ecken-Offset mit Spielerrotation
