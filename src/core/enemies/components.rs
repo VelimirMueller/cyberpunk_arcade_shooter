@@ -5,6 +5,7 @@ pub struct Enemy {
     pub max: u32,
     pub fire_timer:  Option<Timer>,
     pub last_collision_time: Option<std::time::Instant>,
+    pub is_dead: bool,
 }
 
 #[derive(Component)]
