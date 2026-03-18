@@ -25,7 +25,7 @@ fn spawn_enemy(
                 Some(Timer::from_seconds(0.25, TimerMode::Repeating))
             } else {
                 None
-            }, last_collision_time: None },
+            }, last_collision_time: None, is_dead: false },
             Sprite {
                 color,
                 custom_size: Some(Vec2::new(50.0, 50.0 * (count+0.85)/1.25)),

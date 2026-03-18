@@ -83,6 +83,7 @@ pub fn restart_listener(
         game_data.score = 0;
         game_data.wave = 1;
         game_data.total_play_time = 0.0;
+        game_data.enemies_killed = 0;
 
         // Despawn all game entities
         for entity in &game_entity_query {

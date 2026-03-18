@@ -12,6 +12,7 @@ use crate::systems::game_over::{game_won_system, game_over_system, restart_liste
 use crate::data::game_state::GameState;
 use crate::systems::audio::toggle_sound;
 use crate::systems::background::{spawn_background_stars, animate_stars, draw_background_grid};
+use crate::systems::collision::DeathEvent;
 
 #[derive(Resource)]
 pub struct GameData {
@@ -19,6 +20,8 @@ pub struct GameData {
     pub wave: u32,
     pub high_score: u32,
     pub total_play_time: f32,
+    pub enemies_killed: u32,
+    pub total_enemies: u32,
 }
 
 impl Default for GameData {
@@ -28,6 +31,8 @@ impl Default for GameData {
             wave: 1,
             high_score: 0,
             total_play_time: 0.0,
+            enemies_killed: 0,
+            total_enemies: 3,
         }
     }
 }
@@ -77,6 +82,7 @@ pub(crate) fn main() {
         .init_resource::<GameData>()
         .init_resource::<ScreenShake>()
         .init_resource::<crate::systems::audio::AudioManager>()
+        .add_event::<DeathEvent>()
         .add_systems(Startup, (setup, setup_menu, crate::systems::audio::setup_audio, spawn_background_stars))
         .add_systems(Update, (animate_stars, draw_background_grid))
         .add_systems(Update, menu_input_system.run_if(in_state(GameState::Menu)))
@@ -222,15 +228,16 @@ pub fn update_energy_ui(
 pub fn update_enemy_health_ui(
     enemy_query: Query<&Enemy>,
     mut span_query: Query<&mut TextSpan, With<EnemyHpText>>,
-    mut next_state: ResMut<NextState<GameState>>
+    mut next_state: ResMut<NextState<GameState>>,
+    game_data: Res<GameData>,
 ) {
     let total_hp: u32 = enemy_query.iter().map(|enemy| enemy.current).sum();
     for mut span in &mut span_query {
         **span = format!("{} %", total_hp);
+    }
 
-        if total_hp == 0 {
-            next_state.set(GameState::Won);
-        }
+    if game_data.enemies_killed >= game_data.total_enemies {
+        next_state.set(GameState::Won);
     }
 }
 

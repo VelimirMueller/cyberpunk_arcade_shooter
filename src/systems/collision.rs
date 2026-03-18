@@ -6,22 +6,31 @@ use crate::data::game_state::GameState;
 use crate::app::{GameData, trigger_screen_shake, trigger_damage_flash};
 use crate::systems::audio::{play_sound, SoundEffect};
 
+#[derive(Event)]
+pub struct DeathEvent {
+    pub position: Vec3,
+    pub color: Color,
+    pub entity: Entity,
+}
+
 pub fn detect_collisions(
     mut commands: Commands,
     mut player_query: Query<(Entity, &mut Player, &Transform, &Sprite)>,
-    mut enemy_query: Query<(&mut Enemy, &Transform, &Sprite), With<Enemy>>,
+    mut enemy_query: Query<(Entity, &mut Enemy, &Transform, &Sprite), With<Enemy>>,
     particle_query: Query<&Transform, With<EnemyParticle>>,
     player_particle_query: Query<&Transform, With<PlayerParticle>>,
     mut next_state: ResMut<NextState<GameState>>,
     mut game_data: ResMut<GameData>,
     mut screen_shake: ResMut<crate::app::ScreenShake>,
     audio: Res<crate::systems::audio::AudioManager>,
+    mut death_events: EventWriter<DeathEvent>,
 ) {
     for (player_entity, mut player, player_transform, player_sprite) in &mut player_query {
         let player_size = player_sprite.custom_size.unwrap_or(Vec2::ONE);
         let player_pos = player_transform.translation;
 
-        for (_enemy, enemy_transform, enemy_sprite) in &enemy_query {
+        for (_entity, _enemy, enemy_transform, enemy_sprite) in &enemy_query {
+            if _enemy.is_dead { continue; }
             let enemy_size = enemy_sprite.custom_size.unwrap_or(Vec2::ONE);
             let enemy_pos = enemy_transform.translation;
 
@@ -66,7 +75,7 @@ pub fn detect_collisions(
                 }
             }
         }
-        for (mut enemy, enemy_transform, enemy_sprite) in &mut enemy_query {
+        for (enemy_entity, mut enemy, enemy_transform, enemy_sprite) in &mut enemy_query {
             let enemy_size = enemy_sprite.custom_size.unwrap_or(Vec2::ONE);
 
             for player_particle_transform in &player_particle_query {
@@ -75,18 +84,29 @@ pub fn detect_collisions(
                 let enemy_pos = enemy_transform.translation;
 
                 if collide(particle_pos, particle_size, enemy_pos, enemy_size) {
+                    if enemy.is_dead {
+                        continue;
+                    }
                     if enemy.current > 0 {
                         if enemy.last_collision_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.075) {
                             enemy.current -= 1;
                             enemy.last_collision_time = Some(std::time::Instant::now());
-                            game_data.score += 10; // Add score for hitting enemy
+                            game_data.score += 10;
                             play_sound(&audio, SoundEffect::EnemyHit);
                             info!("You hit the Enemy HP: {}", enemy.current);
+
+                            if enemy.current == 0 {
+                                enemy.is_dead = true;
+                                game_data.score += 100;
+                                game_data.enemies_killed += 1;
+                                play_sound(&audio, SoundEffect::Explosion);
+                                death_events.write(DeathEvent {
+                                    position: enemy_transform.translation,
+                                    color: enemy_sprite.color,
+                                    entity: enemy_entity,
+                                });
+                            }
                         }
-                    } else {
-                        info!("Enemy defeated!");
-                        game_data.score += 100; // Bonus for defeating enemy
-                        play_sound(&audio, SoundEffect::Explosion);
                     }
                 }
             }
