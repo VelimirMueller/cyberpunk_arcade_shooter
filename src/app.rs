@@ -11,7 +11,7 @@ use crate::systems::combat::{particle_movement_system, particle_cleanup_system, 
 use crate::systems::game_over::{game_won_system, game_over_system, restart_listener, despawn_game_over_text};
 use crate::data::game_state::GameState;
 use crate::systems::audio::toggle_sound;
-use crate::systems::background::{spawn_background_stars, animate_stars};
+use crate::systems::background::{spawn_background_stars, animate_stars, draw_background_grid};
 
 #[derive(Resource)]
 pub struct GameData {
@@ -78,7 +78,7 @@ pub(crate) fn main() {
         .init_resource::<ScreenShake>()
         .init_resource::<crate::systems::audio::AudioManager>()
         .add_systems(Startup, (setup, setup_menu, crate::systems::audio::setup_audio, spawn_background_stars))
-        .add_systems(Update, animate_stars)
+        .add_systems(Update, (animate_stars, draw_background_grid))
         .add_systems(Update, menu_input_system.run_if(in_state(GameState::Menu)))
         .add_systems(Update, pause_toggle_system.run_if(in_state(GameState::Playing)))
         .add_systems(Update, (despawn_game_over_text, player_movement, enemy_movement_system, enemy_rotation, detect_collisions, update_health_ui, update_enemy_health_ui, particle_movement_system, particle_cleanup_system, boss_shoot_system, player_shoot_system,player_particle_movement_system, update_energy_ui, screen_shake_system, damage_flash_system, update_game_data, update_score_ui).run_if(in_state(GameState::Playing)))
