@@ -364,7 +364,7 @@ pub fn menu_input_system(
             WaveText,
         ));
 
-        next_state.set(GameState::RoundActive);
+        next_state.set(GameState::RoundAnnounce);
     }
 }
 
