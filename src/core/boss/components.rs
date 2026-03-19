@@ -47,6 +47,7 @@ pub struct Boss {
     pub attack_state: AttackState,
     pub base_color: Color,
     pub last_hit_time: Option<std::time::Instant>,
+    pub last_laser_hit_time: Option<std::time::Instant>,
     pub combo_count: u32,
     pub max_combo: u32,
     pub cycle_index: u32,

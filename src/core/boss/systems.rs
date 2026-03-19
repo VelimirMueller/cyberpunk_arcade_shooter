@@ -82,6 +82,7 @@ pub fn spawn_boss(commands: &mut Commands, round: u32) {
             attack_state: AttackState::Idle,
             base_color: color,
             last_hit_time: None,
+            last_laser_hit_time: None,
             combo_count: 0,
             max_combo: 1,
             cycle_index: 0,
