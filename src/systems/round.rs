@@ -5,6 +5,7 @@ use crate::core::boss::systems::spawn_boss;
 use crate::core::player::components::Player;
 use crate::data::game_state::GameState;
 use crate::systems::combat::EnemyParticle;
+use crate::systems::audio::{SoundEvent, SoundEffect};
 
 // ============ Round Announcement ============
 
@@ -45,7 +46,12 @@ pub fn round_announce_system(
     mut next_state: ResMut<NextState<GameState>>,
     mut commands: Commands,
     game_data: Res<GameData>,
+    mut sound_events: EventWriter<SoundEvent>,
 ) {
+    // Play BossSpawn sound at the start of the announcement
+    if round_timer.elapsed == 0.0 {
+        sound_events.write(SoundEvent(SoundEffect::BossSpawn));
+    }
     round_timer.elapsed += time.delta().as_secs_f32();
 
     // Update phase based on elapsed time
@@ -125,6 +131,7 @@ pub fn score_tally_system(
     telegraph_query: Query<Entity, With<ChargeTelegraph>>,
     enemy_particle_query: Query<Entity, With<EnemyParticle>>,
     round_clear_query: Query<Entity, With<RoundClearText>>,
+    mut sound_events: EventWriter<SoundEvent>,
 ) {
     let Some(mut tally_timer) = tally_timer else {
         return;
@@ -156,6 +163,7 @@ pub fn score_tally_system(
     }
 
     if tally_timer.elapsed >= tally_timer.duration {
+        sound_events.write(SoundEvent(SoundEffect::RoundClear));
         // Despawn boss
         for entity in boss_query.iter() {
             commands.entity(entity).despawn();

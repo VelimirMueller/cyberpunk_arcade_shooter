@@ -3,6 +3,7 @@
 use bevy::prelude::*;
 use crate::app::{GameEntity, ScreenShake};
 use crate::core::boss::components::*;
+use crate::systems::audio::{SoundEvent, SoundEffect};
 
 /// Grid Phantom attack pattern: dash + telegraph + trail
 /// State machine: Idle → WindUp → Dashing → Recovery (with optional chain dash in Phase 3)
@@ -12,6 +13,7 @@ pub fn phantom_attack(
     player_transform: &Transform,
     commands: &mut Commands,
     delta: f32,
+    sound_events: &mut EventWriter<SoundEvent>,
 ) {
     let boss_pos = boss_transform.translation.truncate();
     let player_pos = player_transform.translation.truncate();
@@ -27,6 +29,7 @@ pub fn phantom_attack(
                     Timer::from_seconds(windup_duration, TimerMode::Once),
                 );
                 boss.combo_count = 0;
+                sound_events.write(SoundEvent(SoundEffect::DashTelegraph));
 
                 // Spawn telegraph line from boss to player
                 let direction = (player_pos - boss_pos).normalize_or_zero();
@@ -182,6 +185,7 @@ pub fn apex_attack(
     delta: f32,
     screen_shake: &mut ScreenShake,
     hazard_count: usize,
+    sound_events: &mut EventWriter<SoundEvent>,
 ) {
     let cycle_len = match boss.phase {
         BossPhase::Phase1 => 2,
@@ -194,10 +198,10 @@ pub fn apex_attack(
     let was_idle = matches!(boss.attack_state, AttackState::Idle);
 
     match current_attack {
-        0 => phantom_attack(boss, boss_transform, player_transform, commands, delta),
-        1 => sentinel_attack(boss, boss_transform, player_transform, commands, delta),
-        2 => berserker_attack(boss, boss_transform, player_transform, commands, delta, screen_shake),
-        3 => weaver_attack(boss, boss_transform, player_transform, commands, delta, hazard_count),
+        0 => phantom_attack(boss, boss_transform, player_transform, commands, delta, sound_events),
+        1 => sentinel_attack(boss, boss_transform, player_transform, commands, delta, sound_events),
+        2 => berserker_attack(boss, boss_transform, player_transform, commands, delta, screen_shake, sound_events),
+        3 => weaver_attack(boss, boss_transform, player_transform, commands, delta, hazard_count, sound_events),
         _ => {}
     }
 
@@ -215,6 +219,7 @@ pub fn sentinel_attack(
     _player_transform: &Transform,
     commands: &mut Commands,
     delta: f32,
+    sound_events: &mut EventWriter<SoundEvent>,
 ) {
     let boss_pos = boss_transform.translation.truncate();
 
@@ -233,6 +238,7 @@ pub fn sentinel_attack(
             boss.primary_timer.tick(std::time::Duration::from_secs_f32(delta));
 
             if boss.primary_timer.just_finished() {
+                sound_events.write(SoundEvent(SoundEffect::BeamSweep));
                 // Determine number of beam directions based on phase
                 let num_beams = match boss.phase {
                     BossPhase::Phase1 => 1,
@@ -311,6 +317,7 @@ pub fn berserker_attack(
     commands: &mut Commands,
     delta: f32,
     screen_shake: &mut ScreenShake,
+    sound_events: &mut EventWriter<SoundEvent>,
 ) {
     let boss_pos = boss_transform.translation.truncate();
     let player_pos = player_transform.translation.truncate();
@@ -324,6 +331,7 @@ pub fn berserker_attack(
                 boss.attack_state = AttackState::WindUp(
                     Timer::from_seconds(0.8, TimerMode::Once),
                 );
+                sound_events.write(SoundEvent(SoundEffect::ChargeWindUp));
                 // Screen shake during wind-up
                 screen_shake.intensity = 0.3;
                 screen_shake.duration = 0.8;
@@ -418,6 +426,7 @@ pub fn weaver_attack(
     commands: &mut Commands,
     delta: f32,
     hazard_count: usize,
+    sound_events: &mut EventWriter<SoundEvent>,
 ) {
     let player_pos = player_transform.translation.truncate();
 
@@ -432,6 +441,7 @@ pub fn weaver_attack(
                 };
 
                 if hazard_count < max_hazards {
+                    sound_events.write(SoundEvent(SoundEffect::HazardSpawn));
                     // Spawn a HazardZone at random position
                     let x = (rand::random::<f32>() - 0.5) * 1000.0; // ±500
                     let y = (rand::random::<f32>() - 0.5) * 400.0;  // ±200

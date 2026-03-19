@@ -4,6 +4,7 @@ use crate::core::boss::components::*;
 use crate::core::boss::attacks;
 use crate::core::player::components::Player;
 use crate::app::ScreenShake;
+use crate::systems::audio::{SoundEvent, SoundEffect};
 
 pub fn boss_type_for_round(round: u32) -> BossType {
     match round {
@@ -65,6 +66,7 @@ pub fn spawn_boss(commands: &mut Commands, round: u32) {
 pub fn boss_phase_system(
     mut boss_query: Query<&mut Boss>,
     mut screen_shake: ResMut<ScreenShake>,
+    mut sound_events: EventWriter<SoundEvent>,
 ) {
     for mut boss in boss_query.iter_mut() {
         let hp_pct = boss.current_hp as f32 / boss.max_hp as f32;
@@ -85,11 +87,13 @@ pub fn boss_phase_system(
                     boss.attack_state = AttackState::Recovery(
                         Timer::from_seconds(1.5, TimerMode::Once)
                     );
+                    sound_events.write(SoundEvent(SoundEffect::PhaseShift));
                 },
                 TransitionStyle::RageBurst => {
                     screen_shake.intensity = 1.5;
                     screen_shake.duration = 0.5;
                     screen_shake.timer = 0.5;
+                    sound_events.write(SoundEvent(SoundEffect::RageBurst));
                 },
             }
             if boss.boss_type == BossType::ChromeBerserker {
@@ -141,6 +145,7 @@ pub fn boss_attack_system(
     player_query: Query<&Transform, (With<Player>, Without<Boss>)>,
     mut screen_shake: ResMut<ScreenShake>,
     hazard_query: Query<&HazardZone>,
+    mut sound_events: EventWriter<SoundEvent>,
 ) {
     let Ok(player_transform) = player_query.single() else { return };
     let hazard_count = hazard_query.iter().count();
@@ -148,19 +153,19 @@ pub fn boss_attack_system(
         let delta = time.delta_secs();
         match boss.boss_type {
             BossType::GridPhantom => {
-                attacks::phantom_attack(&mut boss, &boss_transform, player_transform, &mut commands, delta);
+                attacks::phantom_attack(&mut boss, &boss_transform, player_transform, &mut commands, delta, &mut sound_events);
             }
             BossType::NeonSentinel => {
-                attacks::sentinel_attack(&mut boss, &mut boss_transform, player_transform, &mut commands, delta);
+                attacks::sentinel_attack(&mut boss, &mut boss_transform, player_transform, &mut commands, delta, &mut sound_events);
             }
             BossType::ChromeBerserker => {
-                attacks::berserker_attack(&mut boss, &boss_transform, player_transform, &mut commands, delta, &mut screen_shake);
+                attacks::berserker_attack(&mut boss, &boss_transform, player_transform, &mut commands, delta, &mut screen_shake, &mut sound_events);
             }
             BossType::VoidWeaver => {
-                attacks::weaver_attack(&mut boss, &mut boss_transform, player_transform, &mut commands, delta, hazard_count);
+                attacks::weaver_attack(&mut boss, &mut boss_transform, player_transform, &mut commands, delta, hazard_count, &mut sound_events);
             }
             BossType::ApexProtocol => {
-                attacks::apex_attack(&mut boss, &mut boss_transform, player_transform, &mut commands, delta, &mut screen_shake, hazard_count);
+                attacks::apex_attack(&mut boss, &mut boss_transform, player_transform, &mut commands, delta, &mut screen_shake, hazard_count, &mut sound_events);
             }
         }
     }
@@ -222,6 +227,7 @@ pub fn hazard_zone_system(
     time: Res<Time>,
     mut commands: Commands,
     mut query: Query<(Entity, &mut HazardZone, &mut Transform, &mut Sprite)>,
+    mut sound_events: EventWriter<SoundEvent>,
 ) {
     for (entity, mut hazard, mut transform, mut sprite) in query.iter_mut() {
         hazard.lifetime.tick(time.delta());
@@ -236,6 +242,7 @@ pub fn hazard_zone_system(
             if let Some(ref mut exp_timer) = hazard.explosion_timer {
                 exp_timer.tick(time.delta());
                 if exp_timer.just_finished() {
+                    sound_events.write(SoundEvent(SoundEffect::HazardExplode));
                     // Explode: expand to 120x120 magenta, set radius to 60, short lifetime
                     sprite.custom_size = Some(Vec2::new(120.0, 120.0));
                     sprite.color = Color::srgba(8.0, 0.0, 8.0, 0.8);
