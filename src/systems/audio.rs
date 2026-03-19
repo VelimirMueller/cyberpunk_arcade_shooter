@@ -13,6 +13,15 @@ pub enum SoundEffect {
     GameOver,
     GameWon,
     MenuSelect,
+    BossSpawn,
+    PhaseShift,
+    RageBurst,
+    DashTelegraph,
+    BeamSweep,
+    ChargeWindUp,
+    HazardSpawn,
+    HazardExplode,
+    RoundClear,
 }
 
 #[derive(Event)]
@@ -141,6 +150,111 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 let t = i as f32 / sample_rate;
                 let envelope = 1.0 - (t / duration);
                 (t * 1000.0 * std::f32::consts::TAU).sin() * envelope * volume * 0.2
+            }).collect()
+        }
+        SoundEffect::BossSpawn => {
+            // Low rumble + rising tone: 80→200 Hz sweep, 500ms
+            let duration = 0.5;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let freq = 80.0 + (120.0 * t / duration);
+                let envelope = (1.0 - (t / duration)).powf(0.3);
+                (t * freq * std::f32::consts::TAU).sin() * envelope * volume * 0.5
+            }).collect()
+        }
+        SoundEffect::PhaseShift => {
+            // White noise burst + 300→100 Hz sweep, 200ms
+            let duration = 0.2;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let freq = 300.0 - (200.0 * t / duration);
+                let envelope = 1.0 - (t / duration);
+                let noise = (rand::random::<f32>() * 2.0 - 1.0) * 0.5;
+                let sweep = (t * freq * std::f32::consts::TAU).sin() * 0.5;
+                (noise + sweep) * envelope * volume * 0.4
+            }).collect()
+        }
+        SoundEffect::RageBurst => {
+            // Impact + bass drop: 50 Hz thump + noise, 300ms
+            let duration = 0.3;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let envelope = (1.0 - (t / duration)).powf(0.5);
+                let noise = (rand::random::<f32>() * 2.0 - 1.0) * 0.3;
+                let thump = (t * 50.0 * std::f32::consts::TAU).sin() * 0.8;
+                ((noise + thump) * 1.5).tanh() * envelope * volume * 0.5
+            }).collect()
+        }
+        SoundEffect::DashTelegraph => {
+            // Rising whine: 200→800 Hz sweep, 800ms
+            let duration = 0.8;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let freq = 200.0 + (600.0 * t / duration);
+                let envelope = (t / duration).min(1.0) * (1.0 - (t / duration)).max(0.0);
+                (t * freq * std::f32::consts::TAU).sin() * envelope * volume * 0.3
+            }).collect()
+        }
+        SoundEffect::BeamSweep => {
+            // Sustained mid-frequency: 400 Hz tone, 500ms
+            let duration = 0.5;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let envelope = 1.0 - (t / duration).powf(2.0);
+                (t * 400.0 * std::f32::consts::TAU).sin() * envelope * volume * 0.3
+            }).collect()
+        }
+        SoundEffect::ChargeWindUp => {
+            // Accelerating rumble: 100→400 Hz, 800ms
+            let duration = 0.8;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let progress = t / duration;
+                let freq = 100.0 + (300.0 * progress * progress);
+                let envelope = progress.min(1.0);
+                (t * freq * std::f32::consts::TAU).sin() * envelope * volume * 0.35
+            }).collect()
+        }
+        SoundEffect::HazardSpawn => {
+            // Bubble/pop: 600→200 Hz, 100ms
+            let duration = 0.1;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let freq = 600.0 - (400.0 * t / duration);
+                let envelope = 1.0 - (t / duration);
+                (t * freq * std::f32::consts::TAU).sin() * envelope * volume * 0.25
+            }).collect()
+        }
+        SoundEffect::HazardExplode => {
+            // Sharp crack: noise + 200 Hz, 150ms
+            let duration = 0.15;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let envelope = 1.0 - (t / duration);
+                let noise = (rand::random::<f32>() * 2.0 - 1.0) * 0.5;
+                let tone = (t * 200.0 * std::f32::consts::TAU).sin() * 0.5;
+                (noise + tone) * envelope * volume * 0.4
+            }).collect()
+        }
+        SoundEffect::RoundClear => {
+            // Triumphant chord: 400+500+600 Hz, 800ms
+            let duration = 0.8;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let envelope = (1.0 - (t / duration)).powf(0.5);
+                let tone1 = (t * 400.0 * std::f32::consts::TAU).sin();
+                let tone2 = (t * 500.0 * std::f32::consts::TAU).sin();
+                let tone3 = (t * 600.0 * std::f32::consts::TAU).sin();
+                (tone1 + tone2 + tone3) / 3.0 * envelope * volume * 0.4
             }).collect()
         }
     }
