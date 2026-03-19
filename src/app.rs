@@ -3,10 +3,9 @@ use bevy::core_pipeline::core_2d::Camera2d;
 use crate::core::player::systems::*;
 use crate::core::player::components::{Player, PlayerRotationTracker};
 use crate::core::world::barriers::systems::spawn_barriers;
-use crate::core::enemies::systems::{create_enemies, enemy_movement_system, enemy_rotation};
 use crate::systems::collision::detect_collisions;
 use bevy::core_pipeline::{bloom::{Bloom}, tonemapping::{DebandDither, Tonemapping}};
-use crate::core::enemies::components::Enemy;
+use crate::core::boss::components::Boss;
 use crate::systems::combat::{particle_movement_system, particle_cleanup_system, boss_shoot_system, player_shoot_system, player_particle_movement_system};
 use crate::systems::game_over::{game_won_system, game_over_system, restart_listener, despawn_game_over_text};
 use crate::data::game_state::GameState;
@@ -24,22 +23,24 @@ use crate::systems::post_processing::{CrtPostProcessPlugin, CrtSettings};
 #[derive(Resource)]
 pub struct GameData {
     pub score: u32,
-    pub wave: u32,
+    pub round: u32,
     pub high_score: u32,
     pub total_play_time: f32,
     pub enemies_killed: u32,
     pub total_enemies: u32,
+    pub total_rounds: u32,
 }
 
 impl Default for GameData {
     fn default() -> Self {
         Self {
             score: 0,
-            wave: 1,
+            round: 1,
             high_score: 0,
             total_play_time: 0.0,
             enemies_killed: 0,
-            total_enemies: 3,
+            total_enemies: 1,
+            total_rounds: 5,
         }
     }
 }
@@ -96,11 +97,11 @@ pub(crate) fn main() {
         .add_systems(Startup, crate::systems::audio::setup_synth_audio)
         .add_systems(Update, (animate_stars, draw_background_grid, crate::systems::audio::play_sounds))
         .add_systems(Update, menu_input_system.run_if(in_state(GameState::Menu)))
-        .add_systems(Update, pause_toggle_system.run_if(in_state(GameState::Playing)))
-        .add_systems(Update, (despawn_game_over_text, player_movement, enemy_movement_system, enemy_rotation, detect_collisions, update_health_ui, update_enemy_health_ui, particle_movement_system, particle_cleanup_system, boss_shoot_system, player_shoot_system,player_particle_movement_system, update_energy_ui, screen_shake_system, damage_flash_system, update_game_data, update_score_ui).run_if(in_state(GameState::Playing)))
-        .add_systems(Update, handle_death_events.after(detect_collisions).run_if(in_state(GameState::Playing)))
-        .add_systems(Update, (animate_shatter, animate_shockwave).run_if(in_state(GameState::Playing)))
-        .add_systems(Update, (spawn_afterimages, animate_afterimages, spawn_ambient_particles, animate_ambient_particles).run_if(in_state(GameState::Playing)))
+        .add_systems(Update, pause_toggle_system.run_if(in_state(GameState::RoundActive)))
+        .add_systems(Update, (despawn_game_over_text, player_movement, detect_collisions, update_health_ui, update_enemy_health_ui, particle_movement_system, particle_cleanup_system, boss_shoot_system, player_shoot_system,player_particle_movement_system, update_energy_ui, screen_shake_system, damage_flash_system, update_game_data, update_score_ui).run_if(in_state(GameState::RoundActive)))
+        .add_systems(Update, handle_death_events.after(detect_collisions).run_if(in_state(GameState::RoundActive)))
+        .add_systems(Update, (animate_shatter, animate_shockwave).run_if(in_state(GameState::RoundActive)))
+        .add_systems(Update, (spawn_afterimages, animate_afterimages, spawn_ambient_particles, animate_ambient_particles).run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, (game_over_system, restart_listener).run_if(in_state(GameState::GameOver)))
         .add_systems(Update, (game_won_system, restart_listener).run_if(in_state(GameState::Won)))
         .add_systems(Update, pause_menu_system.run_if(in_state(GameState::Paused)))
@@ -240,12 +241,12 @@ pub fn update_energy_ui(
 }
 
 pub fn update_enemy_health_ui(
-    enemy_query: Query<&Enemy>,
+    boss_query: Query<&Boss>,
     mut span_query: Query<&mut TextSpan, With<EnemyHpText>>,
     mut next_state: ResMut<NextState<GameState>>,
     game_data: Res<GameData>,
 ) {
-    let total_hp: u32 = enemy_query.iter().map(|enemy| enemy.current).sum();
+    let total_hp: u32 = boss_query.iter().map(|boss| boss.current_hp).sum();
     for mut span in &mut span_query {
         **span = format!("{} %", total_hp);
     }
@@ -333,7 +334,6 @@ pub fn menu_input_system(
         // Start game
         commands.spawn((Player { current: 100, max: 100, last_collision_time: None, energy: 100, last_shot_time: None }, PlayerRotationTracker { last_angle_index: 0 }, GameEntity, Transform::from_xyz(-250.0, 0.0, 0.0), GlobalTransform::default(), Sprite { color: Color::srgb(1.2, 2.8, 1.2), custom_size: Some(Vec2::new(50.0, 50.0)), ..default() }));
         spawn_barriers(commands.reborrow());
-        create_enemies(commands.reborrow());
 
         // Add score UI
         commands.spawn((
@@ -351,7 +351,7 @@ pub fn menu_input_system(
         ));
 
         commands.spawn((
-            Text::new("Wave: 1"),
+            Text::new("Round: 1"),
             TextFont { font_size: 17.0, ..default() },
             TextShadow::default(),
             TextLayout::new_with_justify(JustifyText::Center),
@@ -364,7 +364,7 @@ pub fn menu_input_system(
             WaveText,
         ));
 
-        next_state.set(GameState::Playing);
+        next_state.set(GameState::RoundActive);
     }
 }
 
@@ -411,7 +411,7 @@ pub fn pause_menu_system(
         for entity in &pause_query {
             commands.entity(entity).despawn();
         }
-        next_state.set(GameState::Playing);
+        next_state.set(GameState::RoundActive);
     }
 
     if keyboard_input.just_pressed(KeyCode::KeyQ) {
@@ -448,7 +448,7 @@ pub fn update_score_ui(
         text.0 = format!("Score: {}", game_data.score);
     }
     for mut text in &mut wave_query {
-        text.0 = format!("Wave: {}", game_data.wave);
+        text.0 = format!("Round: {}", game_data.round);
     }
 }
 

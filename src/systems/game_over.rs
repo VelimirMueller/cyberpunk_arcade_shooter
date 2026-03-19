@@ -1,7 +1,6 @@
 use bevy::prelude::*;
-use crate::core::enemies::systems::create_enemies;
 use crate::core::player::systems::spawn_player;
-use crate::core::enemies::components::Enemy;
+use crate::core::boss::components::Boss;
 use crate::core::player::components::{Player, PlayerParticle};
 use crate::systems::combat::EnemyParticle;
 use crate::app::{GameEntity, ScoreText, WaveText};
@@ -64,7 +63,7 @@ pub fn restart_listener(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<GameState>>,
     game_entity_query: Query<Entity, With<GameEntity>>,
-    enemy_query: Query<Entity, With<Enemy>>,
+    boss_query: Query<Entity, With<Boss>>,
     player_query: Query<Entity, With<Player>>,
     enemy_particle_query: Query<Entity, With<EnemyParticle>>,
     player_particle_query: Query<Entity, With<PlayerParticle>>,
@@ -81,7 +80,7 @@ pub fn restart_listener(
 
         // Reset game data for new game
         game_data.score = 0;
-        game_data.wave = 1;
+        game_data.round = 1;
         game_data.total_play_time = 0.0;
         game_data.enemies_killed = 0;
 
@@ -89,7 +88,7 @@ pub fn restart_listener(
         for entity in &game_entity_query {
             commands.entity(entity).despawn();
         }
-        for entity in &enemy_query {
+        for entity in &boss_query {
             commands.entity(entity).despawn();
         }
         for entity in &player_query {
@@ -111,7 +110,6 @@ pub fn restart_listener(
         // Spawn fresh game entities
         spawn_player(commands.reborrow());
         spawn_barriers(commands.reborrow());
-        create_enemies(commands.reborrow());
 
         // Respawn score UI
         commands.spawn((
@@ -129,7 +127,7 @@ pub fn restart_listener(
         ));
 
         commands.spawn((
-            Text::new("Wave: 1"),
+            Text::new("Round: 1"),
             TextFont { font_size: 17.0, ..default() },
             TextShadow::default(),
             TextLayout::new_with_justify(JustifyText::Center),
@@ -142,7 +140,7 @@ pub fn restart_listener(
             WaveText,
         ));
 
-        next_state.set(GameState::Playing);
+        next_state.set(GameState::RoundAnnounce);
     }
 }
 

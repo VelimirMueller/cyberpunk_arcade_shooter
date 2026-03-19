@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::core::enemies::components::Enemy;
+use crate::core::boss::components::Boss;
 use crate::app::GameEntity;
 use crate::core::player::components::{Player, PlayerRotationTracker, PlayerParticle};
 use crate::systems::audio::{SoundEvent, SoundEffect};
@@ -61,15 +61,13 @@ pub fn particle_cleanup_system(
 pub(crate) fn boss_shoot_system(
     time: Res<Time>,
     mut commands: Commands,
-    mut query: Query<(&mut Enemy, &GlobalTransform, &Transform)>,
+    mut query: Query<(&mut Boss, &GlobalTransform, &Transform)>,
     mut sound_events: EventWriter<SoundEvent>,
 ) {
     for (mut boss, global_transform, local_transform) in &mut query {
-        if let Some(timer) = boss.fire_timer.as_mut() {
-            timer.tick(time.delta());
-        }
+        boss.primary_timer.tick(time.delta());
 
-        if boss.fire_timer.as_ref().map_or(false, |t| t.just_finished()) {
+        if boss.primary_timer.just_finished() {
             sound_events.write(SoundEvent(SoundEffect::EnemyShoot));
             let scale = local_transform.scale.xy(); // assume uniform scale for cube
             let half_width = 0.5 * scale.x;
