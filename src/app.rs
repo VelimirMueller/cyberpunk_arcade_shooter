@@ -5,14 +5,21 @@ use crate::core::player::components::{Player, PlayerRotationTracker};
 use crate::core::world::barriers::systems::spawn_barriers;
 use crate::systems::collision::detect_collisions;
 use bevy::core_pipeline::{bloom::{Bloom}, tonemapping::{DebandDither, Tonemapping}};
-use crate::core::boss::components::Boss;
 use crate::systems::combat::{particle_movement_system, particle_cleanup_system, player_shoot_system, player_particle_movement_system};
 use crate::core::boss::systems::{boss_phase_system, boss_idle_movement, boss_attack_system, hazard_lifetime_system, boss_projectile_system, hazard_zone_system};
-use crate::systems::game_over::{game_won_system, game_over_system, restart_listener, despawn_game_over_text};
+use crate::systems::game_over::restart_listener;
+use crate::ui::menus::{
+    spawn_title_menu, despawn_title_menu,
+    spawn_pause_menu, despawn_pause_menu,
+    spawn_game_over_screen, despawn_game_over_screen,
+    spawn_game_won_screen, despawn_game_won_screen,
+    PauseEntity,
+};
 use crate::data::game_state::GameState;
 use crate::systems::round::{start_round_announce, round_announce_system, boss_defeated_check, score_tally_system, despawn_round_clear};
 use crate::ui::announcement::{spawn_announcement_ui, update_announcement_ui, despawn_announcement_ui};
-use crate::systems::audio::{toggle_sound, SoundEvent};
+use crate::ui::hud::{spawn_hud, update_boss_hud, update_player_hud, update_score_hud};
+use crate::systems::audio::SoundEvent;
 use crate::systems::background::{spawn_background_stars, animate_stars, draw_background_grid};
 use crate::systems::collision::DeathEvent;
 use crate::systems::particles::{
@@ -72,11 +79,7 @@ pub struct DamageFlash {
 }
 
 #[derive(Component)]
-pub struct MenuEntity;
-
-#[derive(Component)]
 pub struct AnimatedText;
-
 
 #[derive(Component)]
 pub struct EnergyText;
@@ -96,167 +99,51 @@ pub(crate) fn main() {
         .init_resource::<AfterimageTimer>()
         .init_resource::<AmbientParticleTimer>()
         .add_event::<DeathEvent>()
-        .add_systems(Startup, (setup, setup_menu, spawn_background_stars, setup_shockwave_assets))
+        .add_systems(Startup, (setup, spawn_background_stars, setup_shockwave_assets))
         .add_systems(Startup, crate::systems::audio::setup_synth_audio)
         .add_systems(Update, (animate_stars, draw_background_grid, crate::systems::audio::play_sounds))
+        .add_systems(OnEnter(GameState::Menu), spawn_title_menu)
+        .add_systems(OnExit(GameState::Menu), despawn_title_menu)
         .add_systems(Update, menu_input_system.run_if(in_state(GameState::Menu)))
-        .add_systems(OnEnter(GameState::RoundAnnounce), (start_round_announce, spawn_announcement_ui))
+        .add_systems(OnEnter(GameState::RoundAnnounce), (start_round_announce, spawn_announcement_ui, spawn_hud))
         .add_systems(Update, (round_announce_system, update_announcement_ui).run_if(in_state(GameState::RoundAnnounce)))
         .add_systems(OnExit(GameState::RoundAnnounce), despawn_announcement_ui)
         .add_systems(Update, pause_toggle_system.run_if(in_state(GameState::RoundActive)))
-        .add_systems(Update, (despawn_game_over_text, player_movement, detect_collisions, update_health_ui, update_enemy_health_ui, particle_movement_system, particle_cleanup_system, boss_attack_system, player_shoot_system, player_particle_movement_system, update_energy_ui, screen_shake_system, damage_flash_system, update_game_data, update_score_ui, boss_phase_system, boss_idle_movement, hazard_lifetime_system, boss_projectile_system, hazard_zone_system).run_if(in_state(GameState::RoundActive)))
+        .add_systems(Update, (player_movement, detect_collisions, particle_movement_system, particle_cleanup_system, boss_attack_system, player_shoot_system, player_particle_movement_system, screen_shake_system, damage_flash_system, update_game_data, boss_phase_system, boss_idle_movement, hazard_lifetime_system, boss_projectile_system, hazard_zone_system, update_boss_hud, update_player_hud, update_score_hud).run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, handle_death_events.after(detect_collisions).run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, (animate_shatter, animate_shockwave).run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, (spawn_afterimages, animate_afterimages, spawn_ambient_particles, animate_ambient_particles).run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, (boss_defeated_check, score_tally_system).run_if(in_state(GameState::RoundActive)))
         .add_systems(OnExit(GameState::RoundActive), despawn_round_clear)
-        .add_systems(Update, (game_over_system, restart_listener).run_if(in_state(GameState::GameOver)))
-        .add_systems(Update, (game_won_system, restart_listener).run_if(in_state(GameState::Won)))
+        .add_systems(OnEnter(GameState::GameOver), spawn_game_over_screen)
+        .add_systems(OnExit(GameState::GameOver), despawn_game_over_screen)
+        .add_systems(Update, restart_listener.run_if(in_state(GameState::GameOver)))
+        .add_systems(OnEnter(GameState::Won), spawn_game_won_screen)
+        .add_systems(OnExit(GameState::Won), despawn_game_won_screen)
+        .add_systems(Update, restart_listener.run_if(in_state(GameState::Won)))
+        .add_systems(OnEnter(GameState::Paused), spawn_pause_menu)
+        .add_systems(OnExit(GameState::Paused), despawn_pause_menu)
         .add_systems(Update, pause_menu_system.run_if(in_state(GameState::Paused)))
         .run();
 }
 
-#[derive(Component)]
-struct EnemyHpText;
 fn setup(mut commands: Commands, _next_state: ResMut<NextState<GameState>>) {
     commands.spawn((
         Camera2d,
         Transform::default(),
         GlobalTransform::default(),
         Camera {
-            hdr: true, // 1. HDR is required for bloom
+            hdr: true,
             clear_color: ClearColorConfig::Custom(Color::BLACK),
             ..default()
         },
-        Tonemapping::TonyMcMapface, // 2. Using a tonemapper that desaturates to white is recommended
-        Bloom::default(),           // 3. Enable bloom for the camera
+        Tonemapping::TonyMcMapface,
+        Bloom::default(),
         DebandDither::Enabled,
         CrtSettings::default(),
     ));
-
-
-    commands.spawn((
-        // Accepts a `String` or any type that converts into a `String`, such as `&str`
-        Text::new("Player HP: "),
-        TextFont {
-            // This font is loaded and will be used instead of the default font.
-            font_size: 17.0,
-            ..default()
-        },
-        TextShadow::default(),
-        // Set the justification of the Text
-        TextLayout::new_with_justify(JustifyText::Center),
-        // Set the style of the Node itself.
-        Node {
-            position_type: PositionType::Absolute,
-            top: Val::Px(15.0),
-            left: Val::Px(10.0),
-            ..default()
-        },
-        AnimatedText,
-    ))
-        .with_child((
-            TextSpan::from("\n press [Space] to restart."),
-            TextFont {
-                font_size: 17.0,
-                ..default()
-            },
-            TextColor(Color::WHITE),
-            AnimatedText,
-        ));
-
-    commands.spawn((
-        // Accepts a `String` or any type that converts into a `String`, such as `&str`
-        Text::new("Player Energy: "),
-        TextFont {
-            // This font is loaded and will be used instead of the default font.
-            font_size: 17.0,
-            ..default()
-        },
-        TextShadow::default(),
-        // Set the justification of the Text
-        TextLayout::new_with_justify(JustifyText::Center),
-        // Set the style of the Node itself.
-        Node {
-            position_type: PositionType::Absolute,
-            top: Val::Px(35.0),
-            left: Val::Px(10.0),
-            ..default()
-        },
-        EnergyText,
-    ))
-        .with_child((
-            TextSpan::from("\n press [Space] to restart."),
-            TextFont {
-                font_size: 17.0,
-                ..default()
-            },
-            TextColor(Color::WHITE),
-            EnergyText,
-        ));
-
-    commands.spawn((
-        // Accepts a `String` or any type that converts into a `String`, such as `&str`
-        Text::new("Boss HP: "),
-        TextFont {
-            // This font is loaded and will be used instead of the default font.
-            font_size: 17.0,
-            ..default()
-        },
-        TextShadow::default(),
-        // Set the justification of the Text
-        TextLayout::new_with_justify(JustifyText::Center),
-        // Set the style of the Node itself.
-        Node {
-            position_type: PositionType::Absolute,
-            top: Val::Px(15.0),
-            right: Val::Px(5.0),
-            ..default()
-        },
-        EnemyHpText
-    ))
-        .with_child((
-            TextSpan::from("\n press [Space] to restart."),
-            TextFont {
-                font_size: 17.0,
-                ..default()
-            },
-            TextColor(Color::WHITE),
-            EnemyHpText
-        ));
 }
 
-pub fn update_health_ui(
-    player_query: Query<&Player>,
-    mut span_query: Query<&mut TextSpan, With<AnimatedText>>,
-) {
-    if let Some(player) = player_query.iter().next() {
-        for mut span in &mut span_query {
-            **span = format!("{} %", player.current);
-        }
-    }
-}
-
-pub fn update_energy_ui(
-    player_query: Query<&Player>,
-    mut span_query: Query<&mut TextSpan, With<EnergyText>>,
-) {
-    if let Some(player) = player_query.iter().next() {
-        for mut span in &mut span_query {
-            **span = format!("{} %", player.energy);
-        }
-    }
-}
-
-pub fn update_enemy_health_ui(
-    boss_query: Query<&Boss>,
-    mut span_query: Query<&mut TextSpan, With<EnemyHpText>>,
-) {
-    let total_hp: u32 = boss_query.iter().map(|boss| boss.current_hp).sum();
-    for mut span in &mut span_query {
-        **span = format!("{} %", total_hp);
-    }
-}
 
 // ============ NEW GAME LOOP SYSTEMS ============
 
@@ -266,105 +153,15 @@ pub struct ScoreText;
 #[derive(Component)]
 pub struct WaveText;
 
-#[derive(Component)]
-pub struct PauseText;
-
-pub fn setup_menu(mut commands: Commands, game_data: Res<GameData>) {
-    commands.spawn((
-        Text::new("CYBERPUNK BLOOM CUBE"),
-        TextFont {
-            font_size: 60.0,
-            ..default()
-        },
-        TextShadow::default(),
-        TextLayout::new_with_justify(JustifyText::Center),
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Percent(22.0),
-            top: Val::Percent(30.0),
-            ..default()
-        },
-        MenuEntity,
-    ));
-
-    commands.spawn((
-        Text::new("Press ENTER to Start"),
-        TextFont {
-            font_size: 30.0,
-            ..default()
-        },
-        TextShadow::default(),
-        TextLayout::new_with_justify(JustifyText::Center),
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Percent(28.0),
-            top: Val::Percent(50.0),
-            ..default()
-        },
-        MenuEntity,
-    ));
-
-    commands.spawn((
-        Text::new(&format!("High Score: {}", game_data.high_score)),
-        TextFont {
-            font_size: 20.0,
-            ..default()
-        },
-        TextShadow::default(),
-        TextLayout::new_with_justify(JustifyText::Center),
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Percent(38.0),
-            top: Val::Percent(65.0),
-            ..default()
-        },
-        MenuEntity,
-    ));
-}
-
 pub fn menu_input_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<GameState>>,
     mut commands: Commands,
-    menu_query: Query<Entity, With<MenuEntity>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Enter) {
-        // Clear menu entities
-        for entity in &menu_query {
-            commands.entity(entity).despawn();
-        }
-        // Start game
+        // Start game — spawn player & barriers
         commands.spawn((Player { current: 100, max: 100, last_collision_time: None, energy: 100, last_shot_time: None }, PlayerRotationTracker { last_angle_index: 0 }, GameEntity, Transform::from_xyz(-250.0, 0.0, 0.0), GlobalTransform::default(), Sprite { color: Color::srgb(1.2, 2.8, 1.2), custom_size: Some(Vec2::new(50.0, 50.0)), ..default() }));
         spawn_barriers(commands.reborrow());
-
-        // Add score UI
-        commands.spawn((
-            Text::new("Score: 0"),
-            TextFont { font_size: 17.0, ..default() },
-            TextShadow::default(),
-            TextLayout::new_with_justify(JustifyText::Center),
-            Node {
-                position_type: PositionType::Absolute,
-                top: Val::Px(55.0),
-                left: Val::Px(10.0),
-                ..default()
-            },
-            ScoreText,
-        ));
-
-        commands.spawn((
-            Text::new("Round: 1"),
-            TextFont { font_size: 17.0, ..default() },
-            TextShadow::default(),
-            TextLayout::new_with_justify(JustifyText::Center),
-            Node {
-                position_type: PositionType::Absolute,
-                top: Val::Px(75.0),
-                left: Val::Px(10.0),
-                ..default()
-            },
-            WaveText,
-        ));
 
         next_state.set(GameState::RoundAnnounce);
     }
@@ -383,54 +180,64 @@ pub fn pause_menu_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<GameState>>,
     mut commands: Commands,
-    _game_data: ResMut<GameData>,
     mut audio: NonSendMut<crate::systems::audio::SynthAudio>,
-    pause_query: Query<Entity, With<PauseText>>,
+    pause_query: Query<Entity, With<PauseEntity>>,
 ) {
-    // Spawn pause menu if not exists
-    if pause_query.is_empty() {
-        let sound_status = if audio.sound_enabled { "ON" } else { "OFF" };
-        commands.spawn((
-            Text::new(format!("PAUSED\n\nPress ESC to Resume\nPress Q to Return to Menu\nPress M to Toggle Sound ({})", sound_status)),
-            TextFont {
-                font_size: 40.0,
-                ..default()
-            },
-            TextShadow::default(),
-            TextLayout::new_with_justify(JustifyText::Center),
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Percent(10.0),
-                top: Val::Percent(30.0),
-                ..default()
-            },
-            PauseText,
-        ));
-    }
-
     if keyboard_input.just_pressed(KeyCode::Escape) {
-        // Clear pause text and resume
-        for entity in &pause_query {
-            commands.entity(entity).despawn();
-        }
         next_state.set(GameState::RoundActive);
     }
 
     if keyboard_input.just_pressed(KeyCode::KeyQ) {
-        // Return to menu
-        for entity in &pause_query {
-            commands.entity(entity).despawn();
-        }
         next_state.set(GameState::Menu);
     }
 
     if keyboard_input.just_pressed(KeyCode::KeyM) {
-        // Toggle sound
-        toggle_sound(&mut audio);
+        crate::systems::audio::toggle_sound(&mut audio);
         // Respawn pause menu with updated sound status
         for entity in &pause_query {
             commands.entity(entity).despawn();
         }
+        // Re-spawn with updated status — use inline spawn since we can't call the OnEnter system directly
+        let sound_status = if audio.sound_enabled { "ON" } else { "OFF" };
+        commands
+            .spawn((
+                Node {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    row_gap: Val::Px(16.0),
+                    ..default()
+                },
+                BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.7)),
+                PauseEntity,
+            ))
+            .with_children(|parent| {
+                parent.spawn((
+                    Text::new("PAUSED"),
+                    TextFont { font_size: 36.0, ..default() },
+                    TextColor(Color::srgb(0.0, 1.0, 1.0)),
+                ));
+                parent
+                    .spawn((
+                        Node {
+                            flex_direction: FlexDirection::Column,
+                            align_items: AlignItems::Center,
+                            padding: UiRect::all(Val::Px(24.0)),
+                            row_gap: Val::Px(12.0),
+                            border: UiRect::all(Val::Px(1.0)),
+                            ..default()
+                        },
+                        BorderColor(Color::srgb(0.15, 0.15, 0.15)),
+                    ))
+                    .with_children(|container| {
+                        let gray = Color::srgb(0.33, 0.33, 0.33);
+                        container.spawn((Text::new("Press ESC to Resume"), TextFont { font_size: 14.0, ..default() }, TextColor(gray)));
+                        container.spawn((Text::new("Press Q to Return to Menu"), TextFont { font_size: 14.0, ..default() }, TextColor(gray)));
+                        container.spawn((Text::new(format!("Press M to Toggle Sound ({})", sound_status)), TextFont { font_size: 14.0, ..default() }, TextColor(gray)));
+                    });
+            });
     }
 }
 
@@ -441,18 +248,6 @@ pub fn update_game_data(
     game_data.total_play_time += time.delta().as_secs_f32();
 }
 
-pub fn update_score_ui(
-    game_data: Res<GameData>,
-    mut score_query: Query<&mut Text, With<ScoreText>>,
-    mut wave_query: Query<&mut Text, (With<WaveText>, Without<ScoreText>)>,
-) {
-    for mut text in &mut score_query {
-        text.0 = format!("Score: {}", game_data.score);
-    }
-    for mut text in &mut wave_query {
-        text.0 = format!("Round: {}", game_data.round);
-    }
-}
 
 pub fn screen_shake_system(
     time: Res<Time>,
