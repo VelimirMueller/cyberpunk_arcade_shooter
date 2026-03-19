@@ -173,7 +173,10 @@ pub fn powerup_pickup_system(
 
                 // 2. Deal 20 damage to boss
                 for mut boss in boss_query.iter_mut() {
-                    boss.current_hp = boss.current_hp.saturating_sub(20);
+                    if boss.current_hp > 0 {
+                        boss.current_hp = boss.current_hp.saturating_sub(20);
+                        sound_events.write(SoundEvent(SoundEffect::EnemyHit));
+                    }
                 }
 
                 // 3. Screen shake
@@ -209,7 +212,7 @@ pub fn powerup_pickup_system(
                 commands.spawn((
                     Sprite {
                         color: Color::srgb(1.0, 8.0, 0.7),
-                        custom_size: Some(Vec2::new(10.0, 600.0)),
+                        custom_size: Some(Vec2::new(40.0, 600.0)),
                         ..default()
                     },
                     Transform::from_translation(player_pos + Vec3::new(0.0, 300.0, 0.3)),
@@ -286,12 +289,13 @@ pub fn laser_system(
         let boss_size = boss_sprite.custom_size.unwrap_or(Vec2::ONE);
 
         for (_beam_entity, beam_transform) in beam_query.iter() {
-            let beam_size = Vec2::new(10.0, 600.0);
+            let beam_size = Vec2::new(40.0, 600.0);
             if collide(beam_transform.translation, beam_size, boss_transform.translation, boss_size) {
                 // 75ms cooldown using dedicated field
                 if boss.last_laser_hit_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.075) {
                     boss.current_hp = boss.current_hp.saturating_sub(1);
                     boss.last_laser_hit_time = Some(std::time::Instant::now());
+                    sound_events.write(SoundEvent(SoundEffect::EnemyHit));
                 }
             }
         }
