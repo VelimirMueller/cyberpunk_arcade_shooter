@@ -80,6 +80,8 @@ pub fn spawn_boss(commands: &mut Commands, round: u32) {
             primary_timer,
             secondary_timer: None,
             attack_state: AttackState::Idle,
+            base_color: color,
+            last_hit_time: None,
             combo_count: 0,
             max_combo: 1,
             cycle_index: 0,
@@ -370,18 +372,17 @@ pub fn boss_visual_system(
         let (pulse_alpha, color_mult) = match boss.phase {
             BossPhase::Phase1 => (1.0_f32, 1.0_f32),
             BossPhase::Phase2 => {
-                // Slow sine pulse, period ~1s
                 let pulse = 0.7 + 0.3 * (t * std::f32::consts::TAU).sin();
                 (pulse, 1.3)
             }
             BossPhase::Phase3 => {
-                // Rapid pulse, period ~0.3s
                 let pulse = 0.6 + 0.4 * (t * std::f32::consts::TAU / 0.3).sin();
                 (pulse, 1.6)
             }
         };
 
-        let base = sprite.color.to_srgba();
+        // Always derive from base_color — never read back from sprite (HDR values degrade)
+        let base = boss.base_color.to_srgba();
         sprite.color = Color::srgba(
             base.red * color_mult,
             base.green * color_mult,
