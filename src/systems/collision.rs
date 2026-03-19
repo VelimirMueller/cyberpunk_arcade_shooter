@@ -19,7 +19,7 @@ pub fn detect_collisions(
     mut player_query: Query<(Entity, &mut Player, &Transform, &Sprite)>,
     mut boss_query: Query<(Entity, &mut Boss, &Transform, &Sprite), With<Boss>>,
     particle_query: Query<&Transform, With<EnemyParticle>>,
-    player_particle_query: Query<&Transform, With<PlayerParticle>>,
+    player_particle_query: Query<(Entity, &Transform), With<PlayerParticle>>,
     boss_projectile_query: Query<&Transform, With<BossProjectile>>,
     dash_trail_query: Query<(&Transform, &Sprite), With<DashTrail>>,
     hazard_zone_query: Query<(&Transform, &HazardZone)>,
@@ -143,12 +143,12 @@ pub fn detect_collisions(
             }
         }
 
-        // PlayerParticle vs Boss
+        // PlayerParticle vs Boss — despawn particle on hit, cooldown per boss
         for (boss_entity, mut boss, boss_transform, boss_sprite) in &mut boss_query {
             let boss_size = boss_sprite.custom_size.unwrap_or(Vec2::ONE);
 
-            for player_particle_transform in &player_particle_query {
-                let particle_size = Vec2::new(2.0, 2.0);
+            for (particle_entity, player_particle_transform) in &player_particle_query {
+                let particle_size = Vec2::new(3.0, 3.0);
                 let particle_pos = player_particle_transform.translation;
                 let boss_pos = boss_transform.translation;
 
@@ -156,11 +156,19 @@ pub fn detect_collisions(
                     if boss.is_invulnerable {
                         continue;
                     }
+                    // Cooldown: 75ms between hits
+                    if boss.last_hit_time.map_or(false, |t| t.elapsed().as_secs_f32() < 0.075) {
+                        continue;
+                    }
                     if boss.current_hp > 0 {
                         boss.current_hp -= 1;
+                        boss.last_hit_time = Some(std::time::Instant::now());
                         let mult = score_multiplier(game_data.round);
                         game_data.score += (10.0 * mult) as u32;
                         sound_events.write(SoundEvent(SoundEffect::EnemyHit));
+
+                        // Despawn the particle on hit
+                        commands.entity(particle_entity).despawn();
 
                         if boss.current_hp == 0 {
                             game_data.score += (100.0 * mult) as u32;
