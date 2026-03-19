@@ -3,6 +3,7 @@ use crate::core::boss::components::Boss;
 use crate::app::GameEntity;
 use crate::core::player::components::{Player, PlayerRotationTracker, PlayerParticle};
 use crate::systems::audio::{SoundEvent, SoundEffect};
+use crate::systems::powerups::LaserActive;
 
 #[derive(Component)]
 pub struct EnemyParticle;
@@ -105,7 +106,7 @@ pub fn player_particle_movement_system(
 pub(crate) fn player_shoot_system(
     mut commands: Commands,
     mut query: Query<(&Transform, &mut PlayerRotationTracker)>,
-    mut player: Query<(&mut Player, &Transform, &Sprite)>,
+    mut player: Query<(&mut Player, &Transform, &Sprite, Option<&LaserActive>)>,
     input: Res<ButtonInput<KeyCode>>,
     mut sound_events: EventWriter<SoundEvent>,
 ) {
@@ -128,7 +129,10 @@ pub(crate) fn player_shoot_system(
 
         tracker.last_angle_index = index;
 
-        if let Ok((mut player_data, _transform, _sprite)) = player.single_mut() {
+        if let Ok((mut player_data, _transform, _sprite, laser_active)) = player.single_mut() {
+            if laser_active.is_some() {
+                return; // Suppress normal shooting during laser mode
+            }
             // Check cooldown
             let can_shoot = player_data.last_shot_time.map_or(true, |t| t.elapsed().as_secs_f32() >= SHOT_COOLDOWN);
 

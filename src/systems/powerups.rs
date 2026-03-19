@@ -242,3 +242,66 @@ pub fn powerup_shockwave_system(
         }
     }
 }
+
+pub fn laser_system(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut player_query: Query<(Entity, &Transform, Option<&mut LaserActive>), With<Player>>,
+    mut beam_query: Query<(Entity, &mut Transform), (With<LaserBeam>, Without<Player>)>,
+    mut boss_query: Query<(&mut Boss, &Transform, &Sprite), Without<Player>>,
+    mut sound_events: EventWriter<SoundEvent>,
+) {
+    let Ok((player_entity, player_transform, laser_active)) = player_query.single_mut() else {
+        return;
+    };
+
+    let Some(mut laser) = laser_active else {
+        return;
+    };
+
+    // Tick timers
+    laser.timer.tick(time.delta());
+    laser.sound_timer.tick(time.delta());
+
+    // Repeat sound
+    if laser.sound_timer.just_finished() {
+        sound_events.write(SoundEvent(SoundEffect::LaserHum));
+    }
+
+    // Update beam position to follow player
+    let player_pos = player_transform.translation;
+    let player_rotation = player_transform.rotation;
+    for (_beam_entity, mut beam_transform) in beam_query.iter_mut() {
+        let forward = player_rotation * Vec3::Y * 300.0;
+        beam_transform.translation = player_pos + forward;
+        beam_transform.translation.z = 0.3;
+        beam_transform.rotation = player_rotation;
+    }
+
+    // Beam vs Boss collision
+    for (mut boss, boss_transform, boss_sprite) in boss_query.iter_mut() {
+        if boss.current_hp == 0 {
+            continue;
+        }
+        let boss_size = boss_sprite.custom_size.unwrap_or(Vec2::ONE);
+
+        for (_beam_entity, beam_transform) in beam_query.iter() {
+            let beam_size = Vec2::new(10.0, 600.0);
+            if collide(beam_transform.translation, beam_size, boss_transform.translation, boss_size) {
+                // 75ms cooldown using dedicated field
+                if boss.last_laser_hit_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.075) {
+                    boss.current_hp = boss.current_hp.saturating_sub(1);
+                    boss.last_laser_hit_time = Some(std::time::Instant::now());
+                }
+            }
+        }
+    }
+
+    // Expire laser
+    if laser.timer.finished() {
+        commands.entity(player_entity).remove::<LaserActive>();
+        for (beam_entity, _) in beam_query.iter() {
+            commands.entity(beam_entity).despawn();
+        }
+    }
+}
