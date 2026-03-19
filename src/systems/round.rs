@@ -6,6 +6,7 @@ use crate::core::player::components::Player;
 use crate::data::game_state::GameState;
 use crate::systems::combat::EnemyParticle;
 use crate::systems::audio::{SoundEvent, SoundEffect};
+use crate::systems::powerups::{PowerUp, LaserBeam, PowerUpShockwave, LaserActive};
 
 // ============ Round Announcement ============
 
@@ -123,13 +124,13 @@ pub fn score_tally_system(
     mut commands: Commands,
     mut next_state: ResMut<NextState<GameState>>,
     mut game_data: ResMut<GameData>,
-    mut player_query: Query<&mut Player>,
+    mut player_query: Query<(Entity, &mut Player)>,
     boss_query: Query<Entity, With<Boss>>,
     dash_trail_query: Query<Entity, With<DashTrail>>,
     hazard_query: Query<Entity, With<HazardZone>>,
     projectile_query: Query<Entity, With<BossProjectile>>,
     telegraph_query: Query<Entity, With<ChargeTelegraph>>,
-    enemy_particle_query: Query<Entity, With<EnemyParticle>>,
+    enemy_particle_query: Query<Entity, Or<(With<EnemyParticle>, With<PowerUp>, With<LaserBeam>, With<PowerUpShockwave>)>>,
     round_clear_query: Query<Entity, With<RoundClearText>>,
     mut sound_events: EventWriter<SoundEvent>,
 ) {
@@ -186,7 +187,8 @@ pub fn score_tally_system(
         }
 
         // Restore player
-        for mut player in player_query.iter_mut() {
+        for (player_entity, mut player) in player_query.iter_mut() {
+            commands.entity(player_entity).remove::<LaserActive>();
             let half_max = player.max / 2;
             if player.current < half_max {
                 player.current = half_max;
