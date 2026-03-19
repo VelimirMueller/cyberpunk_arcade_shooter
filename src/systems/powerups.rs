@@ -247,8 +247,8 @@ pub fn laser_system(
     time: Res<Time>,
     mut commands: Commands,
     mut player_query: Query<(Entity, &Transform, Option<&mut LaserActive>), With<Player>>,
-    mut beam_query: Query<(Entity, &mut Transform), (With<LaserBeam>, Without<Player>)>,
-    mut boss_query: Query<(&mut Boss, &Transform, &Sprite), Without<Player>>,
+    mut beam_query: Query<(Entity, &mut Transform), (With<LaserBeam>, Without<Player>, Without<Boss>)>,
+    mut boss_query: Query<(&mut Boss, &Transform, &Sprite), (Without<Player>, Without<LaserBeam>)>,
     mut sound_events: EventWriter<SoundEvent>,
 ) {
     let Ok((player_entity, player_transform, laser_active)) = player_query.single_mut() else {
