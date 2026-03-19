@@ -6,6 +6,27 @@ use crate::core::player::components::Player;
 use crate::app::ScreenShake;
 use crate::systems::audio::{SoundEvent, SoundEffect};
 
+pub fn score_multiplier(round: u32) -> f32 {
+    match round {
+        1 => 1.0,
+        2 => 1.5,
+        3 => 2.0,
+        4 => 2.5,
+        5 => 3.0,
+        _ => 3.0,
+    }
+}
+
+#[derive(Component)]
+pub struct PhaseShiftText {
+    pub timer: Timer,
+}
+
+#[derive(Component)]
+pub struct PhaseFlashEffect {
+    pub timer: Timer,
+}
+
 pub fn boss_type_for_round(round: u32) -> BossType {
     match round {
         1 => BossType::GridPhantom,
@@ -41,6 +62,11 @@ pub fn spawn_boss(commands: &mut Commands, round: u32) {
         BossType::ApexProtocol => Timer::from_seconds(3.0, TimerMode::Repeating),
     };
 
+    // Scale attack speed by round: 0.9^(round-1) makes bosses attack faster each round
+    let speed_scale = 0.9_f32.powi((round as i32) - 1);
+    let scaled_duration = primary_timer.duration().as_secs_f32() * speed_scale;
+    let primary_timer = Timer::from_seconds(scaled_duration, TimerMode::Repeating);
+
     commands.spawn((
         Sprite { color, custom_size: Some(Vec2::new(size, size)), ..default() },
         Transform::from_xyz(0.0, 150.0, 0.0),
@@ -64,11 +90,12 @@ pub fn spawn_boss(commands: &mut Commands, round: u32) {
 }
 
 pub fn boss_phase_system(
-    mut boss_query: Query<&mut Boss>,
+    mut commands: Commands,
+    mut boss_query: Query<(&mut Boss, &Transform)>,
     mut screen_shake: ResMut<ScreenShake>,
     mut sound_events: EventWriter<SoundEvent>,
 ) {
-    for mut boss in boss_query.iter_mut() {
+    for (mut boss, boss_transform) in boss_query.iter_mut() {
         let hp_pct = boss.current_hp as f32 / boss.max_hp as f32;
         let (threshold_2, threshold_3) = boss.phase_thresholds;
 
@@ -88,12 +115,43 @@ pub fn boss_phase_system(
                         Timer::from_seconds(1.5, TimerMode::Once)
                     );
                     sound_events.write(SoundEvent(SoundEffect::PhaseShift));
+
+                    // Spawn "PHASE SHIFT" text centered on screen
+                    commands.spawn((
+                        Text::new("PHASE SHIFT"),
+                        TextFont { font_size: 14.0, ..default() },
+                        TextColor(Color::srgba(1.0, 0.2, 0.2, 1.0)),
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Percent(50.0),
+                            top: Val::Percent(40.0),
+                            ..default()
+                        },
+                        PhaseShiftText {
+                            timer: Timer::from_seconds(1.0, TimerMode::Once),
+                        },
+                        GameEntity,
+                    ));
                 },
                 TransitionStyle::RageBurst => {
                     screen_shake.intensity = 1.5;
                     screen_shake.duration = 0.5;
                     screen_shake.timer = 0.5;
                     sound_events.write(SoundEvent(SoundEffect::RageBurst));
+
+                    // Spawn a white flash sprite at boss position
+                    commands.spawn((
+                        Sprite {
+                            color: Color::srgba(8.0, 8.0, 8.0, 0.9),
+                            custom_size: Some(Vec2::new(20.0, 20.0)),
+                            ..default()
+                        },
+                        Transform::from_translation(boss_transform.translation),
+                        PhaseFlashEffect {
+                            timer: Timer::from_seconds(0.4, TimerMode::Once),
+                        },
+                        GameEntity,
+                    ));
                 },
             }
             if boss.boss_type == BossType::ChromeBerserker {
@@ -264,5 +322,71 @@ pub fn hazard_zone_system(
         if hazard.lifetime.finished() {
             commands.entity(entity).despawn();
         }
+    }
+}
+
+pub fn phase_shift_text_system(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut PhaseShiftText, &mut TextColor)>,
+) {
+    for (entity, mut text, mut color) in query.iter_mut() {
+        text.timer.tick(time.delta());
+        let alpha = 1.0 - text.timer.fraction();
+        color.0 = Color::srgba(1.0, 0.2, 0.2, alpha);
+        if text.timer.finished() {
+            commands.entity(entity).despawn();
+        }
+    }
+}
+
+pub fn phase_flash_system(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut PhaseFlashEffect, &mut Transform, &mut Sprite)>,
+) {
+    for (entity, mut flash, mut transform, mut sprite) in query.iter_mut() {
+        flash.timer.tick(time.delta());
+        let progress = flash.timer.fraction();
+        // Expand rapidly
+        let scale = 1.0 + progress * 15.0;
+        transform.scale = Vec3::splat(scale);
+        // Fade out
+        let alpha = (1.0 - progress) * 0.9;
+        sprite.color = Color::srgba(8.0, 8.0, 8.0, alpha);
+        if flash.timer.finished() {
+            commands.entity(entity).despawn();
+        }
+    }
+}
+
+pub fn boss_visual_system(
+    time: Res<Time>,
+    mut boss_query: Query<(&Boss, &mut Sprite)>,
+) {
+    let t = time.elapsed_secs();
+
+    for (boss, mut sprite) in boss_query.iter_mut() {
+        let (pulse_alpha, color_mult) = match boss.phase {
+            BossPhase::Phase1 => (1.0_f32, 1.0_f32),
+            BossPhase::Phase2 => {
+                // Slow sine pulse, period ~1s
+                let pulse = 0.7 + 0.3 * (t * std::f32::consts::TAU).sin();
+                (pulse, 1.3)
+            }
+            BossPhase::Phase3 => {
+                // Rapid pulse, period ~0.3s
+                let pulse = 0.6 + 0.4 * (t * std::f32::consts::TAU / 0.3).sin();
+                (pulse, 1.6)
+            }
+        };
+
+        let base = sprite.color.to_srgba();
+        sprite.color = Color::srgba(
+            base.red * color_mult,
+            base.green * color_mult,
+            base.blue * color_mult,
+            pulse_alpha,
+        );
     }
 }

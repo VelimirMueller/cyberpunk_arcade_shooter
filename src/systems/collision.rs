@@ -5,6 +5,7 @@ use crate::systems::combat::EnemyParticle;
 use crate::data::game_state::GameState;
 use crate::app::{GameData, trigger_screen_shake, trigger_damage_flash};
 use crate::systems::audio::{SoundEvent, SoundEffect};
+use crate::core::boss::systems::score_multiplier;
 
 #[derive(Event)]
 pub struct DeathEvent {
@@ -157,11 +158,12 @@ pub fn detect_collisions(
                     }
                     if boss.current_hp > 0 {
                         boss.current_hp -= 1;
-                        game_data.score += 10;
+                        let mult = score_multiplier(game_data.round);
+                        game_data.score += (10.0 * mult) as u32;
                         sound_events.write(SoundEvent(SoundEffect::EnemyHit));
 
                         if boss.current_hp == 0 {
-                            game_data.score += 100;
+                            game_data.score += (100.0 * mult) as u32;
                             game_data.enemies_killed += 1;
                             sound_events.write(SoundEvent(SoundEffect::Explosion));
                             death_events.write(DeathEvent {
