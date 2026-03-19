@@ -108,6 +108,18 @@ pub fn boss_idle_movement(
     mut boss_query: Query<(&Boss, &mut Transform)>,
 ) {
     for (boss, mut transform) in boss_query.iter_mut() {
+        // Sentinel and Weaver handle their own positioning
+        if boss.boss_type == BossType::NeonSentinel || boss.boss_type == BossType::VoidWeaver {
+            // Sentinel stays stationary (position set in attack fn)
+            // Weaver teleports (position set in attack fn)
+            // Still allow charging/dashing movement if somehow in that state
+            if let AttackState::Dashing { target, speed } | AttackState::Charging { target, speed } = &boss.attack_state {
+                let direction = (*target - transform.translation.truncate()).normalize_or_zero();
+                transform.translation += (direction * *speed * time.delta_secs()).extend(0.0);
+            }
+            continue;
+        }
+
         match &boss.attack_state {
             AttackState::Idle => {
                 let t = time.elapsed_secs();
@@ -125,19 +137,30 @@ pub fn boss_idle_movement(
 pub fn boss_attack_system(
     time: Res<Time>,
     mut commands: Commands,
-    mut boss_query: Query<(&mut Boss, &Transform)>,
-    player_query: Query<&Transform, With<Player>>,
-    mut _screen_shake: ResMut<ScreenShake>,
+    mut boss_query: Query<(&mut Boss, &mut Transform)>,
+    player_query: Query<&Transform, (With<Player>, Without<Boss>)>,
+    mut screen_shake: ResMut<ScreenShake>,
+    hazard_query: Query<&HazardZone>,
 ) {
     let Ok(player_transform) = player_query.single() else { return };
-    for (mut boss, boss_transform) in boss_query.iter_mut() {
+    let hazard_count = hazard_query.iter().count();
+    for (mut boss, mut boss_transform) in boss_query.iter_mut() {
         let delta = time.delta_secs();
         match boss.boss_type {
             BossType::GridPhantom => {
-                attacks::phantom_attack(&mut boss, boss_transform, player_transform, &mut commands, delta);
+                attacks::phantom_attack(&mut boss, &boss_transform, player_transform, &mut commands, delta);
+            }
+            BossType::NeonSentinel => {
+                attacks::sentinel_attack(&mut boss, &mut boss_transform, player_transform, &mut commands, delta);
+            }
+            BossType::ChromeBerserker => {
+                attacks::berserker_attack(&mut boss, &boss_transform, player_transform, &mut commands, delta, &mut screen_shake);
+            }
+            BossType::VoidWeaver => {
+                attacks::weaver_attack(&mut boss, &mut boss_transform, player_transform, &mut commands, delta, hazard_count);
             }
             _ => {
-                // Other bosses: just tick primary timer (placeholder)
+                // ApexProtocol: placeholder
                 boss.primary_timer.tick(time.delta());
             }
         }
@@ -191,6 +214,48 @@ pub fn boss_projectile_system(
         // Despawn if off screen
         let pos = transform.translation;
         if pos.x.abs() > 700.0 || pos.y.abs() > 400.0 {
+            commands.entity(entity).despawn();
+        }
+    }
+}
+
+pub fn hazard_zone_system(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut HazardZone, &mut Transform, &mut Sprite)>,
+) {
+    for (entity, mut hazard, mut transform, mut sprite) in query.iter_mut() {
+        hazard.lifetime.tick(time.delta());
+
+        // Drift toward player if velocity set
+        if let Some(drift) = hazard.drift_velocity {
+            transform.translation += (drift * time.delta_secs()).extend(0.0);
+        }
+
+        // Handle explosion timer
+        if hazard.explodes {
+            if let Some(ref mut exp_timer) = hazard.explosion_timer {
+                exp_timer.tick(time.delta());
+                if exp_timer.just_finished() {
+                    // Explode: expand to 120x120 magenta, set radius to 60, short lifetime
+                    sprite.custom_size = Some(Vec2::new(120.0, 120.0));
+                    sprite.color = Color::srgba(8.0, 0.0, 8.0, 0.8);
+                    hazard.radius = 60.0;
+                    hazard.lifetime = Timer::from_seconds(0.3, TimerMode::Once);
+                    hazard.explodes = false; // Don't re-explode
+                    hazard.explosion_timer = None;
+                }
+            }
+        }
+
+        // Fade alpha over lifetime
+        let alpha = 1.0 - hazard.lifetime.fraction();
+        let base_alpha = if hazard.radius >= 60.0 { 0.8 } else { 0.3 };
+        let current = sprite.color.to_srgba();
+        sprite.color = Color::srgba(current.red, current.green, current.blue, base_alpha * (1.0 - alpha));
+
+        // Despawn when lifetime done
+        if hazard.lifetime.finished() {
             commands.entity(entity).despawn();
         }
     }
