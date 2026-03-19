@@ -159,9 +159,8 @@ pub fn boss_attack_system(
             BossType::VoidWeaver => {
                 attacks::weaver_attack(&mut boss, &mut boss_transform, player_transform, &mut commands, delta, hazard_count);
             }
-            _ => {
-                // ApexProtocol: placeholder
-                boss.primary_timer.tick(time.delta());
+            BossType::ApexProtocol => {
+                attacks::apex_attack(&mut boss, &mut boss_transform, player_transform, &mut commands, delta, &mut screen_shake, hazard_count);
             }
         }
     }
