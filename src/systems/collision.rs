@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::core::player::components::{Player, PlayerParticle};
-use crate::core::boss::components::Boss;
+use crate::core::boss::components::{Boss, BossProjectile, DashTrail, HazardZone};
 use crate::systems::combat::EnemyParticle;
 use crate::data::game_state::GameState;
 use crate::app::{GameData, trigger_screen_shake, trigger_damage_flash};
@@ -19,6 +19,9 @@ pub fn detect_collisions(
     mut boss_query: Query<(Entity, &mut Boss, &Transform, &Sprite), With<Boss>>,
     particle_query: Query<&Transform, With<EnemyParticle>>,
     player_particle_query: Query<&Transform, With<PlayerParticle>>,
+    boss_projectile_query: Query<&Transform, With<BossProjectile>>,
+    dash_trail_query: Query<(&Transform, &Sprite), With<DashTrail>>,
+    hazard_zone_query: Query<(&Transform, &HazardZone)>,
     mut next_state: ResMut<NextState<GameState>>,
     mut game_data: ResMut<GameData>,
     mut screen_shake: ResMut<crate::app::ScreenShake>,
@@ -29,13 +32,13 @@ pub fn detect_collisions(
         let player_size = player_sprite.custom_size.unwrap_or(Vec2::ONE);
         let player_pos = player_transform.translation;
 
+        // Player vs Boss body collision
         for (_entity, ref _boss, enemy_transform, enemy_sprite) in &boss_query {
             if _boss.is_invulnerable { continue; }
             let enemy_size = enemy_sprite.custom_size.unwrap_or(Vec2::ONE);
             let enemy_pos = enemy_transform.translation;
 
             if collide(player_pos, player_size, enemy_pos, enemy_size) {
-                // Handle collision with boss
                 if player.current > 0 {
                     if player.last_collision_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.025) {
                         player.current -= 1;
@@ -43,7 +46,6 @@ pub fn detect_collisions(
                         trigger_screen_shake(&mut screen_shake);
                         trigger_damage_flash(player_entity, commands.reborrow());
                         sound_events.write(SoundEvent(SoundEffect::PlayerHit));
-                        info!("Collision! with Boss HP {}", player.current);
                     }
                 }
 
@@ -53,20 +55,18 @@ pub fn detect_collisions(
             }
         }
 
+        // EnemyParticle vs Player
         for particle_transform in &particle_query {
-            let particle_size = Vec2::new(2.0, 2.0); // Assuming a fixed size for particles
+            let particle_size = Vec2::new(2.0, 2.0);
             let particle_pos = particle_transform.translation;
 
             if collide(player_pos, player_size, particle_pos, particle_size) {
-                // Handle collision with enemy particles
-                info!("Collision with enemy particle! {}", player.current);
                 if player.current > 0 {
                     if player.last_collision_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.075) {
                         player.current -= 1;
                         player.last_collision_time = Some(std::time::Instant::now());
                         trigger_screen_shake(&mut screen_shake);
                         trigger_damage_flash(player_entity, commands.reborrow());
-                        info!("Collision! with Enemy HP {}", player.current);
                     }
                 }
 
@@ -75,11 +75,79 @@ pub fn detect_collisions(
                 }
             }
         }
+
+        // BossProjectile vs Player
+        for projectile_transform in &boss_projectile_query {
+            let projectile_size = Vec2::new(6.0, 6.0);
+            let projectile_pos = projectile_transform.translation;
+
+            if collide(player_pos, player_size, projectile_pos, projectile_size) {
+                if player.current > 0 {
+                    if player.last_collision_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.075) {
+                        player.current -= 1;
+                        player.last_collision_time = Some(std::time::Instant::now());
+                        trigger_screen_shake(&mut screen_shake);
+                        trigger_damage_flash(player_entity, commands.reborrow());
+                        sound_events.write(SoundEvent(SoundEffect::PlayerHit));
+                    }
+                }
+
+                if player.current == 0 {
+                    next_state.set(GameState::GameOver);
+                }
+            }
+        }
+
+        // DashTrail vs Player
+        for (trail_transform, trail_sprite) in &dash_trail_query {
+            let trail_size = trail_sprite.custom_size.unwrap_or(Vec2::new(20.0, 20.0));
+            let trail_pos = trail_transform.translation;
+
+            if collide(player_pos, player_size, trail_pos, trail_size) {
+                if player.current > 0 {
+                    if player.last_collision_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.075) {
+                        player.current -= 1;
+                        player.last_collision_time = Some(std::time::Instant::now());
+                        trigger_screen_shake(&mut screen_shake);
+                        trigger_damage_flash(player_entity, commands.reborrow());
+                        sound_events.write(SoundEvent(SoundEffect::PlayerHit));
+                    }
+                }
+
+                if player.current == 0 {
+                    next_state.set(GameState::GameOver);
+                }
+            }
+        }
+
+        // HazardZone vs Player
+        for (hazard_transform, hazard_zone) in &hazard_zone_query {
+            let hazard_size = Vec2::new(hazard_zone.radius * 2.0, hazard_zone.radius * 2.0);
+            let hazard_pos = hazard_transform.translation;
+
+            if collide(player_pos, player_size, hazard_pos, hazard_size) {
+                if player.current > 0 {
+                    if player.last_collision_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.075) {
+                        player.current -= 1;
+                        player.last_collision_time = Some(std::time::Instant::now());
+                        trigger_screen_shake(&mut screen_shake);
+                        trigger_damage_flash(player_entity, commands.reborrow());
+                        sound_events.write(SoundEvent(SoundEffect::PlayerHit));
+                    }
+                }
+
+                if player.current == 0 {
+                    next_state.set(GameState::GameOver);
+                }
+            }
+        }
+
+        // PlayerParticle vs Boss
         for (boss_entity, mut boss, boss_transform, boss_sprite) in &mut boss_query {
             let boss_size = boss_sprite.custom_size.unwrap_or(Vec2::ONE);
 
             for player_particle_transform in &player_particle_query {
-                let particle_size = Vec2::new(2.0, 2.0); // Assuming a fixed size for particles
+                let particle_size = Vec2::new(2.0, 2.0);
                 let particle_pos = player_particle_transform.translation;
                 let boss_pos = boss_transform.translation;
 
@@ -88,22 +156,19 @@ pub fn detect_collisions(
                         continue;
                     }
                     if boss.current_hp > 0 {
-                        if true {
-                            boss.current_hp -= 1;
-                            game_data.score += 10;
-                            sound_events.write(SoundEvent(SoundEffect::EnemyHit));
-                            info!("You hit the Boss HP: {}", boss.current_hp);
+                        boss.current_hp -= 1;
+                        game_data.score += 10;
+                        sound_events.write(SoundEvent(SoundEffect::EnemyHit));
 
-                            if boss.current_hp == 0 {
-                                game_data.score += 100;
-                                game_data.enemies_killed += 1;
-                                sound_events.write(SoundEvent(SoundEffect::Explosion));
-                                death_events.write(DeathEvent {
-                                    position: boss_transform.translation,
-                                    color: boss_sprite.color,
-                                    entity: boss_entity,
-                                });
-                            }
+                        if boss.current_hp == 0 {
+                            game_data.score += 100;
+                            game_data.enemies_killed += 1;
+                            sound_events.write(SoundEvent(SoundEffect::Explosion));
+                            death_events.write(DeathEvent {
+                                position: boss_transform.translation,
+                                color: boss_sprite.color,
+                                entity: boss_entity,
+                            });
                         }
                     }
                 }

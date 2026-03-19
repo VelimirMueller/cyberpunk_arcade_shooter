@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::core::player::systems::spawn_player;
-use crate::core::boss::components::Boss;
+use crate::core::boss::components::{Boss, DashTrail, HazardZone, BeamSweep, ChargeTelegraph, BossProjectile};
 use crate::core::player::components::{Player, PlayerParticle};
 use crate::systems::combat::EnemyParticle;
 use crate::app::{GameEntity, ScoreText, WaveText};
@@ -68,6 +68,11 @@ pub fn restart_listener(
     enemy_particle_query: Query<Entity, With<EnemyParticle>>,
     player_particle_query: Query<Entity, With<PlayerParticle>>,
     barrier_query: Query<Entity, With<Barrier>>,
+    dash_trail_query: Query<Entity, With<DashTrail>>,
+    hazard_zone_query: Query<Entity, With<HazardZone>>,
+    beam_sweep_query: Query<Entity, With<BeamSweep>>,
+    charge_telegraph_query: Query<Entity, With<ChargeTelegraph>>,
+    boss_projectile_query: Query<Entity, With<BossProjectile>>,
     ui_query: Query<Entity, Or<(With<ScoreText>, With<WaveText>)>>,
     mut commands: Commands,
     mut game_data: ResMut<crate::app::GameData>,
@@ -101,6 +106,21 @@ pub fn restart_listener(
             commands.entity(entity).despawn();
         }
         for entity in &barrier_query {
+            commands.entity(entity).despawn();
+        }
+        for entity in &dash_trail_query {
+            commands.entity(entity).despawn();
+        }
+        for entity in &hazard_zone_query {
+            commands.entity(entity).despawn();
+        }
+        for entity in &beam_sweep_query {
+            commands.entity(entity).despawn();
+        }
+        for entity in &charge_telegraph_query {
+            commands.entity(entity).despawn();
+        }
+        for entity in &boss_projectile_query {
             commands.entity(entity).despawn();
         }
         for entity in &ui_query {
