@@ -10,6 +10,8 @@ use crate::systems::combat::{particle_movement_system, particle_cleanup_system, 
 use crate::core::boss::systems::{boss_phase_system, boss_idle_movement};
 use crate::systems::game_over::{game_won_system, game_over_system, restart_listener, despawn_game_over_text};
 use crate::data::game_state::GameState;
+use crate::systems::round::{start_round_announce, round_announce_system, boss_defeated_check, score_tally_system, despawn_round_clear};
+use crate::ui::announcement::{spawn_announcement_ui, update_announcement_ui, despawn_announcement_ui};
 use crate::systems::audio::{toggle_sound, SoundEvent};
 use crate::systems::background::{spawn_background_stars, animate_stars, draw_background_grid};
 use crate::systems::collision::DeathEvent;
@@ -98,11 +100,16 @@ pub(crate) fn main() {
         .add_systems(Startup, crate::systems::audio::setup_synth_audio)
         .add_systems(Update, (animate_stars, draw_background_grid, crate::systems::audio::play_sounds))
         .add_systems(Update, menu_input_system.run_if(in_state(GameState::Menu)))
+        .add_systems(OnEnter(GameState::RoundAnnounce), (start_round_announce, spawn_announcement_ui))
+        .add_systems(Update, (round_announce_system, update_announcement_ui).run_if(in_state(GameState::RoundAnnounce)))
+        .add_systems(OnExit(GameState::RoundAnnounce), despawn_announcement_ui)
         .add_systems(Update, pause_toggle_system.run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, (despawn_game_over_text, player_movement, detect_collisions, update_health_ui, update_enemy_health_ui, particle_movement_system, particle_cleanup_system, boss_shoot_system, player_shoot_system, player_particle_movement_system, update_energy_ui, screen_shake_system, damage_flash_system, update_game_data, update_score_ui, boss_phase_system, boss_idle_movement).run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, handle_death_events.after(detect_collisions).run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, (animate_shatter, animate_shockwave).run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, (spawn_afterimages, animate_afterimages, spawn_ambient_particles, animate_ambient_particles).run_if(in_state(GameState::RoundActive)))
+        .add_systems(Update, (boss_defeated_check, score_tally_system).run_if(in_state(GameState::RoundActive)))
+        .add_systems(OnExit(GameState::RoundActive), despawn_round_clear)
         .add_systems(Update, (game_over_system, restart_listener).run_if(in_state(GameState::GameOver)))
         .add_systems(Update, (game_won_system, restart_listener).run_if(in_state(GameState::Won)))
         .add_systems(Update, pause_menu_system.run_if(in_state(GameState::Paused)))
@@ -244,16 +251,10 @@ pub fn update_energy_ui(
 pub fn update_enemy_health_ui(
     boss_query: Query<&Boss>,
     mut span_query: Query<&mut TextSpan, With<EnemyHpText>>,
-    mut next_state: ResMut<NextState<GameState>>,
-    game_data: Res<GameData>,
 ) {
     let total_hp: u32 = boss_query.iter().map(|boss| boss.current_hp).sum();
     for mut span in &mut span_query {
         **span = format!("{} %", total_hp);
-    }
-
-    if game_data.enemies_killed >= game_data.total_enemies {
-        next_state.set(GameState::Won);
     }
 }
 
@@ -382,7 +383,7 @@ pub fn pause_menu_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<GameState>>,
     mut commands: Commands,
-    mut game_data: ResMut<GameData>,
+    _game_data: ResMut<GameData>,
     mut audio: NonSendMut<crate::systems::audio::SynthAudio>,
     pause_query: Query<Entity, With<PauseText>>,
 ) {
