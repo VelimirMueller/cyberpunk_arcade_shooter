@@ -188,7 +188,7 @@ pub fn detect_collisions(
 
 }
 
-fn collide(pos_a: Vec3, size_a: Vec2, pos_b: Vec3, size_b: Vec2) -> bool {
+pub(crate) fn collide(pos_a: Vec3, size_a: Vec2, pos_b: Vec3, size_b: Vec2) -> bool {
     let a_min = pos_a.truncate() - size_a / 2.0;
     let a_max = pos_a.truncate() + size_a / 2.0;
     let b_min = pos_b.truncate() - size_b / 2.0;
