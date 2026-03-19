@@ -22,6 +22,8 @@ pub enum SoundEffect {
     HazardSpawn,
     HazardExplode,
     RoundClear,
+    ShockwavePowerUp,
+    LaserHum,
 }
 
 #[derive(Event)]
@@ -255,6 +257,29 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 let tone2 = (t * 500.0 * std::f32::consts::TAU).sin();
                 let tone3 = (t * 600.0 * std::f32::consts::TAU).sin();
                 (tone1 + tone2 + tone3) / 3.0 * envelope * volume * 0.4
+            }).collect()
+        }
+        SoundEffect::ShockwavePowerUp => {
+            // Deep boom: 40→80 Hz sweep + noise, 400ms
+            let duration = 0.4;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let freq = 40.0 + (40.0 * t / duration);
+                let envelope = (1.0 - (t / duration)).powf(0.5);
+                let noise = (rand::random::<f32>() * 2.0 - 1.0) * 0.4;
+                let thump = (t * freq * std::f32::consts::TAU).sin() * 0.8;
+                ((noise + thump) * 1.5).tanh() * envelope * volume * 0.5
+            }).collect()
+        }
+        SoundEffect::LaserHum => {
+            // Sustained 300 Hz tone, 500ms
+            let duration = 0.5;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let envelope = 1.0 - (t / duration).powf(2.0);
+                (t * 300.0 * std::f32::consts::TAU).sin() * envelope * volume * 0.3
             }).collect()
         }
     }
