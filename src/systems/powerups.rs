@@ -281,22 +281,31 @@ pub fn laser_system(
         beam_transform.rotation = player_rotation;
     }
 
-    // Beam vs Boss collision
+    // Beam vs Boss collision — compute collision zone from player position directly
+    // (avoids AABB rotation mismatch when player faces sideways)
+    let forward_dir = player_rotation * Vec3::Y;
+    let beam_center = player_pos + forward_dir * 300.0;
+    // Compute rotated beam AABB: use the actual beam orientation
+    let right = player_rotation * Vec3::X;
+    let beam_half_width = 20.0; // half of 40px
+    let beam_half_length = 300.0; // half of 600px
+    // Approximate rotated AABB by taking max extents
+    let extent_x = (right.x.abs() * beam_half_width + forward_dir.x.abs() * beam_half_length).max(beam_half_width);
+    let extent_y = (right.y.abs() * beam_half_width + forward_dir.y.abs() * beam_half_length).max(beam_half_width);
+    let beam_aabb_size = Vec2::new(extent_x * 2.0, extent_y * 2.0);
+
     for (mut boss, boss_transform, boss_sprite) in boss_query.iter_mut() {
         if boss.current_hp == 0 {
             continue;
         }
         let boss_size = boss_sprite.custom_size.unwrap_or(Vec2::ONE);
 
-        for (_beam_entity, beam_transform) in beam_query.iter() {
-            let beam_size = Vec2::new(40.0, 600.0);
-            if collide(beam_transform.translation, beam_size, boss_transform.translation, boss_size) {
-                // 75ms cooldown using dedicated field
-                if boss.last_laser_hit_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.075) {
-                    boss.current_hp = boss.current_hp.saturating_sub(1);
-                    boss.last_laser_hit_time = Some(std::time::Instant::now());
-                    sound_events.write(SoundEvent(SoundEffect::EnemyHit));
-                }
+        if collide(beam_center, beam_aabb_size, boss_transform.translation, boss_size) {
+            // 75ms cooldown using dedicated field
+            if boss.last_laser_hit_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.075) {
+                boss.current_hp = boss.current_hp.saturating_sub(1);
+                boss.last_laser_hit_time = Some(std::time::Instant::now());
+                sound_events.write(SoundEvent(SoundEffect::EnemyHit));
             }
         }
     }

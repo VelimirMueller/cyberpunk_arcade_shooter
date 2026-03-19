@@ -101,7 +101,7 @@ impl ScoreTallyTimer {
 pub struct RoundClearText;
 
 pub fn boss_defeated_check(
-    boss_query: Query<&Boss>,
+    game_data: Res<GameData>,
     tally_timer: Option<Res<ScoreTallyTimer>>,
     mut commands: Commands,
 ) {
@@ -110,11 +110,10 @@ pub fn boss_defeated_check(
         return;
     }
 
-    for boss in boss_query.iter() {
-        if boss.current_hp == 0 {
-            commands.insert_resource(ScoreTallyTimer::new());
-            return;
-        }
+    // Use enemies_killed counter instead of querying boss entity —
+    // the boss entity may already be despawned by handle_death_events
+    if game_data.enemies_killed >= game_data.total_enemies {
+        commands.insert_resource(ScoreTallyTimer::new());
     }
 }
 
