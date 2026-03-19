@@ -172,6 +172,41 @@ pub fn phantom_attack(
     }
 }
 
+/// Apex Protocol attack pattern: cycles through all previous boss attacks
+/// Uses cycle_index to track which sub-attack type is active
+pub fn apex_attack(
+    boss: &mut Boss,
+    boss_transform: &mut Transform,
+    player_transform: &Transform,
+    commands: &mut Commands,
+    delta: f32,
+    screen_shake: &mut ScreenShake,
+    hazard_count: usize,
+) {
+    let cycle_len = match boss.phase {
+        BossPhase::Phase1 => 2,
+        BossPhase::Phase2 => 3,
+        BossPhase::Phase3 => 4,
+    };
+    let current_attack = boss.cycle_index % cycle_len;
+
+    // Track if boss was idle before the sub-attack runs
+    let was_idle = matches!(boss.attack_state, AttackState::Idle);
+
+    match current_attack {
+        0 => phantom_attack(boss, boss_transform, player_transform, commands, delta),
+        1 => sentinel_attack(boss, boss_transform, player_transform, commands, delta),
+        2 => berserker_attack(boss, boss_transform, player_transform, commands, delta, screen_shake),
+        3 => weaver_attack(boss, boss_transform, player_transform, commands, delta, hazard_count),
+        _ => {}
+    }
+
+    // When sub-attack completes (returns to Idle), advance cycle
+    if !was_idle && matches!(boss.attack_state, AttackState::Idle) {
+        boss.cycle_index += 1;
+    }
+}
+
 /// Neon Sentinel attack pattern: stationary rotating beam sweeps
 /// Spawns beam projectile segments in lines that rotate around the boss
 pub fn sentinel_attack(
