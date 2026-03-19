@@ -4,8 +4,9 @@ use bevy::prelude::States;
 pub enum GameState {
     #[default]
     Menu,
-    Playing,
+    RoundAnnounce,
+    RoundActive,
     Paused,
     GameOver,
-    Won
+    Won,
 }
