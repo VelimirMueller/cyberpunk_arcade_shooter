@@ -1,0 +1,53 @@
+<h2>Round Announcement Style</h2>
+<p class="subtitle">How should new rounds be introduced to the player?</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0a0a0a;padding:40px 20px;text-align:center;font-family:monospace;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,transparent 50%,rgba(0,255,255,0.03) 50%);background-size:100% 4px;pointer-events:none;"></div>
+      <div style="font-size:12px;color:#ff00ff;letter-spacing:8px;text-transform:uppercase;margin-bottom:12px;opacity:0.8;">// INCOMING THREAT //</div>
+      <div style="font-size:36px;font-weight:bold;color:#00ffff;text-shadow:0 0 20px #00ffff,0 0 40px #00ffff;margin-bottom:8px;">ROUND 3</div>
+      <div style="font-size:18px;color:#ff00ff;text-shadow:0 0 10px #ff00ff;letter-spacing:3px;">NEON SENTINEL</div>
+      <div style="font-size:11px;color:#666;margin-top:16px;letter-spacing:2px;">PHASE SHIFT PROTOCOL ACTIVE</div>
+    </div>
+    <div class="card-body">
+      <h3>A — Cyberpunk Terminal</h3>
+      <p>Glitchy scan-line text reveal. Boss name + subtitle with neon glow. Brief, punchy, fits the CRT aesthetic you already have.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0a0a0a;padding:40px 20px;text-align:center;font-family:monospace;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:0;left:0;right:0;bottom:0;border:2px solid #ff003c;opacity:0.3;margin:8px;"></div>
+      <div style="font-size:11px;color:#ff003c;letter-spacing:12px;text-transform:uppercase;margin-bottom:20px;">W A R N I N G</div>
+      <div style="width:60%;margin:0 auto 16px;height:2px;background:linear-gradient(90deg,transparent,#ff003c,transparent);"></div>
+      <div style="font-size:28px;font-weight:bold;color:#fff;letter-spacing:6px;margin-bottom:6px;">ROUND 3</div>
+      <div style="font-size:22px;color:#ff003c;text-shadow:0 0 15px #ff003c;letter-spacing:4px;margin-bottom:12px;">NEON SENTINEL</div>
+      <div style="display:flex;justify-content:center;gap:20px;font-size:10px;color:#555;letter-spacing:2px;">
+        <span>HP ████████</span>
+        <span>PHASE: 3</span>
+        <span>THREAT: HIGH</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Souls Warning Screen</h3>
+      <p>Dark Souls-inspired threat warning. Red danger framing, boss stats preview, ominous tone. Holds for 2-3 seconds before the fight starts.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0a0a0a;padding:40px 20px;text-align:center;font-family:monospace;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;border:1px solid rgba(0,255,255,0.1);border-radius:50%;"></div>
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:140px;height:140px;border:1px solid rgba(255,0,255,0.15);border-radius:50%;"></div>
+      <div style="position:relative;z-index:1;">
+        <div style="font-size:48px;font-weight:bold;color:#fff;text-shadow:0 0 30px rgba(255,255,255,0.5);margin-bottom:4px;">3</div>
+        <div style="font-size:14px;color:#00ffff;letter-spacing:6px;text-transform:uppercase;">NEON SENTINEL</div>
+        <div style="margin-top:12px;font-size:10px;color:#ff00ff;letter-spacing:3px;">APPROACHES</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Minimalist Focus</h3>
+      <p>Big round number, boss name, and subtle geometric animation. Clean and fast — gets out of the way quickly. More arcade, less cinematic.</p>
+    </div>
+  </div>
+</div>
