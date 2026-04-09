@@ -3,8 +3,9 @@ use crate::app::GameEntity;
 use crate::core::boss::components::*;
 use crate::core::boss::attacks;
 use crate::core::player::components::Player;
-use crate::app::ScreenShake;
+use crate::app::{GameData, ScreenShake};
 use crate::systems::audio::{SoundEvent, SoundEffect};
+use crate::systems::collision::DeathEvent;
 
 pub fn score_multiplier(round: u32) -> f32 {
     match round {
@@ -497,6 +498,221 @@ pub fn boss_visual_system(
             base.blue * color_mult,
             pulse_alpha,
         );
+    }
+}
+
+pub fn boss_death_check_system(
+    mut commands: Commands,
+    mut boss_query: Query<(Entity, &mut Boss, &Transform, &Sprite), Without<BossDeathSequence>>,
+    mut game_data: ResMut<GameData>,
+    mut sound_events: EventWriter<SoundEvent>,
+) {
+    for (entity, mut boss, transform, sprite) in boss_query.iter_mut() {
+        if boss.current_hp == 0 && !boss.is_invulnerable {
+            let mult = score_multiplier(game_data.round);
+            game_data.score += (100.0 * mult) as u32;
+            game_data.enemies_killed += 1;
+            sound_events.write(SoundEvent(SoundEffect::Explosion));
+
+            boss.is_invulnerable = true;
+            boss.attack_state = AttackState::Idle;
+
+            commands.entity(entity).insert(BossDeathSequence {
+                step: DeathStep::Freeze,
+                timer: Timer::from_seconds(0.3, TimerMode::Once),
+                boss_position: transform.translation,
+                boss_color: sprite.color,
+                kill_score: (100.0 * mult) as u32,
+            });
+        }
+    }
+}
+
+pub fn boss_death_system(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut boss_query: Query<(Entity, &mut BossDeathSequence, &Transform, &Sprite)>,
+    mut screen_shake: ResMut<ScreenShake>,
+    mut sound_events: EventWriter<SoundEvent>,
+    mut death_events: EventWriter<DeathEvent>,
+) {
+    for (entity, mut death_seq, boss_transform, _boss_sprite) in boss_query.iter_mut() {
+        death_seq.timer.tick(time.delta());
+        if !death_seq.timer.finished() {
+            continue;
+        }
+
+        match death_seq.step {
+            DeathStep::Freeze => {
+                // Brief freeze — screen shake begins
+                screen_shake.intensity = 1.5;
+                screen_shake.duration = 0.3;
+                screen_shake.timer = 0.3;
+                death_seq.step = DeathStep::Explosion1;
+                death_seq.timer = Timer::from_seconds(0.3, TimerMode::Once);
+            }
+            DeathStep::Explosion1 => {
+                let offset = Vec3::new(
+                    (rand::random::<f32>() - 0.5) * 40.0,
+                    (rand::random::<f32>() - 0.5) * 40.0,
+                    0.1,
+                );
+                let pos = death_seq.boss_position + offset;
+                commands.spawn((
+                    Sprite {
+                        color: Color::srgba(8.0, 6.0, 2.0, 0.9),
+                        custom_size: Some(Vec2::new(10.0, 10.0)),
+                        ..default()
+                    },
+                    Transform::from_translation(pos),
+                    DeathExplosion { timer: Timer::from_seconds(0.3, TimerMode::Once) },
+                    GameEntity,
+                ));
+                sound_events.write(SoundEvent(SoundEffect::Explosion));
+                screen_shake.intensity = 2.0;
+                screen_shake.duration = 0.3;
+                screen_shake.timer = 0.3;
+                death_seq.step = DeathStep::Explosion2;
+                death_seq.timer = Timer::from_seconds(0.3, TimerMode::Once);
+            }
+            DeathStep::Explosion2 => {
+                let offset = Vec3::new(
+                    (rand::random::<f32>() - 0.5) * 40.0,
+                    (rand::random::<f32>() - 0.5) * 40.0,
+                    0.1,
+                );
+                let pos = death_seq.boss_position + offset;
+                commands.spawn((
+                    Sprite {
+                        color: Color::srgba(8.0, 6.0, 2.0, 0.9),
+                        custom_size: Some(Vec2::new(10.0, 10.0)),
+                        ..default()
+                    },
+                    Transform::from_translation(pos),
+                    DeathExplosion { timer: Timer::from_seconds(0.3, TimerMode::Once) },
+                    GameEntity,
+                ));
+                sound_events.write(SoundEvent(SoundEffect::Explosion));
+                screen_shake.intensity = 2.5;
+                screen_shake.duration = 0.3;
+                screen_shake.timer = 0.3;
+                death_seq.step = DeathStep::Explosion3;
+                death_seq.timer = Timer::from_seconds(0.3, TimerMode::Once);
+            }
+            DeathStep::Explosion3 => {
+                let offset = Vec3::new(
+                    (rand::random::<f32>() - 0.5) * 40.0,
+                    (rand::random::<f32>() - 0.5) * 40.0,
+                    0.1,
+                );
+                let pos = death_seq.boss_position + offset;
+                commands.spawn((
+                    Sprite {
+                        color: Color::srgba(8.0, 6.0, 2.0, 0.9),
+                        custom_size: Some(Vec2::new(10.0, 10.0)),
+                        ..default()
+                    },
+                    Transform::from_translation(pos),
+                    DeathExplosion { timer: Timer::from_seconds(0.3, TimerMode::Once) },
+                    GameEntity,
+                ));
+                sound_events.write(SoundEvent(SoundEffect::Explosion));
+                screen_shake.intensity = 3.0;
+                screen_shake.duration = 0.15;
+                screen_shake.timer = 0.15;
+                death_seq.step = DeathStep::WhiteFlash;
+                death_seq.timer = Timer::from_seconds(0.15, TimerMode::Once);
+            }
+            DeathStep::WhiteFlash => {
+                // Spawn a white flash overlay using PhaseFlashEffect
+                commands.spawn((
+                    Sprite {
+                        color: Color::srgba(8.0, 8.0, 8.0, 0.9),
+                        custom_size: Some(Vec2::new(20.0, 20.0)),
+                        ..default()
+                    },
+                    Transform::from_translation(death_seq.boss_position),
+                    PhaseFlashEffect {
+                        timer: Timer::from_seconds(0.4, TimerMode::Once),
+                    },
+                    GameEntity,
+                ));
+                death_seq.step = DeathStep::Shatter;
+                death_seq.timer = Timer::from_seconds(0.1, TimerMode::Once);
+            }
+            DeathStep::Shatter => {
+                // Fire the DeathEvent — handle_death_events will despawn entity + spawn shatter particles
+                let boss_position = death_seq.boss_position;
+                let boss_color = death_seq.boss_color;
+                death_events.write(DeathEvent {
+                    position: boss_position,
+                    color: boss_color,
+                    entity,
+                });
+                // Advance to Text (the boss entity will be despawned by handle_death_events,
+                // so this component won't tick further — that's fine)
+                death_seq.step = DeathStep::Text;
+                death_seq.timer = Timer::from_seconds(1.5, TimerMode::Once);
+            }
+            DeathStep::Text => {
+                commands.spawn((
+                    Text::new("ELIMINATED"),
+                    TextFont { font_size: 32.0, ..default() },
+                    TextColor(Color::srgb(0.0, 8.0, 8.0)),
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Percent(35.0),
+                        top: Val::Percent(30.0),
+                        ..default()
+                    },
+                    EliminatedText { timer: Timer::from_seconds(1.5, TimerMode::Once) },
+                    GameEntity,
+                ));
+                death_seq.step = DeathStep::Pause;
+                death_seq.timer = Timer::from_seconds(1.5, TimerMode::Once);
+            }
+            DeathStep::Pause => {
+                // Done — nothing more to do. Entity is already despawned by handle_death_events.
+            }
+        }
+
+        // Ensure boss_transform is used to suppress unused variable warning
+        let _ = boss_transform;
+    }
+}
+
+pub fn death_explosion_system(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut DeathExplosion, &mut Transform, &mut Sprite)>,
+) {
+    for (entity, mut explosion, mut transform, mut sprite) in query.iter_mut() {
+        explosion.timer.tick(time.delta());
+        let progress = explosion.timer.fraction();
+        // Expand scale
+        let scale = 1.0 + progress * 10.0;
+        transform.scale = Vec3::splat(scale);
+        // Fade alpha
+        let alpha = (1.0 - progress) * 0.9;
+        sprite.color = Color::srgba(8.0, 6.0, 2.0, alpha);
+        if explosion.timer.finished() {
+            commands.entity(entity).despawn();
+        }
+    }
+}
+
+pub fn eliminated_text_system(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut EliminatedText, &mut TextColor)>,
+) {
+    for (entity, mut text, mut color) in query.iter_mut() {
+        text.timer.tick(time.delta());
+        let alpha = 1.0 - text.timer.fraction();
+        color.0 = Color::srgb(0.0, 8.0, 8.0).with_alpha(alpha);
+        if text.timer.finished() {
+            commands.entity(entity).despawn();
+        }
     }
 }
 
