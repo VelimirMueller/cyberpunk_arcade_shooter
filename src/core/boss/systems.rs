@@ -75,7 +75,7 @@ pub fn spawn_boss(commands: &mut Commands, round: u32) {
             phase: BossPhase::Phase1,
             current_hp: max_hp,
             max_hp,
-            phase_thresholds: (0.50, 0.20),
+            phase_thresholds: (0.60, 0.30, 0.10),
             transition_style,
             primary_timer,
             secondary_timer: None,
@@ -100,7 +100,7 @@ pub fn boss_phase_system(
 ) {
     for (mut boss, boss_transform) in boss_query.iter_mut() {
         let hp_pct = boss.current_hp as f32 / boss.max_hp as f32;
-        let (threshold_2, threshold_3) = boss.phase_thresholds;
+        let (threshold_2, threshold_3, _threshold_4) = boss.phase_thresholds;
 
         let new_phase = if hp_pct <= threshold_3 {
             BossPhase::Phase3
@@ -162,6 +162,7 @@ pub fn boss_phase_system(
                     BossPhase::Phase1 => 1,
                     BossPhase::Phase2 => 3,
                     BossPhase::Phase3 => 3,
+                    BossPhase::Phase4 => 3,
                 };
             }
         }
@@ -380,6 +381,10 @@ pub fn boss_visual_system(
                 let pulse = 0.6 + 0.4 * (t * std::f32::consts::TAU / 0.3).sin();
                 (pulse, 1.6)
             }
+            BossPhase::Phase4 => {
+                let pulse = 0.6 + 0.4 * (t * std::f32::consts::TAU / 0.3).sin();
+                (pulse, 1.6)
+            }
         };
 
         // Always derive from base_color — never read back from sprite (HDR values degrade)
@@ -390,5 +395,30 @@ pub fn boss_visual_system(
             base.blue * color_mult,
             pulse_alpha,
         );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_score_multiplier_per_round() {
+        assert_eq!(score_multiplier(1), 1.0);
+        assert_eq!(score_multiplier(2), 1.5);
+        assert_eq!(score_multiplier(3), 2.0);
+        assert_eq!(score_multiplier(4), 2.5);
+        assert_eq!(score_multiplier(5), 3.0);
+        assert_eq!(score_multiplier(6), 3.0);
+    }
+
+    #[test]
+    fn test_boss_type_for_round() {
+        assert_eq!(boss_type_for_round(1), BossType::GridPhantom);
+        assert_eq!(boss_type_for_round(2), BossType::NeonSentinel);
+        assert_eq!(boss_type_for_round(3), BossType::ChromeBerserker);
+        assert_eq!(boss_type_for_round(4), BossType::VoidWeaver);
+        assert_eq!(boss_type_for_round(5), BossType::ApexProtocol);
+        assert_eq!(boss_type_for_round(6), BossType::ApexProtocol);
     }
 }

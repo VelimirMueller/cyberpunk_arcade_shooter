@@ -408,11 +408,12 @@ pub fn update_boss_hud(
     }
 
     // Update phase pips
-    // Phase1 -> threshold at pip 0, Phase2 -> pip 1, Phase3 -> pip 2
+    // Phase1 -> threshold at pip 0, Phase2 -> pip 1, Phase3 -> pip 2, Phase4 -> pip 3
     let cleared_phases = match boss.phase {
         BossPhase::Phase1 => 0,
         BossPhase::Phase2 => 1,
         BossPhase::Phase3 => 2,
+        BossPhase::Phase4 => 3,
     };
 
     for (pip, mut bg) in &mut pip_query {
