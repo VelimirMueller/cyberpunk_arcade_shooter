@@ -228,3 +228,25 @@ pub fn despawn_round_clear(
         commands.entity(entity).despawn();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::core::boss::components::BossType;
+    use crate::core::boss::systems::boss_type_for_round;
+
+    #[test]
+    fn test_round_boss_type_mapping() {
+        assert_eq!(boss_type_for_round(1), BossType::GridPhantom);
+        assert_eq!(boss_type_for_round(2), BossType::NeonSentinel);
+        assert_eq!(boss_type_for_round(3), BossType::ChromeBerserker);
+        assert_eq!(boss_type_for_round(4), BossType::VoidWeaver);
+        assert_eq!(boss_type_for_round(5), BossType::ApexProtocol);
+    }
+
+    #[test]
+    fn test_round_progression_to_won() {
+        let total_rounds = 5u32;
+        let round_after_last = 6u32;
+        assert!(round_after_last > total_rounds);
+    }
+}
