@@ -20,7 +20,7 @@ use crate::systems::round::{start_round_announce, round_announce_system, boss_de
 use crate::ui::announcement::{spawn_announcement_ui, update_announcement_ui, despawn_announcement_ui};
 use crate::ui::hud::{spawn_hud, update_boss_hud, update_player_hud, update_score_hud};
 use crate::systems::audio::SoundEvent;
-use crate::systems::powerups::{setup_powerup_timer, powerup_spawn_system, powerup_lifetime_system, powerup_pickup_system, laser_system, powerup_shockwave_system};
+use crate::systems::powerups::{setup_powerup_timer, powerup_spawn_system, powerup_lifetime_system, powerup_pickup_system, laser_system, powerup_shockwave_system, laser_charge_particle_system, laser_charge_orb_system, laser_stream_particle_system, laser_impact_system};
 use crate::systems::background::{spawn_background_stars, animate_stars, draw_background_grid};
 use crate::systems::collision::DeathEvent;
 use crate::systems::particles::{
@@ -115,7 +115,7 @@ pub(crate) fn main() {
         .add_systems(Update, handle_death_events.after(detect_collisions).run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, (animate_shatter, animate_shockwave).run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, (spawn_afterimages, animate_afterimages, spawn_ambient_particles, animate_ambient_particles, phase_shift_text_system, phase_flash_system, boss_visual_system, phase_transition_system, phase_name_text_system, boss_death_system, death_explosion_system, eliminated_text_system, desperation_ambient_shake).run_if(in_state(GameState::RoundActive)))
-        .add_systems(Update, (powerup_spawn_system, powerup_lifetime_system, powerup_pickup_system, laser_system, powerup_shockwave_system).run_if(in_state(GameState::RoundActive)))
+        .add_systems(Update, (powerup_spawn_system, powerup_lifetime_system, powerup_pickup_system, laser_system, powerup_shockwave_system, laser_charge_particle_system, laser_charge_orb_system, laser_stream_particle_system, laser_impact_system).run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, (boss_defeated_check, score_tally_system).run_if(in_state(GameState::RoundActive)))
         .add_systems(OnExit(GameState::RoundActive), despawn_round_clear)
         .add_systems(OnEnter(GameState::GameOver), spawn_game_over_screen)

@@ -6,7 +6,7 @@ use crate::core::player::components::Player;
 use crate::data::game_state::GameState;
 use crate::systems::combat::EnemyParticle;
 use crate::systems::audio::{SoundEvent, SoundEffect};
-use crate::systems::powerups::{PowerUp, LaserBeam, PowerUpShockwave, LaserActive};
+use crate::systems::powerups::{PowerUp, LaserBeamCore, LaserBeamShell, LaserStreamParticle, LaserImpact, LaserMuzzle, LaserChargeOrb, LaserChargeParticle, PowerUpShockwave, LaserActive};
 
 // ============ Round Announcement ============
 
@@ -129,7 +129,7 @@ pub fn score_tally_system(
     hazard_query: Query<Entity, With<HazardZone>>,
     projectile_query: Query<Entity, With<BossProjectile>>,
     telegraph_query: Query<Entity, With<ChargeTelegraph>>,
-    enemy_particle_query: Query<Entity, Or<(With<EnemyParticle>, With<PowerUp>, With<LaserBeam>, With<PowerUpShockwave>, With<EliminatedText>, With<DeathExplosion>)>>,
+    enemy_particle_query: Query<Entity, Or<(With<EnemyParticle>, With<PowerUp>, With<LaserBeamCore>, With<LaserBeamShell>, With<LaserStreamParticle>, With<LaserImpact>, With<LaserMuzzle>, With<LaserChargeOrb>, With<LaserChargeParticle>, With<PowerUpShockwave>, With<EliminatedText>, With<DeathExplosion>)>>,
     round_clear_query: Query<Entity, With<RoundClearText>>,
     screen_dim_query: Query<Entity, With<ScreenDimOverlay>>,
     phase_name_query: Query<Entity, With<PhaseNameText>>,
