@@ -1,13 +1,16 @@
-use bevy::prelude::*;
-use crate::core::player::systems::spawn_player;
-use crate::core::boss::components::{Boss, DashTrail, HazardZone, BeamSweep, ChargeTelegraph, BossProjectile};
-use crate::core::player::components::{Player, PlayerParticle};
-use crate::systems::combat::EnemyParticle;
 use crate::app::GameEntity;
-use crate::data::game_state::GameState;
+use crate::core::boss::components::{
+    BeamSweep, Boss, BossProjectile, ChargeTelegraph, DashTrail, HazardZone,
+};
+use crate::core::player::components::{Player, PlayerParticle};
+use crate::core::player::systems::spawn_player;
 use crate::core::world::barriers::components::Barrier;
 use crate::core::world::barriers::systems::spawn_barriers;
+use crate::data::game_state::GameState;
+use crate::systems::combat::EnemyParticle;
+use bevy::prelude::*;
 
+#[allow(clippy::too_many_arguments)]
 pub fn restart_listener(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<GameState>>,

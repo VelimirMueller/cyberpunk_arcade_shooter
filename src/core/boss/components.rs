@@ -25,14 +25,21 @@ pub enum TransitionStyle {
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]
+#[allow(dead_code)]
 pub enum AttackState {
     #[default]
     Idle,
     WindUp(Timer),
     Attacking,
     Recovery(Timer),
-    Dashing { target: Vec2, speed: f32 },
-    Charging { target: Vec2, speed: f32 },
+    Dashing {
+        target: Vec2,
+        speed: f32,
+    },
+    Charging {
+        target: Vec2,
+        speed: f32,
+    },
 }
 
 #[derive(Component)]
@@ -42,8 +49,10 @@ pub struct Boss {
     pub current_hp: u32,
     pub max_hp: u32,
     pub phase_thresholds: (f32, f32, f32),
+    #[allow(dead_code)]
     pub transition_style: TransitionStyle,
     pub primary_timer: Timer,
+    #[allow(dead_code)]
     pub secondary_timer: Option<Timer>,
     pub attack_state: AttackState,
     pub base_color: Color,
@@ -74,10 +83,12 @@ impl Boss {
 #[derive(Component)]
 pub struct DashTrail {
     pub lifetime: Timer,
+    #[allow(dead_code)]
     pub damage: u32,
 }
 
 #[derive(Component)]
+#[allow(dead_code)]
 pub struct BeamSweep {
     pub angle: f32,
     pub arc_width: f32,
@@ -92,12 +103,15 @@ pub struct HazardZone {
     pub drift_velocity: Option<Vec2>,
     pub explodes: bool,
     pub explosion_timer: Option<Timer>,
+    #[allow(dead_code)]
     pub damage: u32,
 }
 
 #[derive(Component)]
 pub struct ChargeTelegraph {
+    #[allow(dead_code)]
     pub start: Vec2,
+    #[allow(dead_code)]
     pub end: Vec2,
     pub lifetime: Timer,
 }
@@ -105,10 +119,12 @@ pub struct ChargeTelegraph {
 #[derive(Component)]
 pub struct BossProjectile {
     pub velocity: Vec2,
+    #[allow(dead_code)]
     pub damage: u32,
 }
 
 #[derive(Component)]
+#[allow(dead_code)]
 pub struct PhaseTransitionEffect {
     pub timer: Timer,
     pub style: TransitionStyle,
@@ -158,6 +174,7 @@ pub struct BossDeathSequence {
     pub timer: Timer,
     pub boss_position: Vec3,
     pub boss_color: Color,
+    #[allow(dead_code)]
     pub kill_score: u32,
 }
 

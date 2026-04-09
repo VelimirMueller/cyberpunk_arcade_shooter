@@ -1,8 +1,8 @@
-use bevy::prelude::*;
 use crate::app::{GameData, GameEntity};
 use crate::core::boss::components::{Boss, BossPhase, BossType};
 use crate::core::boss::systems::boss_type_for_round;
 use crate::core::player::components::Player;
+use bevy::prelude::*;
 
 // ── Component Markers ──────────────────────────────────────────────
 
@@ -63,11 +63,7 @@ fn boss_name(boss_type: BossType) -> &'static str {
 
 // ── spawn_hud ──────────────────────────────────────────────────────
 
-pub fn spawn_hud(
-    mut commands: Commands,
-    existing: Query<&HudRoot>,
-    game_data: Res<GameData>,
-) {
+pub fn spawn_hud(mut commands: Commands, existing: Query<&HudRoot>, game_data: Res<GameData>) {
     // Guard: don't spawn if already exists
     if !existing.is_empty() {
         return;
@@ -104,32 +100,36 @@ pub fn spawn_hud(
             })
             .with_children(|top| {
                 // Boss name with glow
-                top.spawn(Node {
-                    ..default()
-                })
-                .with_children(|name_container| {
-                    // Glow layer (behind)
-                    name_container.spawn((
-                        Text::new(boss_name(boss_type)),
-                        TextFont { font_size: 14.0, ..default() },
-                        TextColor(Color::srgba(1.0, 0.0, 0.24, 0.3)),
-                        TextLayout::new_with_justify(JustifyText::Center),
-                        Node {
-                            position_type: PositionType::Absolute,
-                            left: Val::Px(-1.0),
-                            top: Val::Px(-1.0),
-                            ..default()
-                        },
-                    ));
-                    // Main boss name text
-                    name_container.spawn((
-                        Text::new(boss_name(boss_type)),
-                        TextFont { font_size: 12.0, ..default() },
-                        TextColor(COLOR_BOSS_HP),
-                        TextLayout::new_with_justify(JustifyText::Center),
-                        BossNameText,
-                    ));
-                });
+                top.spawn(Node { ..default() })
+                    .with_children(|name_container| {
+                        // Glow layer (behind)
+                        name_container.spawn((
+                            Text::new(boss_name(boss_type)),
+                            TextFont {
+                                font_size: 14.0,
+                                ..default()
+                            },
+                            TextColor(Color::srgba(1.0, 0.0, 0.24, 0.3)),
+                            TextLayout::new_with_justify(JustifyText::Center),
+                            Node {
+                                position_type: PositionType::Absolute,
+                                left: Val::Px(-1.0),
+                                top: Val::Px(-1.0),
+                                ..default()
+                            },
+                        ));
+                        // Main boss name text
+                        name_container.spawn((
+                            Text::new(boss_name(boss_type)),
+                            TextFont {
+                                font_size: 12.0,
+                                ..default()
+                            },
+                            TextColor(COLOR_BOSS_HP),
+                            TextLayout::new_with_justify(JustifyText::Center),
+                            BossNameText,
+                        ));
+                    });
 
                 // Boss HP bar container
                 top.spawn((
@@ -187,7 +187,10 @@ pub fn spawn_hud(
                 // "OPERATOR" label
                 bl.spawn((
                     Text::new("OPERATOR"),
-                    TextFont { font_size: 9.0, ..default() },
+                    TextFont {
+                        font_size: 9.0,
+                        ..default()
+                    },
                     TextColor(COLOR_SCORE_CYAN),
                     TextLayout::new_with_justify(JustifyText::Left),
                 ));
@@ -202,30 +205,34 @@ pub fn spawn_hud(
                 })
                 .with_children(|hp_row| {
                     // HP bar container
-                    hp_row.spawn((
-                        Node {
-                            width: Val::Px(140.0),
-                            height: Val::Px(8.0),
-                            ..default()
-                        },
-                        BackgroundColor(COLOR_BAR_BG),
-                    ))
-                    .with_children(|bar| {
-                        bar.spawn((
+                    hp_row
+                        .spawn((
                             Node {
-                                width: Val::Percent(100.0),
-                                height: Val::Percent(100.0),
+                                width: Val::Px(140.0),
+                                height: Val::Px(8.0),
                                 ..default()
                             },
-                            BackgroundColor(COLOR_PLAYER_HP),
-                            PlayerHpFill,
-                        ));
-                    });
+                            BackgroundColor(COLOR_BAR_BG),
+                        ))
+                        .with_children(|bar| {
+                            bar.spawn((
+                                Node {
+                                    width: Val::Percent(100.0),
+                                    height: Val::Percent(100.0),
+                                    ..default()
+                                },
+                                BackgroundColor(COLOR_PLAYER_HP),
+                                PlayerHpFill,
+                            ));
+                        });
 
                     // HP numeric value
                     hp_row.spawn((
                         Text::new("100"),
-                        TextFont { font_size: 10.0, ..default() },
+                        TextFont {
+                            font_size: 10.0,
+                            ..default()
+                        },
                         TextColor(COLOR_PLAYER_HP),
                         PlayerHpText,
                     ));
@@ -241,30 +248,34 @@ pub fn spawn_hud(
                 })
                 .with_children(|en_row| {
                     // Energy bar container
-                    en_row.spawn((
-                        Node {
-                            width: Val::Px(140.0),
-                            height: Val::Px(5.0),
-                            ..default()
-                        },
-                        BackgroundColor(COLOR_BAR_BG),
-                    ))
-                    .with_children(|bar| {
-                        bar.spawn((
+                    en_row
+                        .spawn((
                             Node {
-                                width: Val::Percent(100.0),
-                                height: Val::Percent(100.0),
+                                width: Val::Px(140.0),
+                                height: Val::Px(5.0),
                                 ..default()
                             },
-                            BackgroundColor(COLOR_PLAYER_ENERGY),
-                            PlayerEnergyFill,
-                        ));
-                    });
+                            BackgroundColor(COLOR_BAR_BG),
+                        ))
+                        .with_children(|bar| {
+                            bar.spawn((
+                                Node {
+                                    width: Val::Percent(100.0),
+                                    height: Val::Percent(100.0),
+                                    ..default()
+                                },
+                                BackgroundColor(COLOR_PLAYER_ENERGY),
+                                PlayerEnergyFill,
+                            ));
+                        });
 
                     // Energy numeric value
                     en_row.spawn((
                         Text::new("100"),
-                        TextFont { font_size: 10.0, ..default() },
+                        TextFont {
+                            font_size: 10.0,
+                            ..default()
+                        },
                         TextColor(COLOR_PLAYER_ENERGY),
                         PlayerEnergyText,
                     ));
@@ -317,7 +328,10 @@ pub fn spawn_hud(
                     // Glow
                     label_container.spawn((
                         Text::new(format!("ROUND {} / 5", game_data.round)),
-                        TextFont { font_size: 12.0, ..default() },
+                        TextFont {
+                            font_size: 12.0,
+                            ..default()
+                        },
                         TextColor(Color::srgba(0.0, 1.0, 0.8, 0.3)),
                         Node {
                             position_type: PositionType::Absolute,
@@ -329,7 +343,10 @@ pub fn spawn_hud(
                     // Main
                     label_container.spawn((
                         Text::new(format!("ROUND {} / 5", game_data.round)),
-                        TextFont { font_size: 10.0, ..default() },
+                        TextFont {
+                            font_size: 10.0,
+                            ..default()
+                        },
                         TextColor(COLOR_SCORE_CYAN),
                         RoundLabelText,
                     ));
@@ -349,7 +366,10 @@ pub fn spawn_hud(
                 // "SCORE" label
                 br.spawn((
                     Text::new("SCORE"),
-                    TextFont { font_size: 9.0, ..default() },
+                    TextFont {
+                        font_size: 9.0,
+                        ..default()
+                    },
                     TextColor(COLOR_LABEL),
                 ));
 
@@ -362,7 +382,10 @@ pub fn spawn_hud(
                     // Glow
                     score_container.spawn((
                         Text::new(format!("{}", game_data.score)),
-                        TextFont { font_size: 18.0, ..default() },
+                        TextFont {
+                            font_size: 18.0,
+                            ..default()
+                        },
                         TextColor(Color::srgba(0.0, 1.0, 0.8, 0.3)),
                         Node {
                             position_type: PositionType::Absolute,
@@ -374,7 +397,10 @@ pub fn spawn_hud(
                     // Main
                     score_container.spawn((
                         Text::new(format!("{}", game_data.score)),
-                        TextFont { font_size: 16.0, ..default() },
+                        TextFont {
+                            font_size: 16.0,
+                            ..default()
+                        },
                         TextColor(COLOR_SCORE_CYAN),
                         ScoreValueText,
                     ));
@@ -417,7 +443,7 @@ pub fn update_boss_hud(
     };
 
     for (pip, mut bg) in &mut pip_query {
-        if (pip.0 as u8) < cleared_phases {
+        if pip.0 < cleared_phases {
             // Cleared phase = dim
             bg.0 = COLOR_DIM_PIP;
         } else {

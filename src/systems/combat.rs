@@ -1,16 +1,17 @@
-use bevy::prelude::*;
-use crate::core::boss::components::Boss;
 use crate::app::GameEntity;
-use crate::core::player::components::{Player, PlayerRotationTracker, PlayerParticle};
-use crate::systems::audio::{SoundEvent, SoundEffect};
+use crate::core::boss::components::Boss;
+use crate::core::player::components::{Player, PlayerParticle, PlayerRotationTracker};
+use crate::systems::audio::{SoundEffect, SoundEvent};
 use crate::systems::powerups::LaserActive;
+use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct EnemyParticle;
 
 #[derive(Component)]
-pub struct Velocity(pub Vec2);
+pub struct Velocity(#[allow(dead_code)] pub Vec2);
 
+#[allow(dead_code)]
 pub(crate) fn spawn_enemy_particle_sprite(mut commands: Commands, position: Vec3, velocity: Vec2) {
     commands.spawn((
         Sprite {
@@ -21,7 +22,7 @@ pub(crate) fn spawn_enemy_particle_sprite(mut commands: Commands, position: Vec3
         Transform::from_translation(position),
         Velocity(velocity),
         EnemyParticle,
-        GameEntity
+        GameEntity,
     ));
 }
 
@@ -40,7 +41,7 @@ pub fn particle_movement_system(
 pub fn particle_cleanup_system(
     mut commands: Commands,
     query: Query<(Entity, &Transform), With<EnemyParticle>>,
-    player_query: Query<(Entity, &Transform), With<PlayerParticle>>
+    player_query: Query<(Entity, &Transform), With<PlayerParticle>>,
 ) {
     const SCREEN_BOUNDS: f32 = 600.0; // adjust to your camera view
 
@@ -59,6 +60,7 @@ pub fn particle_cleanup_system(
     }
 }
 
+#[allow(dead_code)]
 pub(crate) fn boss_shoot_system(
     time: Res<Time>,
     mut commands: Commands,
@@ -82,7 +84,8 @@ pub(crate) fn boss_shoot_system(
             ];
 
             for corner in corners {
-                let corner_world = global_transform.transform_point(Vec3::new(corner.x, corner.y, 0.0));
+                let corner_world =
+                    global_transform.transform_point(Vec3::new(corner.x, corner.y, 0.0));
                 let velocity = corner.normalize_or_zero() * 120.0;
 
                 spawn_enemy_particle_sprite(commands.reborrow(), corner_world, velocity);
@@ -134,7 +137,9 @@ pub(crate) fn player_shoot_system(
                 return; // Suppress normal shooting during laser mode
             }
             // Check cooldown
-            let can_shoot = player_data.last_shot_time.map_or(true, |t| t.elapsed().as_secs_f32() >= SHOT_COOLDOWN);
+            let can_shoot = player_data
+                .last_shot_time
+                .is_none_or(|t| t.elapsed().as_secs_f32() >= SHOT_COOLDOWN);
 
             if can_shoot && player_data.energy >= MIN_ENERGY {
                 player_data.last_shot_time = Some(std::time::Instant::now());
@@ -142,10 +147,10 @@ pub(crate) fn player_shoot_system(
                 // Schieße von 4 Ecken (relativ zur Würfelgröße)
                 let offset = 16.0; // an Sprite-Größe anpassen
                 let directions = [
-                    Vec2::new( offset,  offset),
-                    Vec2::new(-offset,  offset),
+                    Vec2::new(offset, offset),
+                    Vec2::new(-offset, offset),
                     Vec2::new(-offset, -offset),
-                    Vec2::new( offset, -offset),
+                    Vec2::new(offset, -offset),
                 ];
 
                 let total_cost = ENERGY_COST_PER_CORNER * directions.len() as u32;

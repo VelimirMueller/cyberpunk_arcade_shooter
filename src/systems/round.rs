@@ -1,12 +1,18 @@
-use bevy::prelude::*;
 use crate::app::GameData;
-use crate::core::boss::components::{Boss, DashTrail, HazardZone, BossProjectile, ChargeTelegraph, ScreenDimOverlay, PhaseNameText, EliminatedText, DeathExplosion};
+use crate::core::boss::components::{
+    Boss, BossProjectile, ChargeTelegraph, DashTrail, DeathExplosion, EliminatedText, HazardZone,
+    PhaseNameText, ScreenDimOverlay,
+};
 use crate::core::boss::systems::spawn_boss;
 use crate::core::player::components::Player;
 use crate::data::game_state::GameState;
+use crate::systems::audio::{SoundEffect, SoundEvent};
 use crate::systems::combat::EnemyParticle;
-use crate::systems::audio::{SoundEvent, SoundEffect};
-use crate::systems::powerups::{PowerUp, LaserBeamCore, LaserBeamShell, LaserStreamParticle, LaserImpact, LaserMuzzle, LaserChargeOrb, LaserChargeParticle, PowerUpShockwave, LaserActive};
+use crate::systems::powerups::{
+    LaserActive, LaserBeamCore, LaserBeamShell, LaserChargeOrb, LaserChargeParticle, LaserImpact,
+    LaserMuzzle, LaserStreamParticle, PowerUp, PowerUpShockwave,
+};
+use bevy::prelude::*;
 
 // ============ Round Announcement ============
 
@@ -34,6 +40,12 @@ impl RoundTimer {
             phase: AnnouncePhase::ThreatLine,
             duration: 2.5,
         }
+    }
+}
+
+impl Default for RoundTimer {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -97,6 +109,12 @@ impl ScoreTallyTimer {
     }
 }
 
+impl Default for ScoreTallyTimer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[derive(Component)]
 pub struct RoundClearText;
 
@@ -117,6 +135,8 @@ pub fn boss_defeated_check(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::type_complexity)]
 pub fn score_tally_system(
     time: Res<Time>,
     tally_timer: Option<ResMut<ScoreTallyTimer>>,
@@ -129,7 +149,23 @@ pub fn score_tally_system(
     hazard_query: Query<Entity, With<HazardZone>>,
     projectile_query: Query<Entity, With<BossProjectile>>,
     telegraph_query: Query<Entity, With<ChargeTelegraph>>,
-    enemy_particle_query: Query<Entity, Or<(With<EnemyParticle>, With<PowerUp>, With<LaserBeamCore>, With<LaserBeamShell>, With<LaserStreamParticle>, With<LaserImpact>, With<LaserMuzzle>, With<LaserChargeOrb>, With<LaserChargeParticle>, With<PowerUpShockwave>, With<EliminatedText>, With<DeathExplosion>)>>,
+    enemy_particle_query: Query<
+        Entity,
+        Or<(
+            With<EnemyParticle>,
+            With<PowerUp>,
+            With<LaserBeamCore>,
+            With<LaserBeamShell>,
+            With<LaserStreamParticle>,
+            With<LaserImpact>,
+            With<LaserMuzzle>,
+            With<LaserChargeOrb>,
+            With<LaserChargeParticle>,
+            With<PowerUpShockwave>,
+            With<EliminatedText>,
+            With<DeathExplosion>,
+        )>,
+    >,
     round_clear_query: Query<Entity, With<RoundClearText>>,
     screen_dim_query: Query<Entity, With<ScreenDimOverlay>>,
     phase_name_query: Query<Entity, With<PhaseNameText>>,
@@ -220,10 +256,7 @@ pub fn score_tally_system(
     }
 }
 
-pub fn despawn_round_clear(
-    mut commands: Commands,
-    query: Query<Entity, With<RoundClearText>>,
-) {
+pub fn despawn_round_clear(mut commands: Commands, query: Query<Entity, With<RoundClearText>>) {
     for entity in query.iter() {
         commands.entity(entity).despawn();
     }
