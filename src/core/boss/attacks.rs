@@ -73,6 +73,7 @@ pub fn phantom_attack(
                     let trail_lifetime = match boss.phase {
                         BossPhase::Phase2 => 2.0,
                         BossPhase::Phase3 => 4.0,
+                        BossPhase::Phase4 => 4.0,
                         _ => 2.0,
                     };
 
@@ -91,8 +92,8 @@ pub fn phantom_attack(
                     ));
                 }
 
-                // Phase 3: chain a second dash if combo_count < 1
-                if boss.phase == BossPhase::Phase3 && boss.combo_count < 1 {
+                // Phase 3+: chain a second dash if combo_count < 1
+                if (boss.phase == BossPhase::Phase3 || boss.phase == BossPhase::Phase4) && boss.combo_count < 1 {
                     boss.combo_count += 1;
                     // Short wind-up before chain dash
                     boss.attack_state = AttackState::WindUp(
@@ -124,6 +125,7 @@ pub fn phantom_attack(
                         BossPhase::Phase1 => 3.0,
                         BossPhase::Phase2 => 2.0,
                         BossPhase::Phase3 => 1.0,
+                        BossPhase::Phase4 => 1.0,
                     };
                     boss.attack_state = AttackState::Recovery(
                         Timer::from_seconds(recovery_time, TimerMode::Once),
@@ -131,7 +133,7 @@ pub fn phantom_attack(
                     boss.combo_count = 0;
 
                     // Fire 1-2 slow homing projectiles during recovery
-                    let num_projectiles = if boss.phase == BossPhase::Phase1 { 1 } else { 2 };
+                    let num_projectiles = if boss.phase == BossPhase::Phase1 { 1 } else { 2 }; // Phase4 behaves like Phase3
                     for i in 0..num_projectiles {
                         let angle_offset = if num_projectiles == 1 {
                             0.0
@@ -191,6 +193,7 @@ pub fn apex_attack(
         BossPhase::Phase1 => 2,
         BossPhase::Phase2 => 3,
         BossPhase::Phase3 => 4,
+        BossPhase::Phase4 => 4,
     };
     let current_attack = boss.cycle_index % cycle_len;
 
@@ -228,6 +231,7 @@ pub fn sentinel_attack(
         BossPhase::Phase1 => 1.5,
         BossPhase::Phase2 => 2.5,
         BossPhase::Phase3 => 3.0,
+        BossPhase::Phase4 => 3.0,
     };
 
     // Rotate the boss each frame
@@ -244,6 +248,7 @@ pub fn sentinel_attack(
                     BossPhase::Phase1 => 1,
                     BossPhase::Phase2 => 2,
                     BossPhase::Phase3 => 2,
+                    BossPhase::Phase4 => 2,
                 };
 
                 let base_angle = boss_transform.rotation.to_euler(EulerRot::ZYX).0;
@@ -354,8 +359,8 @@ pub fn berserker_attack(
 
             if dist < 15.0 {
                 // Arrived at target
-                // Phase 3: spawn shockwave DashTrail
-                if boss.phase == BossPhase::Phase3 {
+                // Phase 3+: spawn shockwave DashTrail
+                if boss.phase == BossPhase::Phase3 || boss.phase == BossPhase::Phase4 {
                     commands.spawn((
                         Sprite {
                             color: Color::srgba(8.0, 4.0, 0.0, 0.8),
@@ -379,6 +384,7 @@ pub fn berserker_attack(
                     BossPhase::Phase1 => 1,
                     BossPhase::Phase2 => 3,
                     BossPhase::Phase3 => 3,
+                    BossPhase::Phase4 => 3,
                 };
 
                 if boss.combo_count < max_combo {
@@ -394,7 +400,7 @@ pub fn berserker_attack(
                     // Enter recovery
                     let recovery_time = match boss.phase {
                         BossPhase::Phase1 => 2.0,
-                        BossPhase::Phase2 | BossPhase::Phase3 => 1.0,
+                        BossPhase::Phase2 | BossPhase::Phase3 | BossPhase::Phase4 => 1.0,
                     };
                     boss.attack_state = AttackState::Recovery(
                         Timer::from_seconds(recovery_time, TimerMode::Once),
@@ -437,7 +443,7 @@ pub fn weaver_attack(
             if boss.primary_timer.just_finished() {
                 let max_hazards = match boss.phase {
                     BossPhase::Phase1 => 3,
-                    BossPhase::Phase2 | BossPhase::Phase3 => 4,
+                    BossPhase::Phase2 | BossPhase::Phase3 | BossPhase::Phase4 => 4,
                 };
 
                 if hazard_count < max_hazards {
@@ -446,14 +452,14 @@ pub fn weaver_attack(
                     let x = (rand::random::<f32>() - 0.5) * 1000.0; // ±500
                     let y = (rand::random::<f32>() - 0.5) * 400.0;  // ±200
 
-                    let drift_velocity = if boss.phase != BossPhase::Phase1 {
+                    let drift_velocity = if boss.phase != BossPhase::Phase1 { // Phase2/3/4 drift
                         let dir = (player_pos - Vec2::new(x, y)).normalize_or_zero();
                         Some(dir * 30.0)
                     } else {
                         None
                     };
 
-                    let explodes = boss.phase == BossPhase::Phase3;
+                    let explodes = boss.phase == BossPhase::Phase3 || boss.phase == BossPhase::Phase4;
                     let explosion_timer = if explodes {
                         Some(Timer::from_seconds(3.0, TimerMode::Once))
                     } else {
@@ -484,6 +490,7 @@ pub fn weaver_attack(
                     BossPhase::Phase1 => 3.0,
                     BossPhase::Phase2 => 2.5,
                     BossPhase::Phase3 => 1.5,
+                    BossPhase::Phase4 => 1.5,
                 };
                 boss.attack_state = AttackState::Recovery(
                     Timer::from_seconds(teleport_cd, TimerMode::Once),
