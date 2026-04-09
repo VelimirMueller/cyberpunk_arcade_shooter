@@ -24,6 +24,9 @@ pub enum SoundEffect {
     RoundClear,
     ShockwavePowerUp,
     LaserHum,
+    LaserCharge,
+    LaserFire,
+    LaserFadeOut,
 }
 
 #[derive(Event)]
@@ -280,6 +283,42 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 let t = i as f32 / sample_rate;
                 let envelope = 1.0 - (t / duration).powf(2.0);
                 (t * 300.0 * std::f32::consts::TAU).sin() * envelope * volume * 0.3
+            }).collect()
+        }
+        SoundEffect::LaserCharge => {
+            // Ascending sweep: 100→800 Hz over 0.8s
+            let duration = 0.8;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let progress = t / duration;
+                let freq = 100.0 + (700.0 * progress * progress);
+                let envelope = progress.min(1.0);
+                (t * freq * std::f32::consts::TAU).sin() * envelope * volume * 0.4
+            }).collect()
+        }
+        SoundEffect::LaserFire => {
+            // Short bright impact: 800→200 Hz, 0.15s
+            let duration = 0.15;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let freq = 800.0 - (600.0 * t / duration);
+                let envelope = (1.0 - (t / duration)).powf(0.5);
+                let noise = (rand::random::<f32>() * 2.0 - 1.0) * 0.2;
+                let tone = (t * freq * std::f32::consts::TAU).sin() * 0.8;
+                (noise + tone) * envelope * volume * 0.6
+            }).collect()
+        }
+        SoundEffect::LaserFadeOut => {
+            // Descending sweep: 400→80 Hz over 0.5s
+            let duration = 0.5;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples).map(|i| {
+                let t = i as f32 / sample_rate;
+                let freq = 400.0 - (320.0 * t / duration);
+                let envelope = 1.0 - (t / duration);
+                (t * freq * std::f32::consts::TAU).sin() * envelope * volume * 0.3
             }).collect()
         }
     }
