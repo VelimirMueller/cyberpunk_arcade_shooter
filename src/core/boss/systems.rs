@@ -94,77 +94,159 @@ pub fn spawn_boss(commands: &mut Commands, round: u32) {
 
 pub fn boss_phase_system(
     mut commands: Commands,
-    mut boss_query: Query<(&mut Boss, &Transform)>,
+    mut boss_query: Query<(Entity, &mut Boss, &Transform), Without<PhaseTransitionSequence>>,
+) {
+    for (entity, mut boss, _transform) in boss_query.iter_mut() {
+        if boss.current_hp == 0 { continue; }
+        let new_phase = boss.phase_for_hp_pct();
+        if new_phase != boss.phase {
+            let shake_intensity = match new_phase {
+                BossPhase::Phase2 => 1.0,
+                BossPhase::Phase3 => 1.5,
+                BossPhase::Phase4 => 2.0,
+                BossPhase::Phase1 => 0.0,
+            };
+            boss.is_invulnerable = true;
+            boss.attack_state = AttackState::Idle;
+            commands.entity(entity).insert(PhaseTransitionSequence {
+                timer: Timer::from_seconds(0.3, TimerMode::Once),
+                step: TransitionStep::DimScreen,
+                target_phase: new_phase,
+                shake_intensity,
+            });
+        }
+    }
+}
+
+pub fn phase_transition_system(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut boss_query: Query<(Entity, &mut Boss, &mut PhaseTransitionSequence, &Transform)>,
     mut screen_shake: ResMut<ScreenShake>,
     mut sound_events: EventWriter<SoundEvent>,
+    dim_query: Query<Entity, With<ScreenDimOverlay>>,
 ) {
-    for (mut boss, boss_transform) in boss_query.iter_mut() {
-        let hp_pct = boss.current_hp as f32 / boss.max_hp as f32;
-        let (threshold_2, threshold_3, _threshold_4) = boss.phase_thresholds;
+    for (entity, mut boss, mut seq, boss_transform) in boss_query.iter_mut() {
+        seq.timer.tick(time.delta());
+        if !seq.timer.finished() {
+            continue;
+        }
 
-        let new_phase = if hp_pct <= threshold_3 {
-            BossPhase::Phase3
-        } else if hp_pct <= threshold_2 {
-            BossPhase::Phase2
-        } else {
-            BossPhase::Phase1
-        };
-
-        if new_phase != boss.phase {
-            boss.phase = new_phase;
-            match boss.transition_style {
-                TransitionStyle::Stagger => {
-                    boss.attack_state = AttackState::Recovery(
-                        Timer::from_seconds(1.5, TimerMode::Once)
-                    );
-                    sound_events.write(SoundEvent(SoundEffect::PhaseShift));
-
-                    // Spawn "PHASE SHIFT" text centered on screen
-                    commands.spawn((
-                        Text::new("PHASE SHIFT"),
-                        TextFont { font_size: 14.0, ..default() },
-                        TextColor(Color::srgba(1.0, 0.2, 0.2, 1.0)),
-                        Node {
-                            position_type: PositionType::Absolute,
-                            left: Val::Percent(50.0),
-                            top: Val::Percent(40.0),
-                            ..default()
-                        },
-                        PhaseShiftText {
-                            timer: Timer::from_seconds(1.0, TimerMode::Once),
-                        },
-                        GameEntity,
-                    ));
-                },
-                TransitionStyle::RageBurst => {
-                    screen_shake.intensity = 1.5;
-                    screen_shake.duration = 0.5;
-                    screen_shake.timer = 0.5;
-                    sound_events.write(SoundEvent(SoundEffect::RageBurst));
-
-                    // Spawn a white flash sprite at boss position
-                    commands.spawn((
-                        Sprite {
-                            color: Color::srgba(8.0, 8.0, 8.0, 0.9),
-                            custom_size: Some(Vec2::new(20.0, 20.0)),
-                            ..default()
-                        },
-                        Transform::from_translation(boss_transform.translation),
-                        PhaseFlashEffect {
-                            timer: Timer::from_seconds(0.4, TimerMode::Once),
-                        },
-                        GameEntity,
-                    ));
-                },
+        match seq.step {
+            TransitionStep::DimScreen => {
+                // Spawn a dim overlay
+                commands.spawn((
+                    Sprite {
+                        color: Color::srgba(0.0, 0.0, 0.0, 0.5),
+                        custom_size: Some(Vec2::new(1400.0, 800.0)),
+                        ..default()
+                    },
+                    Transform::from_xyz(0.0, 0.0, 5.0),
+                    ScreenDimOverlay,
+                    GameEntity,
+                ));
+                seq.step = TransitionStep::MorphPulse;
+                seq.timer = Timer::from_seconds(0.4, TimerMode::Once);
             }
-            if boss.boss_type == BossType::ChromeBerserker {
-                boss.max_combo = match new_phase {
-                    BossPhase::Phase1 => 1,
-                    BossPhase::Phase2 => 3,
-                    BossPhase::Phase3 => 3,
-                    BossPhase::Phase4 => 3,
+            TransitionStep::MorphPulse => {
+                // Despawn dim overlay
+                for dim_entity in dim_query.iter() {
+                    commands.entity(dim_entity).despawn();
+                }
+                seq.step = TransitionStep::PhaseText;
+                seq.timer = Timer::from_seconds(0.3, TimerMode::Once);
+            }
+            TransitionStep::PhaseText => {
+                let phase_name = match seq.target_phase {
+                    BossPhase::Phase1 => "PHASE 1",
+                    BossPhase::Phase2 => "PHASE 2: AWAKENING",
+                    BossPhase::Phase3 => "PHASE 3: RAGE",
+                    BossPhase::Phase4 => "PHASE 4: DESPERATION",
                 };
+                commands.spawn((
+                    Text::new(phase_name),
+                    TextFont { font_size: 24.0, ..default() },
+                    TextColor(Color::srgba(1.0, 0.5, 0.0, 1.0)),
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Percent(50.0),
+                        top: Val::Percent(38.0),
+                        ..default()
+                    },
+                    PhaseNameText {
+                        timer: Timer::from_seconds(1.5, TimerMode::Once),
+                    },
+                    GameEntity,
+                ));
+                seq.step = TransitionStep::ShockwaveRing;
+                seq.timer = Timer::from_seconds(0.2, TimerMode::Once);
             }
+            TransitionStep::ShockwaveRing => {
+                // Spawn a shockwave ring (reuse PhaseFlashEffect)
+                commands.spawn((
+                    Sprite {
+                        color: Color::srgba(8.0, 8.0, 8.0, 0.9),
+                        custom_size: Some(Vec2::new(20.0, 20.0)),
+                        ..default()
+                    },
+                    Transform::from_translation(boss_transform.translation),
+                    PhaseFlashEffect {
+                        timer: Timer::from_seconds(0.4, TimerMode::Once),
+                    },
+                    GameEntity,
+                ));
+                sound_events.write(SoundEvent(SoundEffect::RageBurst));
+                seq.step = TransitionStep::ScreenShake;
+                seq.timer = Timer::from_seconds(0.3, TimerMode::Once);
+            }
+            TransitionStep::ScreenShake => {
+                let intensity = seq.shake_intensity;
+                screen_shake.intensity = intensity * 1.5;
+                screen_shake.duration = 0.5;
+                screen_shake.timer = 0.5;
+                sound_events.write(SoundEvent(SoundEffect::PhaseShift));
+                seq.step = TransitionStep::Done;
+                seq.timer = Timer::from_seconds(0.5, TimerMode::Once);
+            }
+            TransitionStep::Done => {
+                let target_phase = seq.target_phase;
+                boss.phase = target_phase;
+                boss.is_invulnerable = false;
+
+                // Phase4 desperation: speed up attacks and increase combo
+                if target_phase == BossPhase::Phase4 {
+                    let current_duration = boss.primary_timer.duration().as_secs_f32();
+                    let new_duration = current_duration * 0.6;
+                    boss.primary_timer = Timer::from_seconds(new_duration, TimerMode::Repeating);
+                    if boss.boss_type == BossType::ChromeBerserker {
+                        boss.max_combo = 4;
+                    }
+                } else if boss.boss_type == BossType::ChromeBerserker {
+                    boss.max_combo = match target_phase {
+                        BossPhase::Phase1 => 1,
+                        BossPhase::Phase2 => 3,
+                        BossPhase::Phase3 => 3,
+                        BossPhase::Phase4 => 4,
+                    };
+                }
+
+                commands.entity(entity).remove::<PhaseTransitionSequence>();
+            }
+        }
+    }
+}
+
+pub fn phase_name_text_system(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut PhaseNameText, &mut TextColor)>,
+) {
+    for (entity, mut text, mut color) in query.iter_mut() {
+        text.timer.tick(time.delta());
+        let alpha = 1.0 - text.timer.fraction();
+        color.0 = Color::srgba(1.0, 0.5, 0.0, alpha);
+        if text.timer.finished() {
+            commands.entity(entity).despawn();
         }
     }
 }
@@ -366,11 +448,31 @@ pub fn phase_flash_system(
 
 pub fn boss_visual_system(
     time: Res<Time>,
-    mut boss_query: Query<(&Boss, &mut Sprite)>,
+    mut boss_query: Query<(&Boss, &mut Sprite, &mut Transform, Option<&PhaseTransitionSequence>)>,
 ) {
     let t = time.elapsed_secs();
 
-    for (boss, mut sprite) in boss_query.iter_mut() {
+    for (boss, mut sprite, mut transform, transition) in boss_query.iter_mut() {
+        // MorphPulse: animate scale during transition
+        if let Some(seq) = transition {
+            if seq.step == TransitionStep::MorphPulse {
+                let progress = seq.timer.fraction();
+                // 1.0 → 1.2 → 0.8 → 1.0 over the timer
+                let scale = if progress < 0.33 {
+                    1.0 + (progress / 0.33) * 0.2
+                } else if progress < 0.66 {
+                    1.2 - ((progress - 0.33) / 0.33) * 0.4
+                } else {
+                    0.8 + ((progress - 0.66) / 0.34) * 0.2
+                };
+                transform.scale = Vec3::splat(scale);
+            } else {
+                transform.scale = Vec3::ONE;
+            }
+        } else {
+            transform.scale = Vec3::ONE;
+        }
+
         let (pulse_alpha, color_mult) = match boss.phase {
             BossPhase::Phase1 => (1.0_f32, 1.0_f32),
             BossPhase::Phase2 => {
@@ -382,8 +484,8 @@ pub fn boss_visual_system(
                 (pulse, 1.6)
             }
             BossPhase::Phase4 => {
-                let pulse = 0.6 + 0.4 * (t * std::f32::consts::TAU / 0.3).sin();
-                (pulse, 1.6)
+                let flash = (t * 4.0 * std::f32::consts::TAU).sin();
+                if flash > 0.0 { (1.0, 2.0) } else { (0.8, 1.0) }
             }
         };
 

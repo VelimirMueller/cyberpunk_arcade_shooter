@@ -114,6 +114,32 @@ pub struct PhaseTransitionEffect {
     pub style: TransitionStyle,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TransitionStep {
+    DimScreen,
+    MorphPulse,
+    PhaseText,
+    ShockwaveRing,
+    ScreenShake,
+    Done,
+}
+
+#[derive(Component)]
+pub struct PhaseTransitionSequence {
+    pub timer: Timer,
+    pub step: TransitionStep,
+    pub target_phase: BossPhase,
+    pub shake_intensity: f32,
+}
+
+#[derive(Component)]
+pub struct ScreenDimOverlay;
+
+#[derive(Component)]
+pub struct PhaseNameText {
+    pub timer: Timer,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

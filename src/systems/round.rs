@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::app::GameData;
-use crate::core::boss::components::{Boss, DashTrail, HazardZone, BossProjectile, ChargeTelegraph};
+use crate::core::boss::components::{Boss, DashTrail, HazardZone, BossProjectile, ChargeTelegraph, ScreenDimOverlay, PhaseNameText};
 use crate::core::boss::systems::spawn_boss;
 use crate::core::player::components::Player;
 use crate::data::game_state::GameState;
@@ -131,6 +131,8 @@ pub fn score_tally_system(
     telegraph_query: Query<Entity, With<ChargeTelegraph>>,
     enemy_particle_query: Query<Entity, Or<(With<EnemyParticle>, With<PowerUp>, With<LaserBeam>, With<PowerUpShockwave>)>>,
     round_clear_query: Query<Entity, With<RoundClearText>>,
+    screen_dim_query: Query<Entity, With<ScreenDimOverlay>>,
+    phase_name_query: Query<Entity, With<PhaseNameText>>,
     mut sound_events: EventWriter<SoundEvent>,
 ) {
     let Some(mut tally_timer) = tally_timer else {
@@ -182,6 +184,13 @@ pub fn score_tally_system(
             commands.entity(entity).despawn();
         }
         for entity in enemy_particle_query.iter() {
+            commands.entity(entity).despawn();
+        }
+        // Clean up transition effects
+        for entity in screen_dim_query.iter() {
+            commands.entity(entity).despawn();
+        }
+        for entity in phase_name_query.iter() {
             commands.entity(entity).despawn();
         }
 
