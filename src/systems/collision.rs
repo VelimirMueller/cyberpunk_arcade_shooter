@@ -197,3 +197,44 @@ pub(crate) fn collide(pos_a: Vec3, size_a: Vec2, pos_b: Vec3, size_b: Vec2) -> b
     a_min.x < b_max.x && a_max.x > b_min.x &&
         a_min.y < b_max.y && a_max.y > b_min.y
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_collide_overlapping() {
+        let pos_a = Vec3::new(0.0, 0.0, 0.0);
+        let size_a = Vec2::new(10.0, 10.0);
+        let pos_b = Vec3::new(5.0, 5.0, 0.0);
+        let size_b = Vec2::new(10.0, 10.0);
+        assert!(collide(pos_a, size_a, pos_b, size_b));
+    }
+
+    #[test]
+    fn test_collide_separated() {
+        let pos_a = Vec3::new(0.0, 0.0, 0.0);
+        let size_a = Vec2::new(10.0, 10.0);
+        let pos_b = Vec3::new(100.0, 100.0, 0.0);
+        let size_b = Vec2::new(10.0, 10.0);
+        assert!(!collide(pos_a, size_a, pos_b, size_b));
+    }
+
+    #[test]
+    fn test_collide_touching_edges() {
+        let pos_a = Vec3::new(0.0, 0.0, 0.0);
+        let size_a = Vec2::new(10.0, 10.0);
+        let pos_b = Vec3::new(10.0, 0.0, 0.0);
+        let size_b = Vec2::new(10.0, 10.0);
+        assert!(!collide(pos_a, size_a, pos_b, size_b));
+    }
+
+    #[test]
+    fn test_collide_one_contains_other() {
+        let pos_a = Vec3::new(0.0, 0.0, 0.0);
+        let size_a = Vec2::new(100.0, 100.0);
+        let pos_b = Vec3::new(0.0, 0.0, 0.0);
+        let size_b = Vec2::new(10.0, 10.0);
+        assert!(collide(pos_a, size_a, pos_b, size_b));
+    }
+}
