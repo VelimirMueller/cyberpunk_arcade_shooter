@@ -716,6 +716,21 @@ pub fn eliminated_text_system(
     }
 }
 
+pub fn desperation_ambient_shake(
+    boss_query: Query<&Boss>,
+    mut screen_shake: ResMut<ScreenShake>,
+) {
+    for boss in boss_query.iter() {
+        if boss.phase == BossPhase::Phase4 && boss.current_hp > 0 {
+            if screen_shake.intensity < 0.3 {
+                screen_shake.intensity = 0.3;
+                screen_shake.duration = 0.2;
+                screen_shake.timer = 0.2;
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
