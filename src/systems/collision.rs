@@ -27,7 +27,6 @@ pub fn detect_collisions(
     mut game_data: ResMut<GameData>,
     mut screen_shake: ResMut<crate::app::ScreenShake>,
     mut sound_events: EventWriter<SoundEvent>,
-    mut death_events: EventWriter<DeathEvent>,
 ) {
     for (player_entity, mut player, player_transform, player_sprite) in &mut player_query {
         let player_size = player_sprite.custom_size.unwrap_or(Vec2::ONE);
@@ -144,7 +143,7 @@ pub fn detect_collisions(
         }
 
         // PlayerParticle vs Boss — despawn particle on hit, cooldown per boss
-        for (boss_entity, mut boss, boss_transform, boss_sprite) in &mut boss_query {
+        for (_boss_entity, mut boss, boss_transform, boss_sprite) in &mut boss_query {
             let boss_size = boss_sprite.custom_size.unwrap_or(Vec2::ONE);
 
             for (particle_entity, player_particle_transform) in &player_particle_query {
@@ -170,16 +169,7 @@ pub fn detect_collisions(
                         // Despawn the particle on hit
                         commands.entity(particle_entity).despawn();
 
-                        if boss.current_hp == 0 {
-                            game_data.score += (100.0 * mult) as u32;
-                            game_data.enemies_killed += 1;
-                            sound_events.write(SoundEvent(SoundEffect::Explosion));
-                            death_events.write(DeathEvent {
-                                position: boss_transform.translation,
-                                color: boss_sprite.color,
-                                entity: boss_entity,
-                            });
-                        }
+                        // Boss death handled by boss_death_check_system
                     }
                 }
             }

@@ -6,7 +6,7 @@ use crate::core::world::barriers::systems::spawn_barriers;
 use crate::systems::collision::detect_collisions;
 use bevy::core_pipeline::{bloom::{Bloom}, tonemapping::{DebandDither, Tonemapping}};
 use crate::systems::combat::{particle_movement_system, particle_cleanup_system, player_shoot_system, player_particle_movement_system};
-use crate::core::boss::systems::{boss_phase_system, phase_transition_system, phase_name_text_system, boss_idle_movement, boss_attack_system, hazard_lifetime_system, boss_projectile_system, hazard_zone_system, phase_shift_text_system, phase_flash_system, boss_visual_system};
+use crate::core::boss::systems::{boss_phase_system, phase_transition_system, phase_name_text_system, boss_idle_movement, boss_attack_system, hazard_lifetime_system, boss_projectile_system, hazard_zone_system, phase_shift_text_system, phase_flash_system, boss_visual_system, boss_death_check_system, boss_death_system, death_explosion_system, eliminated_text_system};
 use crate::systems::game_over::restart_listener;
 use crate::ui::menus::{
     spawn_title_menu, despawn_title_menu,
@@ -111,9 +111,10 @@ pub(crate) fn main() {
         .add_systems(OnExit(GameState::RoundAnnounce), despawn_announcement_ui)
         .add_systems(Update, pause_toggle_system.run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, (player_movement, detect_collisions, particle_movement_system, particle_cleanup_system, boss_attack_system, player_shoot_system, player_particle_movement_system, screen_shake_system, damage_flash_system, update_game_data, boss_phase_system, boss_idle_movement, hazard_lifetime_system, boss_projectile_system, hazard_zone_system, update_boss_hud, update_player_hud, update_score_hud).run_if(in_state(GameState::RoundActive)))
+        .add_systems(Update, boss_death_check_system.after(detect_collisions).run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, handle_death_events.after(detect_collisions).run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, (animate_shatter, animate_shockwave).run_if(in_state(GameState::RoundActive)))
-        .add_systems(Update, (spawn_afterimages, animate_afterimages, spawn_ambient_particles, animate_ambient_particles, phase_shift_text_system, phase_flash_system, boss_visual_system, phase_transition_system, phase_name_text_system).run_if(in_state(GameState::RoundActive)))
+        .add_systems(Update, (spawn_afterimages, animate_afterimages, spawn_ambient_particles, animate_ambient_particles, phase_shift_text_system, phase_flash_system, boss_visual_system, phase_transition_system, phase_name_text_system, boss_death_system, death_explosion_system, eliminated_text_system).run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, (powerup_spawn_system, powerup_lifetime_system, powerup_pickup_system, laser_system, powerup_shockwave_system).run_if(in_state(GameState::RoundActive)))
         .add_systems(Update, (boss_defeated_check, score_tally_system).run_if(in_state(GameState::RoundActive)))
         .add_systems(OnExit(GameState::RoundActive), despawn_round_clear)

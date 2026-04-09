@@ -140,6 +140,37 @@ pub struct PhaseNameText {
     pub timer: Timer,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DeathStep {
+    Freeze,
+    Explosion1,
+    Explosion2,
+    Explosion3,
+    WhiteFlash,
+    Shatter,
+    Text,
+    Pause,
+}
+
+#[derive(Component)]
+pub struct BossDeathSequence {
+    pub step: DeathStep,
+    pub timer: Timer,
+    pub boss_position: Vec3,
+    pub boss_color: Color,
+    pub kill_score: u32,
+}
+
+#[derive(Component)]
+pub struct EliminatedText {
+    pub timer: Timer,
+}
+
+#[derive(Component)]
+pub struct DeathExplosion {
+    pub timer: Timer,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
