@@ -1,11 +1,11 @@
-use bevy::prelude::*;
-use crate::core::player::components::{Player, PlayerParticle};
+use crate::app::{GameData, trigger_damage_flash, trigger_screen_shake};
 use crate::core::boss::components::{Boss, BossProjectile, DashTrail, HazardZone};
-use crate::systems::combat::EnemyParticle;
-use crate::data::game_state::GameState;
-use crate::app::{GameData, trigger_screen_shake, trigger_damage_flash};
-use crate::systems::audio::{SoundEvent, SoundEffect};
 use crate::core::boss::systems::score_multiplier;
+use crate::core::player::components::{Player, PlayerParticle};
+use crate::data::game_state::GameState;
+use crate::systems::audio::{SoundEffect, SoundEvent};
+use crate::systems::combat::EnemyParticle;
+use bevy::prelude::*;
 
 #[derive(Event)]
 pub struct DeathEvent {
@@ -14,6 +14,7 @@ pub struct DeathEvent {
     pub entity: Entity,
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn detect_collisions(
     mut commands: Commands,
     mut player_query: Query<(Entity, &mut Player, &Transform, &Sprite)>,
@@ -33,20 +34,24 @@ pub fn detect_collisions(
         let player_pos = player_transform.translation;
 
         // Player vs Boss body collision
-        for (_entity, ref _boss, enemy_transform, enemy_sprite) in &boss_query {
-            if _boss.is_invulnerable { continue; }
+        for (_entity, _boss, enemy_transform, enemy_sprite) in &boss_query {
+            if _boss.is_invulnerable {
+                continue;
+            }
             let enemy_size = enemy_sprite.custom_size.unwrap_or(Vec2::ONE);
             let enemy_pos = enemy_transform.translation;
 
             if collide(player_pos, player_size, enemy_pos, enemy_size) {
-                if player.current > 0 {
-                    if player.last_collision_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.025) {
-                        player.current -= 1;
-                        player.last_collision_time = Some(std::time::Instant::now());
-                        trigger_screen_shake(&mut screen_shake);
-                        trigger_damage_flash(player_entity, commands.reborrow());
-                        sound_events.write(SoundEvent(SoundEffect::PlayerHit));
-                    }
+                if player.current > 0
+                    && player
+                        .last_collision_time
+                        .is_none_or(|t| t.elapsed().as_secs_f32() > 0.025)
+                {
+                    player.current -= 1;
+                    player.last_collision_time = Some(std::time::Instant::now());
+                    trigger_screen_shake(&mut screen_shake);
+                    trigger_damage_flash(player_entity, commands.reborrow());
+                    sound_events.write(SoundEvent(SoundEffect::PlayerHit));
                 }
 
                 if player.current == 0 {
@@ -61,13 +66,15 @@ pub fn detect_collisions(
             let particle_pos = particle_transform.translation;
 
             if collide(player_pos, player_size, particle_pos, particle_size) {
-                if player.current > 0 {
-                    if player.last_collision_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.075) {
-                        player.current -= 1;
-                        player.last_collision_time = Some(std::time::Instant::now());
-                        trigger_screen_shake(&mut screen_shake);
-                        trigger_damage_flash(player_entity, commands.reborrow());
-                    }
+                if player.current > 0
+                    && player
+                        .last_collision_time
+                        .is_none_or(|t| t.elapsed().as_secs_f32() > 0.075)
+                {
+                    player.current -= 1;
+                    player.last_collision_time = Some(std::time::Instant::now());
+                    trigger_screen_shake(&mut screen_shake);
+                    trigger_damage_flash(player_entity, commands.reborrow());
                 }
 
                 if player.current == 0 {
@@ -82,14 +89,16 @@ pub fn detect_collisions(
             let projectile_pos = projectile_transform.translation;
 
             if collide(player_pos, player_size, projectile_pos, projectile_size) {
-                if player.current > 0 {
-                    if player.last_collision_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.075) {
-                        player.current -= 1;
-                        player.last_collision_time = Some(std::time::Instant::now());
-                        trigger_screen_shake(&mut screen_shake);
-                        trigger_damage_flash(player_entity, commands.reborrow());
-                        sound_events.write(SoundEvent(SoundEffect::PlayerHit));
-                    }
+                if player.current > 0
+                    && player
+                        .last_collision_time
+                        .is_none_or(|t| t.elapsed().as_secs_f32() > 0.075)
+                {
+                    player.current -= 1;
+                    player.last_collision_time = Some(std::time::Instant::now());
+                    trigger_screen_shake(&mut screen_shake);
+                    trigger_damage_flash(player_entity, commands.reborrow());
+                    sound_events.write(SoundEvent(SoundEffect::PlayerHit));
                 }
 
                 if player.current == 0 {
@@ -104,14 +113,16 @@ pub fn detect_collisions(
             let trail_pos = trail_transform.translation;
 
             if collide(player_pos, player_size, trail_pos, trail_size) {
-                if player.current > 0 {
-                    if player.last_collision_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.075) {
-                        player.current -= 1;
-                        player.last_collision_time = Some(std::time::Instant::now());
-                        trigger_screen_shake(&mut screen_shake);
-                        trigger_damage_flash(player_entity, commands.reborrow());
-                        sound_events.write(SoundEvent(SoundEffect::PlayerHit));
-                    }
+                if player.current > 0
+                    && player
+                        .last_collision_time
+                        .is_none_or(|t| t.elapsed().as_secs_f32() > 0.075)
+                {
+                    player.current -= 1;
+                    player.last_collision_time = Some(std::time::Instant::now());
+                    trigger_screen_shake(&mut screen_shake);
+                    trigger_damage_flash(player_entity, commands.reborrow());
+                    sound_events.write(SoundEvent(SoundEffect::PlayerHit));
                 }
 
                 if player.current == 0 {
@@ -126,14 +137,16 @@ pub fn detect_collisions(
             let hazard_pos = hazard_transform.translation;
 
             if collide(player_pos, player_size, hazard_pos, hazard_size) {
-                if player.current > 0 {
-                    if player.last_collision_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.075) {
-                        player.current -= 1;
-                        player.last_collision_time = Some(std::time::Instant::now());
-                        trigger_screen_shake(&mut screen_shake);
-                        trigger_damage_flash(player_entity, commands.reborrow());
-                        sound_events.write(SoundEvent(SoundEffect::PlayerHit));
-                    }
+                if player.current > 0
+                    && player
+                        .last_collision_time
+                        .is_none_or(|t| t.elapsed().as_secs_f32() > 0.075)
+                {
+                    player.current -= 1;
+                    player.last_collision_time = Some(std::time::Instant::now());
+                    trigger_screen_shake(&mut screen_shake);
+                    trigger_damage_flash(player_entity, commands.reborrow());
+                    sound_events.write(SoundEvent(SoundEffect::PlayerHit));
                 }
 
                 if player.current == 0 {
@@ -156,7 +169,10 @@ pub fn detect_collisions(
                         continue;
                     }
                     // Cooldown: 75ms between hits
-                    if boss.last_hit_time.map_or(false, |t| t.elapsed().as_secs_f32() < 0.075) {
+                    if boss
+                        .last_hit_time
+                        .is_some_and(|t| t.elapsed().as_secs_f32() < 0.075)
+                    {
                         continue;
                     }
                     if boss.current_hp > 0 {
@@ -175,7 +191,6 @@ pub fn detect_collisions(
             }
         }
     }
-
 }
 
 pub(crate) fn collide(pos_a: Vec3, size_a: Vec2, pos_b: Vec3, size_b: Vec2) -> bool {
@@ -184,8 +199,7 @@ pub(crate) fn collide(pos_a: Vec3, size_a: Vec2, pos_b: Vec3, size_b: Vec2) -> b
     let b_min = pos_b.truncate() - size_b / 2.0;
     let b_max = pos_b.truncate() + size_b / 2.0;
 
-    a_min.x < b_max.x && a_max.x > b_min.x &&
-        a_min.y < b_max.y && a_max.y > b_min.y
+    a_min.x < b_max.x && a_max.x > b_min.x && a_min.y < b_max.y && a_max.y > b_min.y
 }
 
 #[cfg(test)]

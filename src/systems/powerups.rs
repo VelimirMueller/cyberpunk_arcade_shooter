@@ -1,12 +1,12 @@
-use bevy::prelude::*;
-use rand::Rng;
 use crate::app::{GameEntity, ScreenShake};
 use crate::core::boss::components::Boss;
+use crate::core::boss::components::{BossProjectile, ChargeTelegraph, DashTrail, HazardZone};
 use crate::core::player::components::Player;
-use crate::systems::audio::{SoundEvent, SoundEffect};
+use crate::systems::audio::{SoundEffect, SoundEvent};
 use crate::systems::collision::collide;
 use crate::systems::combat::EnemyParticle;
-use crate::core::boss::components::{BossProjectile, DashTrail, HazardZone, ChargeTelegraph};
+use bevy::prelude::*;
+use rand::Rng;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PowerUpKind {
@@ -23,7 +23,8 @@ pub struct PowerUp {
 pub const LASER_CHARGE_DURATION: f32 = 0.8;
 pub const LASER_ACTIVE_DURATION: f32 = 5.2;
 pub const LASER_FADE_DURATION: f32 = 0.8;
-pub const LASER_TOTAL_DURATION: f32 = LASER_CHARGE_DURATION + LASER_ACTIVE_DURATION + LASER_FADE_DURATION;
+pub const LASER_TOTAL_DURATION: f32 =
+    LASER_CHARGE_DURATION + LASER_ACTIVE_DURATION + LASER_FADE_DURATION;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LaserPhase {
@@ -61,6 +62,7 @@ pub struct LaserBeamShell {
 #[derive(Component)]
 pub struct LaserStreamParticle {
     pub lifetime: Timer,
+    #[allow(dead_code)]
     pub drift_offset: f32,
     pub side: f32,
 }
@@ -176,6 +178,7 @@ pub fn powerup_lifetime_system(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn powerup_pickup_system(
     mut commands: Commands,
     player_query: Query<(&Transform, &Sprite, Entity), With<Player>>,
@@ -329,15 +332,35 @@ pub fn powerup_shockwave_system(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::type_complexity)]
 pub fn laser_system(
     time: Res<Time>,
     mut commands: Commands,
     mut player_query: Query<(Entity, &Transform, Option<&mut LaserActive>), With<Player>>,
-    mut core_query: Query<(Entity, &mut Transform, &mut Sprite), (With<LaserBeamCore>, Without<Player>, Without<Boss>, Without<LaserBeamShell>)>,
-    mut shell_query: Query<(Entity, &mut Transform, &mut Sprite, &mut LaserBeamShell), (Without<Player>, Without<Boss>, Without<LaserBeamCore>)>,
+    mut core_query: Query<
+        (Entity, &mut Transform, &mut Sprite),
+        (
+            With<LaserBeamCore>,
+            Without<Player>,
+            Without<Boss>,
+            Without<LaserBeamShell>,
+        ),
+    >,
+    mut shell_query: Query<
+        (Entity, &mut Transform, &mut Sprite, &mut LaserBeamShell),
+        (Without<Player>, Without<Boss>, Without<LaserBeamCore>),
+    >,
     muzzle_query: Query<Entity, With<LaserMuzzle>>,
     impact_query: Query<Entity, With<LaserImpact>>,
-    mut boss_query: Query<(&mut Boss, &Transform, &Sprite), (Without<Player>, Without<LaserBeamCore>, Without<LaserBeamShell>)>,
+    mut boss_query: Query<
+        (&mut Boss, &Transform, &Sprite),
+        (
+            Without<Player>,
+            Without<LaserBeamCore>,
+            Without<LaserBeamShell>,
+        ),
+    >,
     mut screen_shake: ResMut<ScreenShake>,
     mut sound_events: EventWriter<SoundEvent>,
 ) {
@@ -447,7 +470,9 @@ pub fn laser_system(
 
             // Update muzzle position
             for entity in muzzle_query.iter() {
-                commands.entity(entity).insert(Transform::from_translation(player_pos.with_z(0.6)));
+                commands
+                    .entity(entity)
+                    .insert(Transform::from_translation(player_pos.with_z(0.6)));
             }
 
             // Periodically spawn stream particles on sound_timer ticks
@@ -481,8 +506,12 @@ pub fn laser_system(
             let right = player_rotation * Vec3::X;
             let beam_half_width = 16.0; // half of 32px shell
             let beam_half_length = 300.0;
-            let extent_x = (right.x.abs() * beam_half_width + forward_dir.x.abs() * beam_half_length).max(beam_half_width);
-            let extent_y = (right.y.abs() * beam_half_width + forward_dir.y.abs() * beam_half_length).max(beam_half_width);
+            let extent_x = (right.x.abs() * beam_half_width
+                + forward_dir.x.abs() * beam_half_length)
+                .max(beam_half_width);
+            let extent_y = (right.y.abs() * beam_half_width
+                + forward_dir.y.abs() * beam_half_length)
+                .max(beam_half_width);
             let beam_aabb_size = Vec2::new(extent_x * 2.0, extent_y * 2.0);
 
             for (mut boss, boss_transform, boss_sprite) in boss_query.iter_mut() {
@@ -490,28 +519,34 @@ pub fn laser_system(
                     continue;
                 }
                 let boss_size = boss_sprite.custom_size.unwrap_or(Vec2::ONE);
-                if collide(beam_center, beam_aabb_size, boss_transform.translation, boss_size) {
-                    if boss.last_laser_hit_time.map_or(true, |t| t.elapsed().as_secs_f32() > 0.075) {
-                        boss.current_hp = boss.current_hp.saturating_sub(1);
-                        boss.last_laser_hit_time = Some(std::time::Instant::now());
-                        sound_events.write(SoundEvent(SoundEffect::EnemyHit));
+                if collide(
+                    beam_center,
+                    beam_aabb_size,
+                    boss_transform.translation,
+                    boss_size,
+                ) && boss
+                    .last_laser_hit_time
+                    .is_none_or(|t| t.elapsed().as_secs_f32() > 0.075)
+                {
+                    boss.current_hp = boss.current_hp.saturating_sub(1);
+                    boss.last_laser_hit_time = Some(std::time::Instant::now());
+                    sound_events.write(SoundEvent(SoundEffect::EnemyHit));
 
-                        // Spawn/update impact at boss position
-                        // Despawn old impact and respawn fresh
-                        for entity in impact_query.iter() {
-                            commands.entity(entity).despawn();
-                        }
-                        commands.spawn((
-                            Sprite {
-                                color: Color::srgba(2.0, 8.0, 2.0, 0.9),
-                                custom_size: Some(Vec2::new(20.0, 20.0)),
-                                ..default()
-                            },
-                            Transform::from_translation(boss_transform.translation.with_z(0.6)),
-                            LaserImpact,
-                            GameEntity,
-                        ));
+                    // Spawn/update impact at boss position
+                    // Despawn old impact and respawn fresh
+                    for entity in impact_query.iter() {
+                        commands.entity(entity).despawn();
                     }
+                    commands.spawn((
+                        Sprite {
+                            color: Color::srgba(2.0, 8.0, 2.0, 0.9),
+                            custom_size: Some(Vec2::new(20.0, 20.0)),
+                            ..default()
+                        },
+                        Transform::from_translation(boss_transform.translation.with_z(0.6)),
+                        LaserImpact,
+                        GameEntity,
+                    ));
                 }
             }
         }
@@ -560,7 +595,12 @@ pub fn laser_system(
 pub fn laser_charge_particle_system(
     time: Res<Time>,
     mut commands: Commands,
-    mut query: Query<(Entity, &mut Transform, &mut Sprite, &mut LaserChargeParticle)>,
+    mut query: Query<(
+        Entity,
+        &mut Transform,
+        &mut Sprite,
+        &mut LaserChargeParticle,
+    )>,
     player_query: Query<&Transform, (With<Player>, Without<LaserChargeParticle>)>,
 ) {
     let Ok(player_transform) = player_query.single() else {
@@ -594,11 +634,15 @@ pub fn laser_charge_particle_system(
 }
 
 /// Position the charge orb at the player and manage its scale through the charge and early active phase.
+#[allow(clippy::type_complexity)]
 pub fn laser_charge_orb_system(
-    time: Res<Time>,
+    _time: Res<Time>,
     mut commands: Commands,
     mut orb_query: Query<(Entity, &mut Transform, &mut Sprite, &mut LaserChargeOrb)>,
-    player_query: Query<(&Transform, Option<&LaserActive>), (With<Player>, Without<LaserChargeOrb>)>,
+    player_query: Query<
+        (&Transform, Option<&LaserActive>),
+        (With<Player>, Without<LaserChargeOrb>),
+    >,
 ) {
     let Ok((player_transform, laser_active)) = player_query.single() else {
         return;
@@ -632,7 +676,8 @@ pub fn laser_charge_orb_system(
                         } else {
                             orb.scale = scale;
                             transform.scale = Vec3::splat(scale);
-                            sprite.color = Color::srgba(0.4, 1.0, 0.4, 0.9 * (1.0 - shrink_progress));
+                            sprite.color =
+                                Color::srgba(0.4, 1.0, 0.4, 0.9 * (1.0 - shrink_progress));
                         }
                     }
                     LaserPhase::FadingOut => {
@@ -648,7 +693,12 @@ pub fn laser_charge_orb_system(
 pub fn laser_stream_particle_system(
     time: Res<Time>,
     mut commands: Commands,
-    mut query: Query<(Entity, &mut Transform, &mut Sprite, &mut LaserStreamParticle)>,
+    mut query: Query<(
+        Entity,
+        &mut Transform,
+        &mut Sprite,
+        &mut LaserStreamParticle,
+    )>,
     player_query: Query<&Transform, (With<Player>, Without<LaserStreamParticle>)>,
 ) {
     let Ok(player_transform) = player_query.single() else {
@@ -689,7 +739,7 @@ pub fn laser_impact_system(
         return;
     };
 
-    if laser_active.map_or(true, |l| l.phase != LaserPhase::Active) {
+    if laser_active.is_none_or(|l| l.phase != LaserPhase::Active) {
         // Laser not active — despawn any impact entities
         for (entity, _, _) in impact_query.iter() {
             commands.entity(entity).despawn();

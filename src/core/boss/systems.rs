@@ -1,11 +1,11 @@
-use bevy::prelude::*;
 use crate::app::GameEntity;
-use crate::core::boss::components::*;
-use crate::core::boss::attacks;
-use crate::core::player::components::Player;
 use crate::app::{GameData, ScreenShake};
-use crate::systems::audio::{SoundEvent, SoundEffect};
+use crate::core::boss::attacks;
+use crate::core::boss::components::*;
+use crate::core::player::components::Player;
+use crate::systems::audio::{SoundEffect, SoundEvent};
 use crate::systems::collision::DeathEvent;
+use bevy::prelude::*;
 
 pub fn score_multiplier(round: u32) -> f32 {
     match round {
@@ -41,11 +41,36 @@ pub fn boss_type_for_round(round: u32) -> BossType {
 
 fn boss_config(boss_type: BossType) -> (u32, TransitionStyle, Color, f32) {
     match boss_type {
-        BossType::GridPhantom => (150, TransitionStyle::Stagger, Color::srgb(0.0, 8.0, 8.0), 1.0),
-        BossType::NeonSentinel => (200, TransitionStyle::Stagger, Color::srgb(8.0, 0.0, 8.0), 1.2),
-        BossType::ChromeBerserker => (250, TransitionStyle::RageBurst, Color::srgb(8.0, 4.0, 0.0), 1.4),
-        BossType::VoidWeaver => (300, TransitionStyle::Stagger, Color::srgb(4.0, 0.0, 8.0), 1.1),
-        BossType::ApexProtocol => (400, TransitionStyle::RageBurst, Color::srgb(8.0, 8.0, 8.0), 1.6),
+        BossType::GridPhantom => (
+            150,
+            TransitionStyle::Stagger,
+            Color::srgb(0.0, 8.0, 8.0),
+            1.0,
+        ),
+        BossType::NeonSentinel => (
+            200,
+            TransitionStyle::Stagger,
+            Color::srgb(8.0, 0.0, 8.0),
+            1.2,
+        ),
+        BossType::ChromeBerserker => (
+            250,
+            TransitionStyle::RageBurst,
+            Color::srgb(8.0, 4.0, 0.0),
+            1.4,
+        ),
+        BossType::VoidWeaver => (
+            300,
+            TransitionStyle::Stagger,
+            Color::srgb(4.0, 0.0, 8.0),
+            1.1,
+        ),
+        BossType::ApexProtocol => (
+            400,
+            TransitionStyle::RageBurst,
+            Color::srgb(8.0, 8.0, 8.0),
+            1.6,
+        ),
     }
 }
 
@@ -69,7 +94,11 @@ pub fn spawn_boss(commands: &mut Commands, round: u32) {
     let primary_timer = Timer::from_seconds(scaled_duration, TimerMode::Repeating);
 
     commands.spawn((
-        Sprite { color, custom_size: Some(Vec2::new(size, size)), ..default() },
+        Sprite {
+            color,
+            custom_size: Some(Vec2::new(size, size)),
+            ..default()
+        },
         Transform::from_xyz(0.0, 150.0, 0.0),
         Boss {
             boss_type,
@@ -98,7 +127,9 @@ pub fn boss_phase_system(
     mut boss_query: Query<(Entity, &mut Boss, &Transform), Without<PhaseTransitionSequence>>,
 ) {
     for (entity, mut boss, _transform) in boss_query.iter_mut() {
-        if boss.current_hp == 0 { continue; }
+        if boss.current_hp == 0 {
+            continue;
+        }
         let new_phase = boss.phase_for_hp_pct();
         if new_phase != boss.phase {
             let shake_intensity = match new_phase {
@@ -166,7 +197,10 @@ pub fn phase_transition_system(
                 };
                 commands.spawn((
                     Text::new(phase_name),
-                    TextFont { font_size: 24.0, ..default() },
+                    TextFont {
+                        font_size: 24.0,
+                        ..default()
+                    },
                     TextColor(Color::srgba(1.0, 0.5, 0.0, 1.0)),
                     Node {
                         position_type: PositionType::Absolute,
@@ -252,17 +286,16 @@ pub fn phase_name_text_system(
     }
 }
 
-pub fn boss_idle_movement(
-    time: Res<Time>,
-    mut boss_query: Query<(&Boss, &mut Transform)>,
-) {
+pub fn boss_idle_movement(time: Res<Time>, mut boss_query: Query<(&Boss, &mut Transform)>) {
     for (boss, mut transform) in boss_query.iter_mut() {
         // Sentinel and Weaver handle their own positioning
         if boss.boss_type == BossType::NeonSentinel || boss.boss_type == BossType::VoidWeaver {
             // Sentinel stays stationary (position set in attack fn)
             // Weaver teleports (position set in attack fn)
             // Still allow charging/dashing movement if somehow in that state
-            if let AttackState::Dashing { target, speed } | AttackState::Charging { target, speed } = &boss.attack_state {
+            if let AttackState::Dashing { target, speed }
+            | AttackState::Charging { target, speed } = &boss.attack_state
+            {
                 let direction = (*target - transform.translation.truncate()).normalize_or_zero();
                 transform.translation += (direction * *speed * time.delta_secs()).extend(0.0);
             }
@@ -292,25 +325,66 @@ pub fn boss_attack_system(
     hazard_query: Query<&HazardZone>,
     mut sound_events: EventWriter<SoundEvent>,
 ) {
-    let Ok(player_transform) = player_query.single() else { return };
+    let Ok(player_transform) = player_query.single() else {
+        return;
+    };
     let hazard_count = hazard_query.iter().count();
     for (mut boss, mut boss_transform) in boss_query.iter_mut() {
         let delta = time.delta_secs();
         match boss.boss_type {
             BossType::GridPhantom => {
-                attacks::phantom_attack(&mut boss, &boss_transform, player_transform, &mut commands, delta, &mut sound_events);
+                attacks::phantom_attack(
+                    &mut boss,
+                    &boss_transform,
+                    player_transform,
+                    &mut commands,
+                    delta,
+                    &mut sound_events,
+                );
             }
             BossType::NeonSentinel => {
-                attacks::sentinel_attack(&mut boss, &mut boss_transform, player_transform, &mut commands, delta, &mut sound_events);
+                attacks::sentinel_attack(
+                    &mut boss,
+                    &mut boss_transform,
+                    player_transform,
+                    &mut commands,
+                    delta,
+                    &mut sound_events,
+                );
             }
             BossType::ChromeBerserker => {
-                attacks::berserker_attack(&mut boss, &boss_transform, player_transform, &mut commands, delta, &mut screen_shake, &mut sound_events);
+                attacks::berserker_attack(
+                    &mut boss,
+                    &boss_transform,
+                    player_transform,
+                    &mut commands,
+                    delta,
+                    &mut screen_shake,
+                    &mut sound_events,
+                );
             }
             BossType::VoidWeaver => {
-                attacks::weaver_attack(&mut boss, &mut boss_transform, player_transform, &mut commands, delta, hazard_count, &mut sound_events);
+                attacks::weaver_attack(
+                    &mut boss,
+                    &mut boss_transform,
+                    player_transform,
+                    &mut commands,
+                    delta,
+                    hazard_count,
+                    &mut sound_events,
+                );
             }
             BossType::ApexProtocol => {
-                attacks::apex_attack(&mut boss, &mut boss_transform, player_transform, &mut commands, delta, &mut screen_shake, hazard_count, &mut sound_events);
+                attacks::apex_attack(
+                    &mut boss,
+                    &mut boss_transform,
+                    player_transform,
+                    &mut commands,
+                    delta,
+                    &mut screen_shake,
+                    hazard_count,
+                    &mut sound_events,
+                );
             }
         }
     }
@@ -403,7 +477,12 @@ pub fn hazard_zone_system(
         let alpha = 1.0 - hazard.lifetime.fraction();
         let base_alpha = if hazard.radius >= 60.0 { 0.8 } else { 0.3 };
         let current = sprite.color.to_srgba();
-        sprite.color = Color::srgba(current.red, current.green, current.blue, base_alpha * (1.0 - alpha));
+        sprite.color = Color::srgba(
+            current.red,
+            current.green,
+            current.blue,
+            base_alpha * (1.0 - alpha),
+        );
 
         // Despawn when lifetime done
         if hazard.lifetime.finished() {
@@ -449,7 +528,12 @@ pub fn phase_flash_system(
 
 pub fn boss_visual_system(
     time: Res<Time>,
-    mut boss_query: Query<(&Boss, &mut Sprite, &mut Transform, Option<&PhaseTransitionSequence>)>,
+    mut boss_query: Query<(
+        &Boss,
+        &mut Sprite,
+        &mut Transform,
+        Option<&PhaseTransitionSequence>,
+    )>,
 ) {
     let t = time.elapsed_secs();
 
@@ -565,7 +649,9 @@ pub fn boss_death_system(
                         ..default()
                     },
                     Transform::from_translation(pos),
-                    DeathExplosion { timer: Timer::from_seconds(0.3, TimerMode::Once) },
+                    DeathExplosion {
+                        timer: Timer::from_seconds(0.3, TimerMode::Once),
+                    },
                     GameEntity,
                 ));
                 sound_events.write(SoundEvent(SoundEffect::Explosion));
@@ -589,7 +675,9 @@ pub fn boss_death_system(
                         ..default()
                     },
                     Transform::from_translation(pos),
-                    DeathExplosion { timer: Timer::from_seconds(0.3, TimerMode::Once) },
+                    DeathExplosion {
+                        timer: Timer::from_seconds(0.3, TimerMode::Once),
+                    },
                     GameEntity,
                 ));
                 sound_events.write(SoundEvent(SoundEffect::Explosion));
@@ -613,7 +701,9 @@ pub fn boss_death_system(
                         ..default()
                     },
                     Transform::from_translation(pos),
-                    DeathExplosion { timer: Timer::from_seconds(0.3, TimerMode::Once) },
+                    DeathExplosion {
+                        timer: Timer::from_seconds(0.3, TimerMode::Once),
+                    },
                     GameEntity,
                 ));
                 sound_events.write(SoundEvent(SoundEffect::Explosion));
@@ -657,7 +747,10 @@ pub fn boss_death_system(
             DeathStep::Text => {
                 commands.spawn((
                     Text::new("ELIMINATED"),
-                    TextFont { font_size: 32.0, ..default() },
+                    TextFont {
+                        font_size: 32.0,
+                        ..default()
+                    },
                     TextColor(Color::srgb(0.0, 8.0, 8.0)),
                     Node {
                         position_type: PositionType::Absolute,
@@ -665,7 +758,9 @@ pub fn boss_death_system(
                         top: Val::Percent(30.0),
                         ..default()
                     },
-                    EliminatedText { timer: Timer::from_seconds(1.5, TimerMode::Once) },
+                    EliminatedText {
+                        timer: Timer::from_seconds(1.5, TimerMode::Once),
+                    },
                     GameEntity,
                 ));
                 death_seq.step = DeathStep::Pause;
@@ -716,17 +811,12 @@ pub fn eliminated_text_system(
     }
 }
 
-pub fn desperation_ambient_shake(
-    boss_query: Query<&Boss>,
-    mut screen_shake: ResMut<ScreenShake>,
-) {
+pub fn desperation_ambient_shake(boss_query: Query<&Boss>, mut screen_shake: ResMut<ScreenShake>) {
     for boss in boss_query.iter() {
-        if boss.phase == BossPhase::Phase4 && boss.current_hp > 0 {
-            if screen_shake.intensity < 0.3 {
-                screen_shake.intensity = 0.3;
-                screen_shake.duration = 0.2;
-                screen_shake.timer = 0.2;
-            }
+        if boss.phase == BossPhase::Phase4 && boss.current_hp > 0 && screen_shake.intensity < 0.3 {
+            screen_shake.intensity = 0.3;
+            screen_shake.duration = 0.2;
+            screen_shake.timer = 0.2;
         }
     }
 }

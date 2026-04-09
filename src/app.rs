@@ -1,35 +1,52 @@
-use bevy::prelude::*;
-use bevy::core_pipeline::core_2d::Camera2d;
-use crate::core::player::systems::*;
-use crate::core::player::components::{Player, PlayerRotationTracker};
-use crate::core::world::barriers::systems::spawn_barriers;
-use crate::systems::collision::detect_collisions;
-use bevy::core_pipeline::{bloom::{Bloom}, tonemapping::{DebandDither, Tonemapping}};
-use crate::systems::combat::{particle_movement_system, particle_cleanup_system, player_shoot_system, player_particle_movement_system};
-use crate::core::boss::systems::{boss_phase_system, phase_transition_system, phase_name_text_system, boss_idle_movement, boss_attack_system, hazard_lifetime_system, boss_projectile_system, hazard_zone_system, phase_shift_text_system, phase_flash_system, boss_visual_system, boss_death_check_system, boss_death_system, death_explosion_system, eliminated_text_system, desperation_ambient_shake};
-use crate::systems::game_over::restart_listener;
-use crate::ui::menus::{
-    spawn_title_menu, despawn_title_menu,
-    spawn_pause_menu, despawn_pause_menu,
-    spawn_game_over_screen, despawn_game_over_screen,
-    spawn_game_won_screen, despawn_game_won_screen,
-    PauseEntity,
+use crate::core::boss::systems::{
+    boss_attack_system, boss_death_check_system, boss_death_system, boss_idle_movement,
+    boss_phase_system, boss_projectile_system, boss_visual_system, death_explosion_system,
+    desperation_ambient_shake, eliminated_text_system, hazard_lifetime_system, hazard_zone_system,
+    phase_flash_system, phase_name_text_system, phase_shift_text_system, phase_transition_system,
 };
+use crate::core::player::components::{Player, PlayerRotationTracker};
+use crate::core::player::systems::*;
+use crate::core::world::barriers::systems::spawn_barriers;
 use crate::data::game_state::GameState;
-use crate::systems::round::{start_round_announce, round_announce_system, boss_defeated_check, score_tally_system, despawn_round_clear};
-use crate::ui::announcement::{spawn_announcement_ui, update_announcement_ui, despawn_announcement_ui};
-use crate::ui::hud::{spawn_hud, update_boss_hud, update_player_hud, update_score_hud};
 use crate::systems::audio::SoundEvent;
-use crate::systems::powerups::{setup_powerup_timer, powerup_spawn_system, powerup_lifetime_system, powerup_pickup_system, laser_system, powerup_shockwave_system, laser_charge_particle_system, laser_charge_orb_system, laser_stream_particle_system, laser_impact_system};
-use crate::systems::background::{spawn_background_stars, animate_stars, draw_background_grid};
+use crate::systems::background::{animate_stars, draw_background_grid, spawn_background_stars};
 use crate::systems::collision::DeathEvent;
+use crate::systems::collision::detect_collisions;
+use crate::systems::combat::{
+    particle_cleanup_system, particle_movement_system, player_particle_movement_system,
+    player_shoot_system,
+};
+use crate::systems::game_over::restart_listener;
 use crate::systems::particles::{
-    setup_shockwave_assets, handle_death_events,
-    animate_shatter, animate_shockwave,
-    AfterimageTimer, spawn_afterimages, animate_afterimages,
-    AmbientParticleTimer, spawn_ambient_particles, animate_ambient_particles,
+    AfterimageTimer, AmbientParticleTimer, animate_afterimages, animate_ambient_particles,
+    animate_shatter, animate_shockwave, handle_death_events, setup_shockwave_assets,
+    spawn_afterimages, spawn_ambient_particles,
 };
 use crate::systems::post_processing::{CrtPostProcessPlugin, CrtSettings};
+use crate::systems::powerups::{
+    laser_charge_orb_system, laser_charge_particle_system, laser_impact_system,
+    laser_stream_particle_system, laser_system, powerup_lifetime_system, powerup_pickup_system,
+    powerup_shockwave_system, powerup_spawn_system, setup_powerup_timer,
+};
+use crate::systems::round::{
+    boss_defeated_check, despawn_round_clear, round_announce_system, score_tally_system,
+    start_round_announce,
+};
+use crate::ui::announcement::{
+    despawn_announcement_ui, spawn_announcement_ui, update_announcement_ui,
+};
+use crate::ui::hud::{spawn_hud, update_boss_hud, update_player_hud, update_score_hud};
+use crate::ui::menus::{
+    PauseEntity, despawn_game_over_screen, despawn_game_won_screen, despawn_pause_menu,
+    despawn_title_menu, spawn_game_over_screen, spawn_game_won_screen, spawn_pause_menu,
+    spawn_title_menu,
+};
+use bevy::core_pipeline::core_2d::Camera2d;
+use bevy::core_pipeline::{
+    bloom::Bloom,
+    tonemapping::{DebandDither, Tonemapping},
+};
+use bevy::prelude::*;
 
 #[derive(Resource)]
 pub struct GameData {
@@ -88,9 +105,7 @@ pub struct EnergyText;
 #[derive(Component)]
 pub struct GameEntity;
 
-
-
-pub(crate) fn main() {
+pub fn main() {
     App::new()
         .add_plugins((DefaultPlugins, CrtPostProcessPlugin))
         .init_state::<GameState>()
@@ -100,36 +115,139 @@ pub(crate) fn main() {
         .init_resource::<AfterimageTimer>()
         .init_resource::<AmbientParticleTimer>()
         .add_event::<DeathEvent>()
-        .add_systems(Startup, (setup, spawn_background_stars, setup_shockwave_assets))
+        .add_systems(
+            Startup,
+            (setup, spawn_background_stars, setup_shockwave_assets),
+        )
         .add_systems(Startup, crate::systems::audio::setup_synth_audio)
-        .add_systems(Update, (animate_stars, draw_background_grid, crate::systems::audio::play_sounds))
+        .add_systems(
+            Update,
+            (
+                animate_stars,
+                draw_background_grid,
+                crate::systems::audio::play_sounds,
+            ),
+        )
         .add_systems(OnEnter(GameState::Menu), spawn_title_menu)
         .add_systems(OnExit(GameState::Menu), despawn_title_menu)
         .add_systems(Update, menu_input_system.run_if(in_state(GameState::Menu)))
-        .add_systems(OnEnter(GameState::RoundAnnounce), (start_round_announce, spawn_announcement_ui, spawn_hud, setup_powerup_timer))
-        .add_systems(Update, (round_announce_system, update_announcement_ui).run_if(in_state(GameState::RoundAnnounce)))
+        .add_systems(
+            OnEnter(GameState::RoundAnnounce),
+            (
+                start_round_announce,
+                spawn_announcement_ui,
+                spawn_hud,
+                setup_powerup_timer,
+            ),
+        )
+        .add_systems(
+            Update,
+            (round_announce_system, update_announcement_ui)
+                .run_if(in_state(GameState::RoundAnnounce)),
+        )
         .add_systems(OnExit(GameState::RoundAnnounce), despawn_announcement_ui)
-        .add_systems(Update, pause_toggle_system.run_if(in_state(GameState::RoundActive)))
-        .add_systems(Update, (player_movement, detect_collisions, particle_movement_system, particle_cleanup_system, boss_attack_system, player_shoot_system, player_particle_movement_system, screen_shake_system, damage_flash_system, update_game_data, boss_phase_system, boss_idle_movement, hazard_lifetime_system, boss_projectile_system, hazard_zone_system, update_boss_hud, update_player_hud, update_score_hud).run_if(in_state(GameState::RoundActive)))
-        .add_systems(Update, boss_death_check_system.after(detect_collisions).run_if(in_state(GameState::RoundActive)))
-        .add_systems(Update, handle_death_events.after(detect_collisions).run_if(in_state(GameState::RoundActive)))
-        .add_systems(Update, (animate_shatter, animate_shockwave).run_if(in_state(GameState::RoundActive)))
-        .add_systems(Update, (spawn_afterimages, animate_afterimages, spawn_ambient_particles, animate_ambient_particles, phase_shift_text_system, phase_flash_system, boss_visual_system, phase_transition_system, phase_name_text_system, boss_death_system, death_explosion_system, eliminated_text_system, desperation_ambient_shake).run_if(in_state(GameState::RoundActive)))
-        .add_systems(Update, (powerup_spawn_system, powerup_lifetime_system, powerup_pickup_system, laser_system, powerup_shockwave_system, laser_charge_particle_system, laser_charge_orb_system, laser_stream_particle_system, laser_impact_system).run_if(in_state(GameState::RoundActive)))
-        .add_systems(Update, (boss_defeated_check, score_tally_system).run_if(in_state(GameState::RoundActive)))
+        .add_systems(
+            Update,
+            pause_toggle_system.run_if(in_state(GameState::RoundActive)),
+        )
+        .add_systems(
+            Update,
+            (
+                player_movement,
+                detect_collisions,
+                particle_movement_system,
+                particle_cleanup_system,
+                boss_attack_system,
+                player_shoot_system,
+                player_particle_movement_system,
+                screen_shake_system,
+                damage_flash_system,
+                update_game_data,
+                boss_phase_system,
+                boss_idle_movement,
+                hazard_lifetime_system,
+                boss_projectile_system,
+                hazard_zone_system,
+                update_boss_hud,
+                update_player_hud,
+                update_score_hud,
+            )
+                .run_if(in_state(GameState::RoundActive)),
+        )
+        .add_systems(
+            Update,
+            boss_death_check_system
+                .after(detect_collisions)
+                .run_if(in_state(GameState::RoundActive)),
+        )
+        .add_systems(
+            Update,
+            handle_death_events
+                .after(detect_collisions)
+                .run_if(in_state(GameState::RoundActive)),
+        )
+        .add_systems(
+            Update,
+            (animate_shatter, animate_shockwave).run_if(in_state(GameState::RoundActive)),
+        )
+        .add_systems(
+            Update,
+            (
+                spawn_afterimages,
+                animate_afterimages,
+                spawn_ambient_particles,
+                animate_ambient_particles,
+                phase_shift_text_system,
+                phase_flash_system,
+                boss_visual_system,
+                phase_transition_system,
+                phase_name_text_system,
+                boss_death_system,
+                death_explosion_system,
+                eliminated_text_system,
+                desperation_ambient_shake,
+            )
+                .run_if(in_state(GameState::RoundActive)),
+        )
+        .add_systems(
+            Update,
+            (
+                powerup_spawn_system,
+                powerup_lifetime_system,
+                powerup_pickup_system,
+                laser_system,
+                powerup_shockwave_system,
+                laser_charge_particle_system,
+                laser_charge_orb_system,
+                laser_stream_particle_system,
+                laser_impact_system,
+            )
+                .run_if(in_state(GameState::RoundActive)),
+        )
+        .add_systems(
+            Update,
+            (boss_defeated_check, score_tally_system).run_if(in_state(GameState::RoundActive)),
+        )
         .add_systems(OnExit(GameState::RoundActive), despawn_round_clear)
         .add_systems(OnEnter(GameState::GameOver), spawn_game_over_screen)
         .add_systems(OnExit(GameState::GameOver), despawn_game_over_screen)
-        .add_systems(Update, restart_listener.run_if(in_state(GameState::GameOver)))
+        .add_systems(
+            Update,
+            restart_listener.run_if(in_state(GameState::GameOver)),
+        )
         .add_systems(OnEnter(GameState::Won), spawn_game_won_screen)
         .add_systems(OnExit(GameState::Won), despawn_game_won_screen)
         .add_systems(Update, restart_listener.run_if(in_state(GameState::Won)))
         .add_systems(OnEnter(GameState::Paused), spawn_pause_menu)
         .add_systems(OnExit(GameState::Paused), despawn_pause_menu)
-        .add_systems(Update, pause_menu_system.run_if(in_state(GameState::Paused)))
+        .add_systems(
+            Update,
+            pause_menu_system.run_if(in_state(GameState::Paused)),
+        )
         .run();
 }
 
+#[allow(dead_code)]
 fn setup(mut commands: Commands, _next_state: ResMut<NextState<GameState>>) {
     commands.spawn((
         Camera2d,
@@ -147,7 +265,6 @@ fn setup(mut commands: Commands, _next_state: ResMut<NextState<GameState>>) {
     ));
 }
 
-
 // ============ NEW GAME LOOP SYSTEMS ============
 
 #[derive(Component)]
@@ -163,7 +280,26 @@ pub fn menu_input_system(
 ) {
     if keyboard_input.just_pressed(KeyCode::Enter) {
         // Start game — spawn player & barriers
-        commands.spawn((Player { current: 100, max: 100, last_collision_time: None, energy: 100, last_shot_time: None }, PlayerRotationTracker { last_angle_index: 0 }, GameEntity, Transform::from_xyz(-250.0, 0.0, 0.0), GlobalTransform::default(), Sprite { color: Color::srgb(1.2, 2.8, 1.2), custom_size: Some(Vec2::new(50.0, 50.0)), ..default() }));
+        commands.spawn((
+            Player {
+                current: 100,
+                max: 100,
+                last_collision_time: None,
+                energy: 100,
+                last_shot_time: None,
+            },
+            PlayerRotationTracker {
+                last_angle_index: 0,
+            },
+            GameEntity,
+            Transform::from_xyz(-250.0, 0.0, 0.0),
+            GlobalTransform::default(),
+            Sprite {
+                color: Color::srgb(1.2, 2.8, 1.2),
+                custom_size: Some(Vec2::new(50.0, 50.0)),
+                ..default()
+            },
+        ));
         spawn_barriers(commands.reborrow());
 
         next_state.set(GameState::RoundAnnounce);
@@ -219,7 +355,10 @@ pub fn pause_menu_system(
             .with_children(|parent| {
                 parent.spawn((
                     Text::new("PAUSED"),
-                    TextFont { font_size: 36.0, ..default() },
+                    TextFont {
+                        font_size: 36.0,
+                        ..default()
+                    },
                     TextColor(Color::srgb(0.0, 1.0, 1.0)),
                 ));
                 parent
@@ -236,21 +375,38 @@ pub fn pause_menu_system(
                     ))
                     .with_children(|container| {
                         let gray = Color::srgb(0.33, 0.33, 0.33);
-                        container.spawn((Text::new("Press ESC to Resume"), TextFont { font_size: 14.0, ..default() }, TextColor(gray)));
-                        container.spawn((Text::new("Press Q to Return to Menu"), TextFont { font_size: 14.0, ..default() }, TextColor(gray)));
-                        container.spawn((Text::new(format!("Press M to Toggle Sound ({})", sound_status)), TextFont { font_size: 14.0, ..default() }, TextColor(gray)));
+                        container.spawn((
+                            Text::new("Press ESC to Resume"),
+                            TextFont {
+                                font_size: 14.0,
+                                ..default()
+                            },
+                            TextColor(gray),
+                        ));
+                        container.spawn((
+                            Text::new("Press Q to Return to Menu"),
+                            TextFont {
+                                font_size: 14.0,
+                                ..default()
+                            },
+                            TextColor(gray),
+                        ));
+                        container.spawn((
+                            Text::new(format!("Press M to Toggle Sound ({})", sound_status)),
+                            TextFont {
+                                font_size: 14.0,
+                                ..default()
+                            },
+                            TextColor(gray),
+                        ));
                     });
             });
     }
 }
 
-pub fn update_game_data(
-    time: Res<Time>,
-    mut game_data: ResMut<GameData>,
-) {
+pub fn update_game_data(time: Res<Time>, mut game_data: ResMut<GameData>) {
     game_data.total_play_time += time.delta().as_secs_f32();
 }
-
 
 pub fn screen_shake_system(
     time: Res<Time>,
@@ -263,7 +419,8 @@ pub fn screen_shake_system(
         if screen_shake.timer <= 0.0 {
             screen_shake.intensity = 0.0;
         } else {
-            let shake_amount = screen_shake.intensity * (screen_shake.timer / screen_shake.duration);
+            let shake_amount =
+                screen_shake.intensity * (screen_shake.timer / screen_shake.duration);
             if let Ok(mut transform) = camera_query.single_mut() {
                 transform.translation.x = (rand::random::<f32>() - 0.5) * shake_amount * 10.0;
                 transform.translation.y = (rand::random::<f32>() - 0.5) * shake_amount * 10.0;
