@@ -1,10 +1,10 @@
-pub(crate) mod combat;
-mod inventory;
-pub mod collision;
-pub mod game_over;
 pub mod audio;
 pub mod background;
+pub mod collision;
+pub(crate) mod combat;
+pub mod game_over;
+mod inventory;
 pub mod particles;
 pub mod post_processing;
-pub mod round;
 pub mod powerups;
+pub mod round;

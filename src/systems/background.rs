@@ -1,6 +1,6 @@
+use crate::env::{CEILING_Y, GROUND_Y, LEFT_BOUND, RIGHT_BOUND};
 use bevy::prelude::*;
 use rand::Rng;
-use crate::env::{LEFT_BOUND, RIGHT_BOUND, GROUND_Y, CEILING_Y};
 
 #[derive(Component)]
 pub struct BackgroundStar {
@@ -37,10 +37,7 @@ pub fn spawn_background_stars(mut commands: Commands) {
     }
 }
 
-pub fn animate_stars(
-    time: Res<Time>,
-    mut query: Query<(&BackgroundStar, &mut Transform)>,
-) {
+pub fn animate_stars(time: Res<Time>, mut query: Query<(&BackgroundStar, &mut Transform)>) {
     let dt = time.delta().as_secs_f32();
     for (star, mut transform) in &mut query {
         transform.translation.x += star.velocity.x * dt;
@@ -67,11 +64,7 @@ pub fn draw_background_grid(mut gizmos: Gizmos) {
     // Vertical lines
     let mut x = LEFT_BOUND;
     while x <= RIGHT_BOUND {
-        gizmos.line_2d(
-            Vec2::new(x, GROUND_Y),
-            Vec2::new(x, CEILING_Y),
-            grid_color,
-        );
+        gizmos.line_2d(Vec2::new(x, GROUND_Y), Vec2::new(x, CEILING_Y), grid_color);
         x += cell_size;
     }
 

@@ -1,8 +1,8 @@
-use bevy::prelude::*;
 use crate::app::GameData;
 use crate::core::boss::components::BossType;
 use crate::core::boss::systems::boss_type_for_round;
 use crate::systems::round::RoundTimer;
+use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct AnnouncementEntity;
@@ -32,69 +32,80 @@ fn boss_flavor(boss_type: BossType) -> &'static str {
     }
 }
 
-pub fn spawn_announcement_ui(
-    mut commands: Commands,
-    game_data: Res<GameData>,
-) {
+pub fn spawn_announcement_ui(mut commands: Commands, game_data: Res<GameData>) {
     let boss_type = boss_type_for_round(game_data.round);
 
     // Full-screen dark overlay
-    commands.spawn((
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(0.0),
-            top: Val::Px(0.0),
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
-            flex_direction: FlexDirection::Column,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            ..default()
-        },
-        BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.7)),
-        GlobalZIndex(10),
-        AnnouncementEntity,
-    )).with_children(|parent| {
-        // "// INCOMING THREAT //" - magenta, 14px, visible at 0.0s
-        parent.spawn((
-            Text::new("// INCOMING THREAT //"),
-            TextFont { font_size: 14.0, ..default() },
-            TextColor(Color::srgba(8.0, 0.0, 8.0, 0.0)),
-            TextLayout::new_with_justify(JustifyText::Center),
-            AnnouncementText { visible_after: 0.0 },
+    commands
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(0.0),
+                top: Val::Px(0.0),
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                flex_direction: FlexDirection::Column,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.7)),
+            GlobalZIndex(10),
             AnnouncementEntity,
-        ));
+        ))
+        .with_children(|parent| {
+            // "// INCOMING THREAT //" - magenta, 14px, visible at 0.0s
+            parent.spawn((
+                Text::new("// INCOMING THREAT //"),
+                TextFont {
+                    font_size: 14.0,
+                    ..default()
+                },
+                TextColor(Color::srgba(8.0, 0.0, 8.0, 0.0)),
+                TextLayout::new_with_justify(JustifyText::Center),
+                AnnouncementText { visible_after: 0.0 },
+                AnnouncementEntity,
+            ));
 
-        // "ROUND N" - cyan, 48px, visible at 0.4s
-        parent.spawn((
-            Text::new(format!("ROUND {}", game_data.round)),
-            TextFont { font_size: 48.0, ..default() },
-            TextColor(Color::srgba(0.0, 8.0, 8.0, 0.0)),
-            TextLayout::new_with_justify(JustifyText::Center),
-            AnnouncementText { visible_after: 0.4 },
-            AnnouncementEntity,
-        ));
+            // "ROUND N" - cyan, 48px, visible at 0.4s
+            parent.spawn((
+                Text::new(format!("ROUND {}", game_data.round)),
+                TextFont {
+                    font_size: 48.0,
+                    ..default()
+                },
+                TextColor(Color::srgba(0.0, 8.0, 8.0, 0.0)),
+                TextLayout::new_with_justify(JustifyText::Center),
+                AnnouncementText { visible_after: 0.4 },
+                AnnouncementEntity,
+            ));
 
-        // Boss name - magenta, 24px, visible at 0.8s
-        parent.spawn((
-            Text::new(boss_name(boss_type)),
-            TextFont { font_size: 24.0, ..default() },
-            TextColor(Color::srgba(8.0, 0.0, 8.0, 0.0)),
-            TextLayout::new_with_justify(JustifyText::Center),
-            AnnouncementText { visible_after: 0.8 },
-            AnnouncementEntity,
-        ));
+            // Boss name - magenta, 24px, visible at 0.8s
+            parent.spawn((
+                Text::new(boss_name(boss_type)),
+                TextFont {
+                    font_size: 24.0,
+                    ..default()
+                },
+                TextColor(Color::srgba(8.0, 0.0, 8.0, 0.0)),
+                TextLayout::new_with_justify(JustifyText::Center),
+                AnnouncementText { visible_after: 0.8 },
+                AnnouncementEntity,
+            ));
 
-        // Flavor text - gray, 11px, visible at 1.2s
-        parent.spawn((
-            Text::new(boss_flavor(boss_type)),
-            TextFont { font_size: 11.0, ..default() },
-            TextColor(Color::srgba(0.5, 0.5, 0.5, 0.0)),
-            TextLayout::new_with_justify(JustifyText::Center),
-            AnnouncementText { visible_after: 1.2 },
-            AnnouncementEntity,
-        ));
-    });
+            // Flavor text - gray, 11px, visible at 1.2s
+            parent.spawn((
+                Text::new(boss_flavor(boss_type)),
+                TextFont {
+                    font_size: 11.0,
+                    ..default()
+                },
+                TextColor(Color::srgba(0.5, 0.5, 0.5, 0.0)),
+                TextLayout::new_with_justify(JustifyText::Center),
+                AnnouncementText { visible_after: 1.2 },
+                AnnouncementEntity,
+            ));
+        });
 }
 
 pub fn update_announcement_ui(

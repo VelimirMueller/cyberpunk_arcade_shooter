@@ -13,6 +13,35 @@
   <component name="ChangeListManager">
     <list default="true" id="c7bf7c83-c036-4727-b202-11f9ea52bec0" name="Changes" comment="overhaul and add juice">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/boss/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/boss/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/camera.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/camera.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/player/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/player/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/player/plugin.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/player/plugin.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/time.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/time.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/world/barriers/components.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/world/barriers/components.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/world/barriers/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/world/barriers/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/world/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/world/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/env.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/env.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/systems/background.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/background.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/systems/inventory.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/inventory.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/systems/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/systems/particles.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/particles.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/systems/post_processing.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/post_processing.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/announcement.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/announcement.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/inventory_ui.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/inventory_ui.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/market_ui.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/market_ui.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/menus.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/menus.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/config.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/config.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/loader.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/loader.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/boss_integration.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/boss_integration.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/helpers/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/helpers/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/laser_integration.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/laser_integration.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,8 +84,8 @@
               <option name="branches">
                 <list>
                   <RecentBranch>
-                    <option name="branchName" value="add-boss-stages" />
-                    <option name="lastUsedInstant" value="1773931562" />
+                    <option name="branchName" value="boss-phases-laser-tests" />
+                    <option name="lastUsedInstant" value="1775763161" />
                   </RecentBranch>
                   <RecentBranch>
                     <option name="branchName" value="main" />
@@ -101,7 +130,7 @@
     &quot;RunOnceActivity.rust.reset.selective.auto.import&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;add-boss-stages&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;boss-phases-laser-tests&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/home/velimir/dev/cyberpunk_the_incedible_bloom_cube&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,

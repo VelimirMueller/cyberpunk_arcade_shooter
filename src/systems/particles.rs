@@ -1,7 +1,7 @@
+use crate::app::GameEntity;
+use crate::systems::collision::DeathEvent;
 use bevy::prelude::*;
 use rand::Rng;
-use crate::systems::collision::DeathEvent;
-use crate::app::GameEntity;
 
 // ---- Shatter Particles ----
 
@@ -27,10 +27,7 @@ pub struct ShockwaveAssets {
     pub mesh: Handle<Mesh>,
 }
 
-pub fn setup_shockwave_assets(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-) {
+pub fn setup_shockwave_assets(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>) {
     let mesh = meshes.add(Circle::new(1.0));
     commands.insert_resource(ShockwaveAssets { mesh });
 }

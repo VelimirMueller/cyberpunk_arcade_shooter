@@ -1,0 +1,120 @@
+<h2>Laser Beam Visual Style</h2>
+<p class="subtitle">How should the laser look and feel? Pick the direction that excites you most.</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #0a0a1a; padding: 30px; display: flex; align-items: center; justify-content: center; min-height: 200px; position: relative; overflow: hidden;">
+      <!-- Style A: Clean Energy Beam -->
+      <div style="position: relative; width: 100%; height: 180px;">
+        <!-- Charge phase indicator -->
+        <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); text-align: center;">
+          <div style="width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle, #00ffff, #0066ff 60%, transparent 70%); box-shadow: 0 0 20px #00ffff, 0 0 40px #0066ff; margin: 0 auto 5px; animation: pulse-a 0.8s ease-in-out infinite;"></div>
+          <span style="color: #00ffff; font-size: 10px; opacity: 0.7;">CHARGING</span>
+        </div>
+        <!-- The beam -->
+        <div style="position: absolute; bottom: 45px; left: 50%; transform: translateX(-50%); width: 6px; height: 120px; background: linear-gradient(to top, #00ffff, #ffffff 30%, #00ffff 70%, transparent); box-shadow: 0 0 15px #00ffff, 0 0 30px #0088ff; border-radius: 3px;"></div>
+        <!-- Outer glow -->
+        <div style="position: absolute; bottom: 45px; left: 50%; transform: translateX(-50%); width: 20px; height: 120px; background: linear-gradient(to top, rgba(0,255,255,0.3), rgba(0,136,255,0.1) 70%, transparent); border-radius: 10px;"></div>
+        <!-- Impact point -->
+        <div style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.8), rgba(0,255,255,0.4) 40%, transparent 70%); box-shadow: 0 0 30px #00ffff;"></div>
+      </div>
+      <style>
+        @keyframes pulse-a { 0%,100% { transform: translateX(-50%) scale(1); opacity: 0.8; } 50% { transform: translateX(-50%) scale(1.3); opacity: 1; } }
+      </style>
+    </div>
+    <div class="card-body">
+      <h3>A. Clean Energy Beam</h3>
+      <p>Tight, focused beam with soft outer glow. Charge-up shows as a growing orb at the barrel. Elegant and readable. Think Mega Man charged shot meets tron laser.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Clear visual feedback</li><li>Doesn't clutter the screen</li><li>Easier to aim</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Less "spectacular"</li><li>Simpler particle work</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #0a0a1a; padding: 30px; display: flex; align-items: center; justify-content: center; min-height: 200px; position: relative; overflow: hidden;">
+      <!-- Style B: Particle Storm Beam -->
+      <div style="position: relative; width: 100%; height: 180px;">
+        <!-- Swirling charge particles -->
+        <div style="position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px;">
+          <div style="position: absolute; width: 4px; height: 4px; background: #ff00ff; border-radius: 50%; box-shadow: 0 0 8px #ff00ff; top: 5px; left: 10px; animation: orbit-b1 0.6s linear infinite;"></div>
+          <div style="position: absolute; width: 3px; height: 3px; background: #ff66ff; border-radius: 50%; box-shadow: 0 0 6px #ff66ff; top: 20px; left: 35px; animation: orbit-b2 0.8s linear infinite;"></div>
+          <div style="position: absolute; width: 5px; height: 5px; background: #cc00ff; border-radius: 50%; box-shadow: 0 0 10px #cc00ff; top: 35px; left: 20px; animation: orbit-b3 0.5s linear infinite;"></div>
+          <div style="width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle, #ffffff, #ff00ff 60%, transparent 80%); box-shadow: 0 0 25px #ff00ff, 0 0 50px #cc00ff; position: absolute; top: 15px; left: 15px;"></div>
+        </div>
+        <!-- Main beam with particle trail -->
+        <div style="position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); width: 12px; height: 110px; background: linear-gradient(to top, #ff00ff, #ff66ff 20%, #ffffff 50%, #ff66ff 80%, transparent); box-shadow: 0 0 20px #ff00ff, 0 0 40px rgba(255,0,255,0.5), 0 0 60px rgba(204,0,255,0.3); border-radius: 6px;"></div>
+        <!-- Side particles -->
+        <div style="position: absolute; bottom: 70px; left: calc(50% - 20px); width: 3px; height: 3px; background: #ff88ff; border-radius: 50%; box-shadow: 0 0 6px #ff00ff; animation: drift-b 1s ease-out infinite;"></div>
+        <div style="position: absolute; bottom: 90px; left: calc(50% + 15px); width: 2px; height: 2px; background: #ffaaff; border-radius: 50%; box-shadow: 0 0 4px #ff00ff; animation: drift-b 1.2s ease-out infinite 0.3s;"></div>
+        <div style="position: absolute; bottom: 110px; left: calc(50% - 12px); width: 4px; height: 4px; background: #ff44ff; border-radius: 50%; box-shadow: 0 0 8px #ff00ff; animation: drift-b 0.9s ease-out infinite 0.6s;"></div>
+        <!-- Impact burst -->
+        <div style="position: absolute; top: 5px; left: 50%; transform: translateX(-50%); width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,0,255,0.5) 30%, rgba(204,0,255,0.2) 60%, transparent 80%); box-shadow: 0 0 40px #ff00ff, 0 0 80px rgba(255,0,255,0.4);"></div>
+      </div>
+      <style>
+        @keyframes orbit-b1 { 0% { transform: rotate(0deg) translateX(18px); } 100% { transform: rotate(360deg) translateX(18px); } }
+        @keyframes orbit-b2 { 0% { transform: rotate(120deg) translateX(15px); } 100% { transform: rotate(480deg) translateX(15px); } }
+        @keyframes orbit-b3 { 0% { transform: rotate(240deg) translateX(20px); } 100% { transform: rotate(600deg) translateX(20px); } }
+        @keyframes drift-b { 0% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; transform: translateX(-15px); } }
+      </style>
+    </div>
+    <div class="card-body">
+      <h3>B. Particle Storm Beam</h3>
+      <p>Wide beam with orbiting charge particles that spiral inward during charge-up, then explode outward as the beam fires. Particles stream along the beam edges. Maximum spectacle.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Visually spectacular</li><li>Great charge-up anticipation</li><li>Feels powerful</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>More entities to manage</li><li>Could obscure gameplay</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #0a0a1a; padding: 30px; display: flex; align-items: center; justify-content: center; min-height: 200px; position: relative; overflow: hidden;">
+      <!-- Style C: Cyberpunk Dual-layer -->
+      <div style="position: relative; width: 100%; height: 180px;">
+        <!-- Charge ring -->
+        <div style="position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; border: 2px solid #00ff88; border-radius: 50%; box-shadow: 0 0 15px #00ff88, inset 0 0 15px rgba(0,255,136,0.3); animation: ring-c 1s ease-in-out infinite;">
+          <div style="position: absolute; inset: 5px; border: 1px solid #00ffcc; border-radius: 50%; box-shadow: 0 0 8px #00ffcc;"></div>
+        </div>
+        <!-- Inner core beam -->
+        <div style="position: absolute; bottom: 42px; left: 50%; transform: translateX(-50%); width: 4px; height: 115px; background: linear-gradient(to top, #ffffff, #00ffcc 30%, #00ff88 70%, transparent); box-shadow: 0 0 8px #00ffcc;"></div>
+        <!-- Outer shell beam -->
+        <div style="position: absolute; bottom: 42px; left: 50%; transform: translateX(-50%); width: 24px; height: 115px; background: linear-gradient(to top, rgba(0,255,136,0.4), rgba(0,255,204,0.2) 50%, transparent); border: 1px solid rgba(0,255,136,0.3); border-radius: 12px; box-shadow: 0 0 20px rgba(0,255,136,0.3);"></div>
+        <!-- Electric arcs -->
+        <svg style="position: absolute; bottom: 42px; left: calc(50% - 25px); width: 50px; height: 115px; opacity: 0.6;" viewBox="0 0 50 115">
+          <path d="M25 115 L20 95 L30 80 L18 60 L28 40 L22 20 L25 0" stroke="#00ffcc" stroke-width="1" fill="none" opacity="0.8"/>
+          <path d="M25 115 L32 90 L22 75 L35 55 L20 35 L30 15 L25 0" stroke="#00ff88" stroke-width="1" fill="none" opacity="0.5"/>
+        </svg>
+        <!-- Impact cross -->
+        <div style="position: absolute; top: 8px; left: 50%; transform: translateX(-50%);">
+          <div style="width: 50px; height: 2px; background: linear-gradient(90deg, transparent, #00ffcc, transparent); box-shadow: 0 0 10px #00ffcc;"></div>
+          <div style="width: 2px; height: 50px; background: linear-gradient(180deg, transparent, #00ffcc, transparent); box-shadow: 0 0 10px #00ffcc; position: absolute; top: -24px; left: 24px;"></div>
+        </div>
+      </div>
+      <style>
+        @keyframes ring-c { 0%,100% { transform: translateX(-50%) scale(1) rotate(0deg); } 50% { transform: translateX(-50%) scale(1.15) rotate(180deg); } }
+      </style>
+    </div>
+    <div class="card-body">
+      <h3>C. Cyberpunk Dual-Layer</h3>
+      <p>Thin core beam inside a translucent outer shell with electric arcs crackling between them. Charge-up shows as concentric rings collapsing. Fits the cyberpunk aesthetic perfectly.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Matches game's cyberpunk theme</li><li>Visually distinct layers</li><li>Electric arcs add energy</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>More complex rendering</li><li>Needs careful tuning</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px;">
+  <h3>Charge-Up Sequence (all styles)</h3>
+  <p>Regardless of beam style, the charge-up follows this timeline:</p>
+  <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; line-height: 1.8;">
+    <div><span style="color: #888;">0.0s</span> <span style="color: #00ffcc;">PICKUP</span> &mdash; particles begin converging on player from all directions</div>
+    <div><span style="color: #888;">0.0-0.8s</span> <span style="color: #ffcc00;">CHARGE</span> &mdash; energy orb grows at barrel, particles orbit faster, screen vibrates subtly</div>
+    <div><span style="color: #888;">0.8s</span> <span style="color: #ff4444;">FLASH</span> &mdash; brief white flash, screen shake, beam fires instantly to full length</div>
+    <div><span style="color: #888;">0.8-6.8s</span> <span style="color: #00ff88;">ACTIVE</span> &mdash; beam sustained, particles stream along edges, HDR bloom pulses</div>
+    <div><span style="color: #888;">6.0-6.8s</span> <span style="color: #ff8800;">FADE</span> &mdash; beam flickers, narrows, particles disperse, then gone</div>
+  </div>
+</div>
