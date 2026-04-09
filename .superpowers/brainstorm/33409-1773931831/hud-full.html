@@ -1,0 +1,122 @@
+<h2>Full HUD Layout — Cinematic Frame</h2>
+<p class="subtitle">Complete mockup of in-game HUD during a boss fight</p>
+
+<div class="mockup">
+  <div class="mockup-header">In-Game HUD — Round 3: CHROME BERSERKER (Phase 2)</div>
+  <div class="mockup-body" style="background:#030306;padding:0;position:relative;height:420px;font-family:'Courier New',monospace;overflow:hidden;">
+
+    <!-- CRT scanline overlay -->
+    <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,255,0.012) 2px,rgba(0,255,255,0.012) 4px);pointer-events:none;z-index:10;"></div>
+
+    <!-- === TOP CENTER: Boss Info === -->
+    <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);text-align:center;width:60%;z-index:5;">
+      <!-- Boss name -->
+      <div style="font-size:10px;color:#ff003c;letter-spacing:5px;text-transform:uppercase;margin-bottom:6px;text-shadow:0 0 8px rgba(255,0,60,0.5);">CHROME BERSERKER</div>
+      <!-- Boss HP bar -->
+      <div style="position:relative;height:12px;background:#0a0808;border:1px solid #2a1111;margin:0 auto;width:100%;">
+        <!-- Phase markers -->
+        <div style="position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;background:#ff003c;opacity:0.4;z-index:2;"></div>
+        <div style="position:absolute;left:20%;top:-3px;bottom:-3px;width:2px;background:#ff003c;opacity:0.4;z-index:2;"></div>
+        <!-- HP fill (38% - in Phase 2) -->
+        <div style="position:absolute;right:0;top:0;bottom:0;width:38%;background:linear-gradient(90deg,#ff003c,#ff2244);box-shadow:0 0 12px rgba(255,0,60,0.6),inset 0 1px 0 rgba(255,255,255,0.15);"></div>
+        <!-- Damage flash sliver -->
+        <div style="position:absolute;right:38%;top:0;bottom:0;width:4%;background:rgba(255,100,100,0.3);"></div>
+      </div>
+      <!-- Phase pips -->
+      <div style="display:flex;gap:6px;justify-content:center;margin-top:8px;">
+        <div style="display:flex;align-items:center;gap:4px;">
+          <div style="width:8px;height:8px;background:#2a1111;border:1px solid #3a1111;"></div>
+          <span style="font-size:8px;color:#3a1111;">I</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <div style="width:8px;height:8px;background:#ff003c;border:1px solid #ff003c;box-shadow:0 0 6px #ff003c;"></div>
+          <span style="font-size:8px;color:#ff003c;">II</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <div style="width:8px;height:8px;background:#ff003c;border:1px solid #ff003c;box-shadow:0 0 6px #ff003c;"></div>
+          <span style="font-size:8px;color:#ff003c;">III</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- === GAME AREA (center) === -->
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">
+      <!-- Simulated boss -->
+      <div style="width:40px;height:40px;background:rgba(255,0,60,0.15);border:2px solid rgba(255,0,60,0.4);transform:rotate(45deg);margin:0 auto 40px;box-shadow:0 0 20px rgba(255,0,60,0.2);"></div>
+      <!-- Simulated player -->
+      <div style="width:20px;height:20px;background:rgba(0,255,136,0.2);border:2px solid rgba(0,255,136,0.5);transform:rotate(45deg);margin:0 auto;box-shadow:0 0 12px rgba(0,255,136,0.2);"></div>
+    </div>
+
+    <!-- === BOTTOM LEFT: Player Stats === -->
+    <div style="position:absolute;bottom:16px;left:20px;z-index:5;">
+      <!-- Player label -->
+      <div style="font-size:8px;color:#00ffcc;letter-spacing:3px;margin-bottom:6px;opacity:0.7;">OPERATOR</div>
+      <!-- HP bar -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+        <div style="width:10px;height:10px;border:1px solid #00ff88;background:rgba(0,255,136,0.2);box-shadow:0 0 4px rgba(0,255,136,0.3);"></div>
+        <div style="width:140px;height:8px;background:#0a0a0a;border:1px solid #113322;position:relative;">
+          <div style="width:72%;height:100%;background:linear-gradient(90deg,#00cc66,#00ff88);box-shadow:0 0 10px rgba(0,255,136,0.4),inset 0 1px 0 rgba(255,255,255,0.1);"></div>
+        </div>
+        <span style="font-size:11px;color:#00ff88;font-weight:bold;min-width:24px;text-shadow:0 0 6px rgba(0,255,136,0.5);">72</span>
+      </div>
+      <!-- Energy bar -->
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:10px;height:10px;border:1px solid #8800ff;background:rgba(136,0,255,0.15);box-shadow:0 0 4px rgba(136,0,255,0.2);"></div>
+        <div style="width:140px;height:5px;background:#0a0a0a;border:1px solid #1a0033;">
+          <div style="width:85%;height:100%;background:linear-gradient(90deg,#6600cc,#aa44ff);box-shadow:0 0 6px rgba(136,0,255,0.4);"></div>
+        </div>
+        <span style="font-size:10px;color:#aa44ff;min-width:24px;">85</span>
+      </div>
+    </div>
+
+    <!-- === BOTTOM CENTER: Round indicator === -->
+    <div style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);z-index:5;text-align:center;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div style="width:16px;height:2px;background:linear-gradient(90deg,transparent,#222);"></div>
+        <div style="display:flex;gap:4px;">
+          <div style="width:6px;height:6px;background:#1a1a1a;border:1px solid #222;"></div>
+          <div style="width:6px;height:6px;background:#1a1a1a;border:1px solid #222;"></div>
+          <div style="width:6px;height:6px;background:#00ffcc;border:1px solid #00ffcc;box-shadow:0 0 4px #00ffcc;"></div>
+          <div style="width:6px;height:6px;background:#00ffcc;border:1px solid #00ffcc;box-shadow:0 0 4px #00ffcc;"></div>
+          <div style="width:6px;height:6px;background:#00ffcc;border:1px solid #00ffcc;box-shadow:0 0 4px #00ffcc;"></div>
+        </div>
+        <div style="width:16px;height:2px;background:linear-gradient(90deg,#222,transparent);"></div>
+      </div>
+      <div style="font-size:8px;color:#333;letter-spacing:3px;margin-top:4px;">ROUND 3 / 5</div>
+    </div>
+
+    <!-- === BOTTOM RIGHT: Score === -->
+    <div style="position:absolute;bottom:16px;right:20px;z-index:5;text-align:right;">
+      <div style="font-size:8px;color:#555;letter-spacing:2px;margin-bottom:4px;">SCORE</div>
+      <div style="font-size:16px;color:#00ffcc;font-weight:bold;text-shadow:0 0 8px rgba(0,255,204,0.4);letter-spacing:2px;">12,450</div>
+    </div>
+
+    <!-- === PHASE TRANSITION FLASH (subtle, showing it just happened) === -->
+    <div style="position:absolute;top:70px;left:50%;transform:translateX(-50%);z-index:6;text-align:center;opacity:0.4;">
+      <div style="font-size:10px;color:#ff003c;letter-spacing:6px;text-shadow:0 0 10px #ff003c;">PHASE SHIFT</div>
+    </div>
+
+  </div>
+</div>
+
+<div style="margin-top:20px;">
+  <h3>HUD Elements Breakdown</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:12px;">
+      <div style="color:#ff003c;font-size:11px;letter-spacing:2px;margin-bottom:6px;">TOP CENTER</div>
+      <p style="color:#999;margin:0;">Boss name, HP bar with phase threshold markers, phase pips showing completed/current phases. HP depletes right-to-left with damage flash slivers.</p>
+    </div>
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:12px;">
+      <div style="color:#00ff88;font-size:11px;letter-spacing:2px;margin-bottom:6px;">BOTTOM LEFT</div>
+      <p style="color:#999;margin:0;">Player HP (thicker bar, green) and Energy (thinner bar, purple). Icon squares with matching glow. Numeric value beside each bar.</p>
+    </div>
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:12px;">
+      <div style="color:#00ffcc;font-size:11px;letter-spacing:2px;margin-bottom:6px;">BOTTOM CENTER</div>
+      <p style="color:#999;margin:0;">Round progress pips (filled = remaining, hollow = completed). Subtle divider lines. Small "ROUND X / 5" text.</p>
+    </div>
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:12px;">
+      <div style="color:#00ffcc;font-size:11px;letter-spacing:2px;margin-bottom:6px;">BOTTOM RIGHT</div>
+      <p style="color:#999;margin:0;">Score with neon glow. Updates with pop animation on hit/kill.</p>
+    </div>
+  </div>
+</div>
