@@ -1,9 +1,9 @@
 mod helpers;
 
 use bevy::prelude::*;
+use cyberpunk_rpg::app::{GameData, ScreenShake};
 use cyberpunk_rpg::core::boss::components::*;
 use cyberpunk_rpg::core::boss::systems::boss_phase_system;
-use cyberpunk_rpg::app::{ScreenShake, GameData};
 use cyberpunk_rpg::systems::audio::SoundEvent;
 use cyberpunk_rpg::systems::collision::DeathEvent;
 use helpers::*;
@@ -23,7 +23,10 @@ fn test_boss_takes_damage() {
     let mut app = test_app();
     let boss_entity = spawn_test_boss(&mut app, BossType::GridPhantom, 100);
     app.update();
-    app.world_mut().get_mut::<Boss>(boss_entity).unwrap().current_hp = 90;
+    app.world_mut()
+        .get_mut::<Boss>(boss_entity)
+        .unwrap()
+        .current_hp = 90;
     assert_eq!(app.world().get::<Boss>(boss_entity).unwrap().current_hp, 90);
 }
 
@@ -33,10 +36,20 @@ fn test_boss_phase_transition_at_60_percent() {
     app.add_systems(Update, boss_phase_system);
     let boss_entity = spawn_test_boss(&mut app, BossType::GridPhantom, 100);
     app.update();
-    app.world_mut().get_mut::<Boss>(boss_entity).unwrap().current_hp = 60;
+    app.world_mut()
+        .get_mut::<Boss>(boss_entity)
+        .unwrap()
+        .current_hp = 60;
     app.update();
-    assert!(app.world().get::<PhaseTransitionSequence>(boss_entity).is_some());
-    let transition = app.world().get::<PhaseTransitionSequence>(boss_entity).unwrap();
+    assert!(
+        app.world()
+            .get::<PhaseTransitionSequence>(boss_entity)
+            .is_some()
+    );
+    let transition = app
+        .world()
+        .get::<PhaseTransitionSequence>(boss_entity)
+        .unwrap();
     assert_eq!(transition.target_phase, BossPhase::Phase2);
 }
 
@@ -46,9 +59,15 @@ fn test_boss_phase_transition_at_30_percent() {
     app.add_systems(Update, boss_phase_system);
     let boss_entity = spawn_test_boss(&mut app, BossType::GridPhantom, 100);
     app.update();
-    app.world_mut().get_mut::<Boss>(boss_entity).unwrap().current_hp = 30;
+    app.world_mut()
+        .get_mut::<Boss>(boss_entity)
+        .unwrap()
+        .current_hp = 30;
     app.update();
-    let transition = app.world().get::<PhaseTransitionSequence>(boss_entity).unwrap();
+    let transition = app
+        .world()
+        .get::<PhaseTransitionSequence>(boss_entity)
+        .unwrap();
     assert_eq!(transition.target_phase, BossPhase::Phase3);
 }
 
@@ -58,9 +77,15 @@ fn test_boss_enters_desperation_at_10_percent() {
     app.add_systems(Update, boss_phase_system);
     let boss_entity = spawn_test_boss(&mut app, BossType::GridPhantom, 100);
     app.update();
-    app.world_mut().get_mut::<Boss>(boss_entity).unwrap().current_hp = 10;
+    app.world_mut()
+        .get_mut::<Boss>(boss_entity)
+        .unwrap()
+        .current_hp = 10;
     app.update();
-    let transition = app.world().get::<PhaseTransitionSequence>(boss_entity).unwrap();
+    let transition = app
+        .world()
+        .get::<PhaseTransitionSequence>(boss_entity)
+        .unwrap();
     assert_eq!(transition.target_phase, BossPhase::Phase4);
 }
 
@@ -70,7 +95,10 @@ fn test_boss_invulnerable_during_transition() {
     app.add_systems(Update, boss_phase_system);
     let boss_entity = spawn_test_boss(&mut app, BossType::GridPhantom, 100);
     app.update();
-    app.world_mut().get_mut::<Boss>(boss_entity).unwrap().current_hp = 60;
+    app.world_mut()
+        .get_mut::<Boss>(boss_entity)
+        .unwrap()
+        .current_hp = 60;
     app.update();
     let boss = app.world().get::<Boss>(boss_entity).unwrap();
     assert!(boss.is_invulnerable);
