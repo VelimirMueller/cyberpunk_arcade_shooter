@@ -1,5 +1,5 @@
-pub(crate) mod player;
+pub mod player;
 mod camera;
 mod time;
 pub(crate) mod world;
-pub(crate) mod boss;
+pub mod boss;

@@ -1,3 +1,3 @@
-pub(crate) mod components;
+pub mod components;
 pub(crate) mod systems;
 mod plugin;
