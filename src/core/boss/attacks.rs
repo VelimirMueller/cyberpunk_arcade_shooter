@@ -1,9 +1,9 @@
 // Per-boss attack patterns — implemented in Task 4-8
 
-use bevy::prelude::*;
 use crate::app::{GameEntity, ScreenShake};
 use crate::core::boss::components::*;
-use crate::systems::audio::{SoundEvent, SoundEffect};
+use crate::systems::audio::{SoundEffect, SoundEvent};
+use bevy::prelude::*;
 
 /// Grid Phantom attack pattern: dash + telegraph + trail
 /// State machine: Idle → WindUp → Dashing → Recovery (with optional chain dash in Phase 3)
@@ -20,14 +20,14 @@ pub fn phantom_attack(
 
     match &mut boss.attack_state {
         AttackState::Idle => {
-            boss.primary_timer.tick(std::time::Duration::from_secs_f32(delta));
+            boss.primary_timer
+                .tick(std::time::Duration::from_secs_f32(delta));
 
             if boss.primary_timer.just_finished() {
                 // Start wind-up
                 let windup_duration = if boss.combo_count > 0 { 0.3 } else { 1.0 };
-                boss.attack_state = AttackState::WindUp(
-                    Timer::from_seconds(windup_duration, TimerMode::Once),
-                );
+                boss.attack_state =
+                    AttackState::WindUp(Timer::from_seconds(windup_duration, TimerMode::Once));
                 boss.combo_count = 0;
                 sound_events.write(SoundEvent(SoundEffect::DashTelegraph));
 
@@ -41,8 +41,11 @@ pub fn phantom_attack(
                         custom_size: Some(Vec2::new(2.0, 900.0)),
                         ..default()
                     },
-                    Transform::from_translation(boss_pos.extend(0.0))
-                        .with_rotation(Quat::from_rotation_z(direction.y.atan2(direction.x) - std::f32::consts::FRAC_PI_2)),
+                    Transform::from_translation(boss_pos.extend(0.0)).with_rotation(
+                        Quat::from_rotation_z(
+                            direction.y.atan2(direction.x) - std::f32::consts::FRAC_PI_2,
+                        ),
+                    ),
                     ChargeTelegraph {
                         start: boss_pos,
                         end: telegraph_end,
@@ -73,6 +76,7 @@ pub fn phantom_attack(
                     let trail_lifetime = match boss.phase {
                         BossPhase::Phase2 => 2.0,
                         BossPhase::Phase3 => 4.0,
+                        BossPhase::Phase4 => 4.0,
                         _ => 2.0,
                     };
 
@@ -91,13 +95,14 @@ pub fn phantom_attack(
                     ));
                 }
 
-                // Phase 3: chain a second dash if combo_count < 1
-                if boss.phase == BossPhase::Phase3 && boss.combo_count < 1 {
+                // Phase 3+: chain a second dash if combo_count < 1
+                if (boss.phase == BossPhase::Phase3 || boss.phase == BossPhase::Phase4)
+                    && boss.combo_count < 1
+                {
                     boss.combo_count += 1;
                     // Short wind-up before chain dash
-                    boss.attack_state = AttackState::WindUp(
-                        Timer::from_seconds(0.3, TimerMode::Once),
-                    );
+                    boss.attack_state =
+                        AttackState::WindUp(Timer::from_seconds(0.3, TimerMode::Once));
 
                     // Spawn telegraph for chain dash
                     let direction = (player_pos - boss_pos).normalize_or_zero();
@@ -109,8 +114,11 @@ pub fn phantom_attack(
                             custom_size: Some(Vec2::new(2.0, 900.0)),
                             ..default()
                         },
-                        Transform::from_translation(boss_pos.extend(0.0))
-                            .with_rotation(Quat::from_rotation_z(direction.y.atan2(direction.x) - std::f32::consts::FRAC_PI_2)),
+                        Transform::from_translation(boss_pos.extend(0.0)).with_rotation(
+                            Quat::from_rotation_z(
+                                direction.y.atan2(direction.x) - std::f32::consts::FRAC_PI_2,
+                            ),
+                        ),
                         ChargeTelegraph {
                             start: boss_pos,
                             end: telegraph_end,
@@ -124,14 +132,18 @@ pub fn phantom_attack(
                         BossPhase::Phase1 => 3.0,
                         BossPhase::Phase2 => 2.0,
                         BossPhase::Phase3 => 1.0,
+                        BossPhase::Phase4 => 1.0,
                     };
-                    boss.attack_state = AttackState::Recovery(
-                        Timer::from_seconds(recovery_time, TimerMode::Once),
-                    );
+                    boss.attack_state =
+                        AttackState::Recovery(Timer::from_seconds(recovery_time, TimerMode::Once));
                     boss.combo_count = 0;
 
                     // Fire 1-2 slow homing projectiles during recovery
-                    let num_projectiles = if boss.phase == BossPhase::Phase1 { 1 } else { 2 };
+                    let num_projectiles = if boss.phase == BossPhase::Phase1 {
+                        1
+                    } else {
+                        2
+                    }; // Phase4 behaves like Phase3
                     for i in 0..num_projectiles {
                         let angle_offset = if num_projectiles == 1 {
                             0.0
@@ -177,6 +189,7 @@ pub fn phantom_attack(
 
 /// Apex Protocol attack pattern: cycles through all previous boss attacks
 /// Uses cycle_index to track which sub-attack type is active
+#[allow(clippy::too_many_arguments)]
 pub fn apex_attack(
     boss: &mut Boss,
     boss_transform: &mut Transform,
@@ -191,6 +204,7 @@ pub fn apex_attack(
         BossPhase::Phase1 => 2,
         BossPhase::Phase2 => 3,
         BossPhase::Phase3 => 4,
+        BossPhase::Phase4 => 4,
     };
     let current_attack = boss.cycle_index % cycle_len;
 
@@ -198,10 +212,40 @@ pub fn apex_attack(
     let was_idle = matches!(boss.attack_state, AttackState::Idle);
 
     match current_attack {
-        0 => phantom_attack(boss, boss_transform, player_transform, commands, delta, sound_events),
-        1 => sentinel_attack(boss, boss_transform, player_transform, commands, delta, sound_events),
-        2 => berserker_attack(boss, boss_transform, player_transform, commands, delta, screen_shake, sound_events),
-        3 => weaver_attack(boss, boss_transform, player_transform, commands, delta, hazard_count, sound_events),
+        0 => phantom_attack(
+            boss,
+            boss_transform,
+            player_transform,
+            commands,
+            delta,
+            sound_events,
+        ),
+        1 => sentinel_attack(
+            boss,
+            boss_transform,
+            player_transform,
+            commands,
+            delta,
+            sound_events,
+        ),
+        2 => berserker_attack(
+            boss,
+            boss_transform,
+            player_transform,
+            commands,
+            delta,
+            screen_shake,
+            sound_events,
+        ),
+        3 => weaver_attack(
+            boss,
+            boss_transform,
+            player_transform,
+            commands,
+            delta,
+            hazard_count,
+            sound_events,
+        ),
         _ => {}
     }
 
@@ -228,6 +272,7 @@ pub fn sentinel_attack(
         BossPhase::Phase1 => 1.5,
         BossPhase::Phase2 => 2.5,
         BossPhase::Phase3 => 3.0,
+        BossPhase::Phase4 => 3.0,
     };
 
     // Rotate the boss each frame
@@ -235,7 +280,8 @@ pub fn sentinel_attack(
 
     match &mut boss.attack_state {
         AttackState::Idle => {
-            boss.primary_timer.tick(std::time::Duration::from_secs_f32(delta));
+            boss.primary_timer
+                .tick(std::time::Duration::from_secs_f32(delta));
 
             if boss.primary_timer.just_finished() {
                 sound_events.write(SoundEvent(SoundEffect::BeamSweep));
@@ -244,13 +290,19 @@ pub fn sentinel_attack(
                     BossPhase::Phase1 => 1,
                     BossPhase::Phase2 => 2,
                     BossPhase::Phase3 => 2,
+                    BossPhase::Phase4 => 2,
                 };
 
                 let base_angle = boss_transform.rotation.to_euler(EulerRot::ZYX).0;
-                let spread_count = if boss.phase == BossPhase::Phase3 { 3 } else { 1 };
+                let spread_count = if boss.phase == BossPhase::Phase3 {
+                    3
+                } else {
+                    1
+                };
 
                 for beam_idx in 0..num_beams {
-                    let beam_angle = base_angle + (beam_idx as f32) * std::f32::consts::PI / num_beams as f32;
+                    let beam_angle =
+                        base_angle + (beam_idx as f32) * std::f32::consts::PI / num_beams as f32;
 
                     // Phase 3: randomize direction slightly
                     let angle_jitter = if boss.phase == BossPhase::Phase3 {
@@ -324,13 +376,12 @@ pub fn berserker_attack(
 
     match &mut boss.attack_state {
         AttackState::Idle => {
-            boss.primary_timer.tick(std::time::Duration::from_secs_f32(delta));
+            boss.primary_timer
+                .tick(std::time::Duration::from_secs_f32(delta));
 
             if boss.primary_timer.just_finished() {
                 // Start wind-up
-                boss.attack_state = AttackState::WindUp(
-                    Timer::from_seconds(0.8, TimerMode::Once),
-                );
+                boss.attack_state = AttackState::WindUp(Timer::from_seconds(0.8, TimerMode::Once));
                 sound_events.write(SoundEvent(SoundEffect::ChargeWindUp));
                 // Screen shake during wind-up
                 screen_shake.intensity = 0.3;
@@ -354,8 +405,8 @@ pub fn berserker_attack(
 
             if dist < 15.0 {
                 // Arrived at target
-                // Phase 3: spawn shockwave DashTrail
-                if boss.phase == BossPhase::Phase3 {
+                // Phase 3+: spawn shockwave DashTrail
+                if boss.phase == BossPhase::Phase3 || boss.phase == BossPhase::Phase4 {
                     commands.spawn((
                         Sprite {
                             color: Color::srgba(8.0, 4.0, 0.0, 0.8),
@@ -379,14 +430,14 @@ pub fn berserker_attack(
                     BossPhase::Phase1 => 1,
                     BossPhase::Phase2 => 3,
                     BossPhase::Phase3 => 3,
+                    BossPhase::Phase4 => 3,
                 };
 
                 if boss.combo_count < max_combo {
                     boss.combo_count += 1;
                     // Short wind-up before next charge
-                    boss.attack_state = AttackState::WindUp(
-                        Timer::from_seconds(0.3, TimerMode::Once),
-                    );
+                    boss.attack_state =
+                        AttackState::WindUp(Timer::from_seconds(0.3, TimerMode::Once));
                     screen_shake.intensity = 0.2;
                     screen_shake.duration = 0.3;
                     screen_shake.timer = 0.3;
@@ -394,11 +445,10 @@ pub fn berserker_attack(
                     // Enter recovery
                     let recovery_time = match boss.phase {
                         BossPhase::Phase1 => 2.0,
-                        BossPhase::Phase2 | BossPhase::Phase3 => 1.0,
+                        BossPhase::Phase2 | BossPhase::Phase3 | BossPhase::Phase4 => 1.0,
                     };
-                    boss.attack_state = AttackState::Recovery(
-                        Timer::from_seconds(recovery_time, TimerMode::Once),
-                    );
+                    boss.attack_state =
+                        AttackState::Recovery(Timer::from_seconds(recovery_time, TimerMode::Once));
                     boss.combo_count = 0;
                 }
             }
@@ -432,28 +482,31 @@ pub fn weaver_attack(
 
     match &mut boss.attack_state {
         AttackState::Idle => {
-            boss.primary_timer.tick(std::time::Duration::from_secs_f32(delta));
+            boss.primary_timer
+                .tick(std::time::Duration::from_secs_f32(delta));
 
             if boss.primary_timer.just_finished() {
                 let max_hazards = match boss.phase {
                     BossPhase::Phase1 => 3,
-                    BossPhase::Phase2 | BossPhase::Phase3 => 4,
+                    BossPhase::Phase2 | BossPhase::Phase3 | BossPhase::Phase4 => 4,
                 };
 
                 if hazard_count < max_hazards {
                     sound_events.write(SoundEvent(SoundEffect::HazardSpawn));
                     // Spawn a HazardZone at random position
                     let x = (rand::random::<f32>() - 0.5) * 1000.0; // ±500
-                    let y = (rand::random::<f32>() - 0.5) * 400.0;  // ±200
+                    let y = (rand::random::<f32>() - 0.5) * 400.0; // ±200
 
                     let drift_velocity = if boss.phase != BossPhase::Phase1 {
+                        // Phase2/3/4 drift
                         let dir = (player_pos - Vec2::new(x, y)).normalize_or_zero();
                         Some(dir * 30.0)
                     } else {
                         None
                     };
 
-                    let explodes = boss.phase == BossPhase::Phase3;
+                    let explodes =
+                        boss.phase == BossPhase::Phase3 || boss.phase == BossPhase::Phase4;
                     let explosion_timer = if explodes {
                         Some(Timer::from_seconds(3.0, TimerMode::Once))
                     } else {
@@ -484,10 +537,10 @@ pub fn weaver_attack(
                     BossPhase::Phase1 => 3.0,
                     BossPhase::Phase2 => 2.5,
                     BossPhase::Phase3 => 1.5,
+                    BossPhase::Phase4 => 1.5,
                 };
-                boss.attack_state = AttackState::Recovery(
-                    Timer::from_seconds(teleport_cd, TimerMode::Once),
-                );
+                boss.attack_state =
+                    AttackState::Recovery(Timer::from_seconds(teleport_cd, TimerMode::Once));
             }
         }
         AttackState::Recovery(timer) => {

@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::app::GameData;
+use bevy::prelude::*;
 
 // ── Marker Components ────────────────────────────────────────────
 
@@ -43,14 +43,23 @@ fn spawn_glow_text(
     // Glow layer (behind)
     parent.spawn((
         Text::new(text),
-        TextFont { font_size: font_size + 2.0, ..default() },
+        TextFont {
+            font_size: font_size + 2.0,
+            ..default()
+        },
         TextColor(glow_color),
-        Node { position_type: PositionType::Absolute, ..default() },
+        Node {
+            position_type: PositionType::Absolute,
+            ..default()
+        },
     ));
     // Main text (on top)
     parent.spawn((
         Text::new(text),
-        TextFont { font_size, ..default() },
+        TextFont {
+            font_size,
+            ..default()
+        },
         TextColor(color),
     ));
 }
@@ -84,33 +93,32 @@ fn container_node() -> Node {
 
 pub fn spawn_title_menu(mut commands: Commands, game_data: Res<GameData>) {
     commands
-        .spawn((
-            centered_column(),
-            BackgroundColor(OVERLAY_BG),
-            MenuEntity,
-        ))
+        .spawn((centered_column(), BackgroundColor(OVERLAY_BG), MenuEntity))
         .with_children(|parent| {
             // Title with glow
             spawn_glow_text(parent, "CYBERPUNK BLOOM CUBE", 40.0, CYAN, 0.3);
 
             // Container
             parent
-                .spawn((
-                    container_node(),
-                    BorderColor(CONTAINER_BORDER),
-                ))
+                .spawn((container_node(), BorderColor(CONTAINER_BORDER)))
                 .with_children(|container| {
                     // High score
                     container.spawn((
                         Text::new(format!("High Score: {}", game_data.high_score)),
-                        TextFont { font_size: 14.0, ..default() },
+                        TextFont {
+                            font_size: 14.0,
+                            ..default()
+                        },
                         TextColor(GRAY),
                     ));
 
                     // Start instruction
                     container.spawn((
                         Text::new("PRESS ENTER TO START"),
-                        TextFont { font_size: 16.0, ..default() },
+                        TextFont {
+                            font_size: 16.0,
+                            ..default()
+                        },
                         TextColor(MAGENTA),
                     ));
                 });
@@ -129,9 +137,9 @@ pub fn despawn_title_menu(mut commands: Commands, query: Query<Entity, With<Menu
 
 pub fn spawn_pause_menu(
     mut commands: Commands,
-    audio: NonSendMut<crate::systems::audio::SynthAudio>,
+    library: Res<crate::systems::audio::SoundLibrary>,
 ) {
-    let sound_status = if audio.sound_enabled { "ON" } else { "OFF" };
+    let sound_status = if library.sound_enabled { "ON" } else { "OFF" };
 
     commands
         .spawn((
@@ -151,30 +159,39 @@ pub fn spawn_pause_menu(
             // Title
             parent.spawn((
                 Text::new("PAUSED"),
-                TextFont { font_size: 36.0, ..default() },
+                TextFont {
+                    font_size: 36.0,
+                    ..default()
+                },
                 TextColor(CYAN),
             ));
 
             // Container with options
             parent
-                .spawn((
-                    container_node(),
-                    BorderColor(CONTAINER_BORDER),
-                ))
+                .spawn((container_node(), BorderColor(CONTAINER_BORDER)))
                 .with_children(|container| {
                     container.spawn((
                         Text::new("Press ESC to Resume"),
-                        TextFont { font_size: 14.0, ..default() },
+                        TextFont {
+                            font_size: 14.0,
+                            ..default()
+                        },
                         TextColor(GRAY),
                     ));
                     container.spawn((
                         Text::new("Press Q to Return to Menu"),
-                        TextFont { font_size: 14.0, ..default() },
+                        TextFont {
+                            font_size: 14.0,
+                            ..default()
+                        },
                         TextColor(GRAY),
                     ));
                     container.spawn((
                         Text::new(format!("Press M to Toggle Sound ({})", sound_status)),
-                        TextFont { font_size: 14.0, ..default() },
+                        TextFont {
+                            font_size: 14.0,
+                            ..default()
+                        },
                         TextColor(GRAY),
                     ));
                 });
@@ -205,20 +222,29 @@ pub fn spawn_game_over_screen(mut commands: Commands, game_data: Res<GameData>) 
             // Score info
             parent.spawn((
                 Text::new(format!("Final Score: {}", game_data.score)),
-                TextFont { font_size: 20.0, ..default() },
+                TextFont {
+                    font_size: 20.0,
+                    ..default()
+                },
                 TextColor(CYAN),
             ));
 
             parent.spawn((
                 Text::new(format!("Reached Round: {}", game_data.round)),
-                TextFont { font_size: 16.0, ..default() },
+                TextFont {
+                    font_size: 16.0,
+                    ..default()
+                },
                 TextColor(GRAY),
             ));
 
             // Restart instruction
             parent.spawn((
                 Text::new("PRESS SPACE TO RESTART"),
-                TextFont { font_size: 14.0, ..default() },
+                TextFont {
+                    font_size: 14.0,
+                    ..default()
+                },
                 TextColor(MAGENTA),
             ));
         });
@@ -251,23 +277,26 @@ pub fn spawn_game_won_screen(mut commands: Commands, game_data: Res<GameData>) {
             // Score info
             parent.spawn((
                 Text::new(format!("Final Score: {}", game_data.score)),
-                TextFont { font_size: 20.0, ..default() },
+                TextFont {
+                    font_size: 20.0,
+                    ..default()
+                },
                 TextColor(CYAN),
             ));
 
             // Return instruction
             parent.spawn((
                 Text::new("PRESS SPACE TO RETURN TO MENU"),
-                TextFont { font_size: 14.0, ..default() },
+                TextFont {
+                    font_size: 14.0,
+                    ..default()
+                },
                 TextColor(MAGENTA),
             ));
         });
 }
 
-pub fn despawn_game_won_screen(
-    mut commands: Commands,
-    query: Query<Entity, With<GameWonEntity>>,
-) {
+pub fn despawn_game_won_screen(mut commands: Commands, query: Query<Entity, With<GameWonEntity>>) {
     for entity in &query {
         commands.entity(entity).despawn();
     }

@@ -1,20 +1,15 @@
-use bevy::prelude::*;
 use crate::app::GameEntity;
 use crate::core::player::components::{Player, PlayerRotationTracker};
 use crate::env::{
-    GROUND_Y,
-    CEILING_Y,
-    LEFT_BOUND,
-    RIGHT_BOUND,
-    MOVE_SPEED,
-    ROTATE_SPEED,
-    TIME_STEP
+    CEILING_Y, GROUND_Y, LEFT_BOUND, MOVE_SPEED, RIGHT_BOUND, ROTATE_SPEED, TIME_STEP,
 };
+use bevy::prelude::*;
 
+#[allow(dead_code)]
 fn add_energy(player: &mut Player) {
     player.energy += 1;
 }
-pub(crate) fn player_movement(
+pub fn player_movement(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<(&mut Player, &mut Transform), With<Player>>,
 ) {
@@ -54,33 +49,19 @@ fn get_input_direction(input: &ButtonInput<KeyCode>) -> Vec3 {
     direction
 }
 
-fn apply_movement(transform: &mut Transform, direction: Vec3) -> () {
+fn apply_movement(transform: &mut Transform, direction: Vec3) {
     with_boundaries(transform, direction);
 }
 
-fn with_boundaries(transform: &mut Transform, direction: Vec3) -> () {
-
-    let mut new_translation = transform.translation + direction.normalize_or_zero() * MOVE_SPEED * TIME_STEP;
-    if new_translation.y < GROUND_Y {
-        new_translation.y = GROUND_Y;
-    }
-
-    if new_translation.y > CEILING_Y {
-        new_translation.y = CEILING_Y;
-    }
-
-    if new_translation.x < LEFT_BOUND {
-        new_translation.x = LEFT_BOUND;
-    }
-
-    if new_translation.x > RIGHT_BOUND {
-        new_translation.x = RIGHT_BOUND;
-    }
-
+fn with_boundaries(transform: &mut Transform, direction: Vec3) {
+    let mut new_translation =
+        transform.translation + direction.normalize_or_zero() * MOVE_SPEED * TIME_STEP;
+    new_translation.y = new_translation.y.clamp(GROUND_Y, CEILING_Y);
+    new_translation.x = new_translation.x.clamp(LEFT_BOUND, RIGHT_BOUND);
     transform.translation = new_translation;
 }
 
-fn apply_rotation(transform: &mut Transform, input: &ButtonInput<KeyCode>) -> () {
+fn apply_rotation(transform: &mut Transform, input: &ButtonInput<KeyCode>) {
     if input.pressed(KeyCode::KeyW) || input.pressed(KeyCode::KeyA) {
         transform.rotate_z(ROTATE_SPEED * TIME_STEP);
     }
@@ -90,12 +71,18 @@ fn apply_rotation(transform: &mut Transform, input: &ButtonInput<KeyCode>) -> ()
     }
 }
 
-pub(crate) fn spawn_player(
-    mut commands: Commands,
-) -> () {
+pub fn spawn_player(mut commands: Commands) {
     commands.spawn((
-        Player { current: 100, max: 100, last_collision_time: None, energy: 100, last_shot_time: None },
-        PlayerRotationTracker { last_angle_index: 0 },
+        Player {
+            current: 100,
+            max: 100,
+            last_collision_time: None,
+            energy: 100,
+            last_shot_time: None,
+        },
+        PlayerRotationTracker {
+            last_angle_index: 0,
+        },
         GameEntity,
         Transform::from_xyz(-250.0, 0.0, 0.0),
         GlobalTransform::default(),

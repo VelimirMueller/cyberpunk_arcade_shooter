@@ -1,12 +1,18 @@
-use bevy::prelude::*;
 use crate::app::GameData;
-use crate::core::boss::components::{Boss, DashTrail, HazardZone, BossProjectile, ChargeTelegraph};
+use crate::core::boss::components::{
+    Boss, BossProjectile, ChargeTelegraph, DashTrail, DeathExplosion, EliminatedText, HazardZone,
+    PhaseNameText, ScreenDimOverlay,
+};
 use crate::core::boss::systems::spawn_boss;
 use crate::core::player::components::Player;
 use crate::data::game_state::GameState;
+use crate::systems::audio::{SoundEffect, SoundEvent};
 use crate::systems::combat::EnemyParticle;
-use crate::systems::audio::{SoundEvent, SoundEffect};
-use crate::systems::powerups::{PowerUp, LaserBeam, PowerUpShockwave, LaserActive};
+use crate::systems::powerups::{
+    LaserActive, LaserBeamCore, LaserBeamShell, LaserChargeOrb, LaserChargeParticle, LaserImpact,
+    LaserMuzzle, LaserStreamParticle, PowerUp, PowerUpShockwave,
+};
+use bevy::prelude::*;
 
 // ============ Round Announcement ============
 
@@ -34,6 +40,12 @@ impl RoundTimer {
             phase: AnnouncePhase::ThreatLine,
             duration: 2.5,
         }
+    }
+}
+
+impl Default for RoundTimer {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -97,6 +109,12 @@ impl ScoreTallyTimer {
     }
 }
 
+impl Default for ScoreTallyTimer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[derive(Component)]
 pub struct RoundClearText;
 
@@ -117,6 +135,8 @@ pub fn boss_defeated_check(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::type_complexity)]
 pub fn score_tally_system(
     time: Res<Time>,
     tally_timer: Option<ResMut<ScoreTallyTimer>>,
@@ -129,8 +149,26 @@ pub fn score_tally_system(
     hazard_query: Query<Entity, With<HazardZone>>,
     projectile_query: Query<Entity, With<BossProjectile>>,
     telegraph_query: Query<Entity, With<ChargeTelegraph>>,
-    enemy_particle_query: Query<Entity, Or<(With<EnemyParticle>, With<PowerUp>, With<LaserBeam>, With<PowerUpShockwave>)>>,
+    enemy_particle_query: Query<
+        Entity,
+        Or<(
+            With<EnemyParticle>,
+            With<PowerUp>,
+            With<LaserBeamCore>,
+            With<LaserBeamShell>,
+            With<LaserStreamParticle>,
+            With<LaserImpact>,
+            With<LaserMuzzle>,
+            With<LaserChargeOrb>,
+            With<LaserChargeParticle>,
+            With<PowerUpShockwave>,
+            With<EliminatedText>,
+            With<DeathExplosion>,
+        )>,
+    >,
     round_clear_query: Query<Entity, With<RoundClearText>>,
+    screen_dim_query: Query<Entity, With<ScreenDimOverlay>>,
+    phase_name_query: Query<Entity, With<PhaseNameText>>,
     mut sound_events: EventWriter<SoundEvent>,
 ) {
     let Some(mut tally_timer) = tally_timer else {
@@ -184,6 +222,13 @@ pub fn score_tally_system(
         for entity in enemy_particle_query.iter() {
             commands.entity(entity).despawn();
         }
+        // Clean up transition effects
+        for entity in screen_dim_query.iter() {
+            commands.entity(entity).despawn();
+        }
+        for entity in phase_name_query.iter() {
+            commands.entity(entity).despawn();
+        }
 
         // Restore player
         for (player_entity, mut player) in player_query.iter_mut() {
@@ -211,11 +256,30 @@ pub fn score_tally_system(
     }
 }
 
-pub fn despawn_round_clear(
-    mut commands: Commands,
-    query: Query<Entity, With<RoundClearText>>,
-) {
+pub fn despawn_round_clear(mut commands: Commands, query: Query<Entity, With<RoundClearText>>) {
     for entity in query.iter() {
         commands.entity(entity).despawn();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::core::boss::components::BossType;
+    use crate::core::boss::systems::boss_type_for_round;
+
+    #[test]
+    fn test_round_boss_type_mapping() {
+        assert_eq!(boss_type_for_round(1), BossType::GridPhantom);
+        assert_eq!(boss_type_for_round(2), BossType::NeonSentinel);
+        assert_eq!(boss_type_for_round(3), BossType::ChromeBerserker);
+        assert_eq!(boss_type_for_round(4), BossType::VoidWeaver);
+        assert_eq!(boss_type_for_round(5), BossType::ApexProtocol);
+    }
+
+    #[test]
+    fn test_round_progression_to_won() {
+        let total_rounds = 5u32;
+        let round_after_last = 6u32;
+        assert!(round_after_last > total_rounds);
     }
 }

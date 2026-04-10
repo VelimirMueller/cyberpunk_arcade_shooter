@@ -1,37 +1,37 @@
 use bevy::app::{App, Plugin};
-use bevy::asset::{weak_handle, Assets, Handle};
+use bevy::asset::{Assets, Handle, weak_handle};
+use bevy::core_pipeline::{
+    core_2d::graph::{Core2d, Node2d},
+    fullscreen_vertex_shader::fullscreen_shader_vertex_state,
+};
 use bevy::ecs::{
     component::Component,
     entity::Entity,
     query::{QueryItem, With},
     resource::Resource,
     schedule::IntoScheduleConfigs as _,
-    system::{lifetimeless::Read, Commands, Query, Res, ResMut},
+    system::{Commands, Query, Res, ResMut, lifetimeless::Read},
     world::{FromWorld, World},
 };
 use bevy::image::BevyDefault;
 use bevy::prelude::Camera;
 use bevy::render::{
+    Render, RenderApp, RenderSet,
     extract_component::{ExtractComponent, ExtractComponentPlugin},
     render_graph::{
-        NodeRunError, RenderGraphApp as _, RenderGraphContext, RenderLabel, ViewNode, ViewNodeRunner,
+        NodeRunError, RenderGraphApp as _, RenderGraphContext, RenderLabel, ViewNode,
+        ViewNodeRunner,
     },
     render_resource::{
-        binding_types::{sampler, texture_2d, uniform_buffer},
         BindGroupEntries, BindGroupLayout, BindGroupLayoutEntries, CachedRenderPipelineId,
         ColorTargetState, ColorWrites, DynamicUniformBuffer, FilterMode, FragmentState, Operations,
-        PipelineCache, RenderPassColorAttachment, RenderPassDescriptor,
-        RenderPipelineDescriptor, Sampler, SamplerBindingType, SamplerDescriptor, Shader,
-        ShaderStages, ShaderType, SpecializedRenderPipeline, SpecializedRenderPipelines,
-        TextureFormat, TextureSampleType,
+        PipelineCache, RenderPassColorAttachment, RenderPassDescriptor, RenderPipelineDescriptor,
+        Sampler, SamplerBindingType, SamplerDescriptor, Shader, ShaderStages, ShaderType,
+        SpecializedRenderPipeline, SpecializedRenderPipelines, TextureFormat, TextureSampleType,
+        binding_types::{sampler, texture_2d, uniform_buffer},
     },
     renderer::{RenderContext, RenderDevice, RenderQueue},
     view::{ExtractedView, ViewTarget},
-    Render, RenderApp, RenderSet,
-};
-use bevy::core_pipeline::{
-    core_2d::graph::{Core2d, Node2d},
-    fullscreen_vertex_shader::fullscreen_shader_vertex_state,
 };
 use bevy::utils::prelude::default;
 
@@ -188,8 +188,7 @@ impl SpecializedRenderPipeline for CrtPipeline {
 // Shader handle
 // ---------------------------------------------------------------------------
 
-const CRT_SHADER_HANDLE: Handle<Shader> =
-    weak_handle!("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
+const CRT_SHADER_HANDLE: Handle<Shader> = weak_handle!("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
 
 // ---------------------------------------------------------------------------
 // Render node
@@ -237,19 +236,20 @@ impl ViewNode for CrtPostProcessNode {
             )),
         );
 
-        let mut render_pass = render_context
-            .command_encoder()
-            .begin_render_pass(&RenderPassDescriptor {
-                label: Some("crt_post_process_pass"),
-                color_attachments: &[Some(RenderPassColorAttachment {
-                    view: post_process.destination,
-                    resolve_target: None,
-                    ops: Operations::default(),
-                })],
-                depth_stencil_attachment: None,
-                timestamp_writes: None,
-                occlusion_query_set: None,
-            });
+        let mut render_pass =
+            render_context
+                .command_encoder()
+                .begin_render_pass(&RenderPassDescriptor {
+                    label: Some("crt_post_process_pass"),
+                    color_attachments: &[Some(RenderPassColorAttachment {
+                        view: post_process.destination,
+                        resolve_target: None,
+                        ops: Operations::default(),
+                    })],
+                    depth_stencil_attachment: None,
+                    timestamp_writes: None,
+                    occlusion_query_set: None,
+                });
 
         render_pass.set_pipeline(pipeline);
         render_pass.set_bind_group(0, &bind_group, &[uniform_offset.0]);
@@ -306,7 +306,9 @@ fn prepare_crt_uniforms(
             _padding2: 0.0,
             _padding3: 0.0,
         });
-        commands.entity(entity).insert(CrtUniformBufferOffset(offset));
+        commands
+            .entity(entity)
+            .insert(CrtUniformBufferOffset(offset));
     }
 
     uniform_buffers
