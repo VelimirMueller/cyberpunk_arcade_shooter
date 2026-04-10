@@ -3,6 +3,7 @@ use crate::core::player::components::{Player, PlayerRotationTracker};
 use crate::env::{
     CEILING_Y, GROUND_Y, LEFT_BOUND, MOVE_SPEED, RIGHT_BOUND, ROTATE_SPEED, TIME_STEP,
 };
+use crate::utils::config::ENTITY_SCALE;
 use bevy::prelude::*;
 
 #[allow(dead_code)]
@@ -88,7 +89,7 @@ pub fn spawn_player(mut commands: Commands) {
         GlobalTransform::default(),
         Sprite {
             color: Color::srgb(1.2, 2.8, 1.2),
-            custom_size: Some(Vec2::new(50.0, 50.0)),
+            custom_size: Some(Vec2::new(50.0 * ENTITY_SCALE, 50.0 * ENTITY_SCALE)),
             ..default()
         },
     ));

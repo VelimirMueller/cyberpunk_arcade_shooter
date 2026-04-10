@@ -5,6 +5,7 @@ use crate::core::player::components::Player;
 use crate::systems::audio::{SoundEffect, SoundEvent};
 use crate::systems::collision::collide;
 use crate::systems::combat::EnemyParticle;
+use crate::utils::config::ENTITY_SCALE;
 use bevy::prelude::*;
 use rand::Rng;
 
@@ -138,7 +139,7 @@ pub fn powerup_spawn_system(
     commands.spawn((
         Sprite {
             color,
-            custom_size: Some(Vec2::new(16.0, 16.0)),
+            custom_size: Some(Vec2::new(16.0 * ENTITY_SCALE, 16.0 * ENTITY_SCALE)),
             ..default()
         },
         Transform::from_xyz(x, y, 0.5)
@@ -398,7 +399,7 @@ pub fn laser_system(
                 commands.spawn((
                     Sprite {
                         color: Color::srgba(4.0, 8.0, 6.0, 1.0),
-                        custom_size: Some(Vec2::new(6.0, 600.0)),
+                        custom_size: Some(Vec2::new(6.0 * ENTITY_SCALE, 600.0)),
                         ..default()
                     },
                     Transform::from_translation((player_pos + forward).with_z(0.5))
@@ -411,7 +412,7 @@ pub fn laser_system(
                 commands.spawn((
                     Sprite {
                         color: Color::srgba(0.0, 4.0, 0.5, 0.55),
-                        custom_size: Some(Vec2::new(32.0, 600.0)),
+                        custom_size: Some(Vec2::new(32.0 * ENTITY_SCALE, 600.0)),
                         ..default()
                     },
                     Transform::from_translation((player_pos + forward).with_z(0.4))
@@ -424,7 +425,7 @@ pub fn laser_system(
                 commands.spawn((
                     Sprite {
                         color: Color::srgba(2.0, 8.0, 4.0, 0.8),
-                        custom_size: Some(Vec2::new(40.0, 20.0)),
+                        custom_size: Some(Vec2::new(40.0 * ENTITY_SCALE, 20.0 * ENTITY_SCALE)),
                         ..default()
                     },
                     Transform::from_translation(player_pos.with_z(0.6)),
@@ -462,7 +463,7 @@ pub fn laser_system(
                 t.translation = (player_pos + forward_dir * 300.0).with_z(0.4);
                 t.rotation = player_rotation;
                 shell.pulse_timer += dt.as_secs_f32();
-                let pulse = 30.0 + 6.0 * (shell.pulse_timer * std::f32::consts::TAU * 1.7).sin();
+                let pulse = (30.0 + 6.0 * (shell.pulse_timer * std::f32::consts::TAU * 1.7).sin()) * ENTITY_SCALE;
                 if let Some(size) = sprite.custom_size.as_mut() {
                     size.x = pulse;
                 }
