@@ -10,9 +10,11 @@ webgpu = ["bevy/webgpu"]
 [dependencies]
 bevy = "0.16.1"
 rand = "0.8"
+rodio = { version = "0.20", default-features = false, features = ["wav"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 getrandom = { version = "0.2", features = ["js"] }
+web-time = "1.1"
 
 [profile.release]
 opt-level = 3

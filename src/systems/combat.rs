@@ -142,7 +142,7 @@ pub(crate) fn player_shoot_system(
                 .is_none_or(|t| t.elapsed().as_secs_f32() >= SHOT_COOLDOWN);
 
             if can_shoot && player_data.energy >= MIN_ENERGY {
-                player_data.last_shot_time = Some(std::time::Instant::now());
+                player_data.last_shot_time = Some(crate::utils::time_compat::Instant::now());
 
                 // Schieße von 4 Ecken (relativ zur Würfelgröße)
                 let offset = 16.0; // an Sprite-Größe anpassen

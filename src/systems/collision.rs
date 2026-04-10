@@ -48,7 +48,7 @@ pub fn detect_collisions(
                         .is_none_or(|t| t.elapsed().as_secs_f32() > 0.025)
                 {
                     player.current -= 1;
-                    player.last_collision_time = Some(std::time::Instant::now());
+                    player.last_collision_time = Some(crate::utils::time_compat::Instant::now());
                     trigger_screen_shake(&mut screen_shake);
                     trigger_damage_flash(player_entity, commands.reborrow());
                     sound_events.write(SoundEvent(SoundEffect::PlayerHit));
@@ -72,7 +72,7 @@ pub fn detect_collisions(
                         .is_none_or(|t| t.elapsed().as_secs_f32() > 0.075)
                 {
                     player.current -= 1;
-                    player.last_collision_time = Some(std::time::Instant::now());
+                    player.last_collision_time = Some(crate::utils::time_compat::Instant::now());
                     trigger_screen_shake(&mut screen_shake);
                     trigger_damage_flash(player_entity, commands.reborrow());
                 }
@@ -95,7 +95,7 @@ pub fn detect_collisions(
                         .is_none_or(|t| t.elapsed().as_secs_f32() > 0.075)
                 {
                     player.current -= 1;
-                    player.last_collision_time = Some(std::time::Instant::now());
+                    player.last_collision_time = Some(crate::utils::time_compat::Instant::now());
                     trigger_screen_shake(&mut screen_shake);
                     trigger_damage_flash(player_entity, commands.reborrow());
                     sound_events.write(SoundEvent(SoundEffect::PlayerHit));
@@ -119,7 +119,7 @@ pub fn detect_collisions(
                         .is_none_or(|t| t.elapsed().as_secs_f32() > 0.075)
                 {
                     player.current -= 1;
-                    player.last_collision_time = Some(std::time::Instant::now());
+                    player.last_collision_time = Some(crate::utils::time_compat::Instant::now());
                     trigger_screen_shake(&mut screen_shake);
                     trigger_damage_flash(player_entity, commands.reborrow());
                     sound_events.write(SoundEvent(SoundEffect::PlayerHit));
@@ -143,7 +143,7 @@ pub fn detect_collisions(
                         .is_none_or(|t| t.elapsed().as_secs_f32() > 0.075)
                 {
                     player.current -= 1;
-                    player.last_collision_time = Some(std::time::Instant::now());
+                    player.last_collision_time = Some(crate::utils::time_compat::Instant::now());
                     trigger_screen_shake(&mut screen_shake);
                     trigger_damage_flash(player_entity, commands.reborrow());
                     sound_events.write(SoundEvent(SoundEffect::PlayerHit));
@@ -177,7 +177,7 @@ pub fn detect_collisions(
                     }
                     if boss.current_hp > 0 {
                         boss.current_hp -= 1;
-                        boss.last_hit_time = Some(std::time::Instant::now());
+                        boss.last_hit_time = Some(crate::utils::time_compat::Instant::now());
                         let mult = score_multiplier(game_data.round);
                         game_data.score += (10.0 * mult) as u32;
                         sound_events.write(SoundEvent(SoundEffect::EnemyHit));

@@ -12,15 +12,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c7bf7c83-c036-4727-b202-11f9ea52bec0" name="Changes" comment="overhaul and add juice">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/cyberpunk_rpg-1c0d190656baae66.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/cyberpunk_rpg-1c0d190656baae66_bg.wasm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/cyberpunk_rpg-a419bae5742e9513.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/cyberpunk_rpg-a419bae5742e9513_bg.wasm" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/cyberpunk_rpg-4f9567271ae71dc5.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/cyberpunk_rpg-4f9567271ae71dc5_bg.wasm" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/dist/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/boss/components.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/boss/components.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/player/components.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/player/components.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/systems/audio.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/audio.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/systems/collision.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/collision.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/systems/combat.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/combat.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/systems/particles.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/particles.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/systems/powerups.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/powerups.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/utils/config.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/config.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/utils/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/mod.rs" afterDir="false" />
     </list>
@@ -115,32 +121,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.rust.reset.selective.auto.import": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "main",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "/home/velimir/dev/cyberpunk_the_incedible_bloom_cube",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
-    "org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon": "",
-    "org.rust.disableDetachedFileInspection/home/velimir/cyberpunk_rpg/src/core/world/barriers/systems.rs": "true",
-    "org.rust.first.attach.projects": "true",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.rust.reset.selective.auto.import&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/velimir/dev/cyberpunk_the_incedible_bloom_cube&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
+    &quot;org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon&quot;: &quot;&quot;,
+    &quot;org.rust.disableDetachedFileInspection/home/velimir/cyberpunk_rpg/src/core/world/barriers/systems.rs&quot;: &quot;true&quot;,
+    &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/core/world/barriers" />
@@ -226,6 +232,7 @@
       <workItem from="1773931515502" duration="10137000" />
       <workItem from="1775808472033" duration="149000" />
       <workItem from="1775831607328" duration="4212000" />
+      <workItem from="1775853043727" duration="1085000" />
     </task>
     <task id="LOCAL-00001" summary="add basic game with a player, barriers and basic movements">
       <option name="closed" value="true" />

@@ -427,7 +427,7 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
 // ---------------------------------------------------------------------------
 
 fn samples_to_wav_bytes(samples: &[f32], sample_rate: u32) -> Vec<u8> {
-    let data_size = (samples.len() * 4) as u32;
+    let data_size = (samples.len() * 2) as u32; // 2 bytes per 16-bit sample
     let file_size = 36 + data_size;
 
     let mut buf = Vec::with_capacity(file_size as usize + 8);
@@ -440,18 +440,20 @@ fn samples_to_wav_bytes(samples: &[f32], sample_rate: u32) -> Vec<u8> {
     // fmt chunk
     buf.extend_from_slice(b"fmt ");
     buf.extend_from_slice(&16u32.to_le_bytes());
-    buf.extend_from_slice(&3u16.to_le_bytes()); // IEEE float
+    buf.extend_from_slice(&1u16.to_le_bytes()); // PCM
     buf.extend_from_slice(&1u16.to_le_bytes()); // mono
     buf.extend_from_slice(&sample_rate.to_le_bytes());
-    buf.extend_from_slice(&(sample_rate * 4).to_le_bytes()); // byte rate
-    buf.extend_from_slice(&4u16.to_le_bytes()); // block align
-    buf.extend_from_slice(&32u16.to_le_bytes()); // bits per sample
+    buf.extend_from_slice(&(sample_rate * 2).to_le_bytes()); // byte rate (sr * block_align)
+    buf.extend_from_slice(&2u16.to_le_bytes()); // block align (channels * bytes_per_sample)
+    buf.extend_from_slice(&16u16.to_le_bytes()); // bits per sample
 
     // data chunk
     buf.extend_from_slice(b"data");
     buf.extend_from_slice(&data_size.to_le_bytes());
     for &sample in samples {
-        buf.extend_from_slice(&sample.to_le_bytes());
+        let clamped = sample.clamp(-1.0, 1.0);
+        let pcm = (clamped * 32767.0) as i16;
+        buf.extend_from_slice(&pcm.to_le_bytes());
     }
 
     buf

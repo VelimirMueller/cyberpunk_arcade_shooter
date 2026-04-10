@@ -1,6 +1,5 @@
 use crate::app::GameEntity;
 use crate::systems::collision::DeathEvent;
-use crate::utils::config::QualityTier;
 use bevy::prelude::*;
 use rand::Rng;
 
@@ -40,7 +39,6 @@ pub fn handle_death_events(
     mut death_events: EventReader<DeathEvent>,
     shockwave_assets: Res<ShockwaveAssets>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    quality: Res<QualityTier>,
 ) {
     let mut rng = rand::thread_rng();
 
@@ -48,10 +46,7 @@ pub fn handle_death_events(
         // Despawn the enemy entity
         commands.entity(event.entity).despawn();
 
-        let particle_count = match *quality {
-            QualityTier::Low => rng.gen_range(4..=6),
-            QualityTier::High => rng.gen_range(12..=20),
-        };
+        let particle_count = rng.gen_range(12..=20);
         for _ in 0..particle_count {
             let angle = rng.gen_range(0.0..std::f32::consts::TAU);
             let speed = rng.gen_range(200.0..400.0);
@@ -178,12 +173,7 @@ pub fn spawn_afterimages(
     mut commands: Commands,
     player_query: Query<(&Transform, &Sprite), With<crate::core::player::components::Player>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    quality: Res<QualityTier>,
 ) {
-    if *quality == QualityTier::Low {
-        return;
-    }
-
     // Always tick the timer so first afterimage spawns immediately on movement
     timer.timer.tick(time.delta());
 
@@ -263,12 +253,7 @@ pub fn spawn_ambient_particles(
     mut timer: ResMut<AmbientParticleTimer>,
     mut commands: Commands,
     player_query: Query<&Transform, With<crate::core::player::components::Player>>,
-    quality: Res<QualityTier>,
 ) {
-    if *quality == QualityTier::Low {
-        return;
-    }
-
     timer.timer.tick(time.delta());
 
     if !timer.timer.just_finished() {
