@@ -7,6 +7,7 @@ pub enum QualityTier {
     Mobile,
 }
 
+#[allow(clippy::derivable_impls)] // not derivable: returns Mobile on wasm32
 impl Default for QualityTier {
     fn default() -> Self {
         #[cfg(target_arch = "wasm32")]

@@ -1,6 +1,8 @@
 use crate::app::GameEntity;
 use crate::systems::collision::DeathEvent;
-use crate::utils::config::{AFTERIMAGE_INTERVAL, AMBIENT_PARTICLE_INTERVAL, DEATH_PARTICLE_MIN, DEATH_PARTICLE_MAX};
+use crate::utils::config::{
+    AFTERIMAGE_INTERVAL, AMBIENT_PARTICLE_INTERVAL, DEATH_PARTICLE_MAX, DEATH_PARTICLE_MIN,
+};
 use bevy::prelude::*;
 use rand::Rng;
 

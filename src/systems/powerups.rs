@@ -463,7 +463,8 @@ pub fn laser_system(
                 t.translation = (player_pos + forward_dir * 300.0).with_z(0.4);
                 t.rotation = player_rotation;
                 shell.pulse_timer += dt.as_secs_f32();
-                let pulse = (30.0 + 6.0 * (shell.pulse_timer * std::f32::consts::TAU * 1.7).sin()) * ENTITY_SCALE;
+                let pulse = (30.0 + 6.0 * (shell.pulse_timer * std::f32::consts::TAU * 1.7).sin())
+                    * ENTITY_SCALE;
                 if let Some(size) = sprite.custom_size.as_mut() {
                     size.x = pulse;
                 }
