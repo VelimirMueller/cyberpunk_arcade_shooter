@@ -263,8 +263,32 @@ pub fn main() {
 }
 
 #[allow(dead_code)]
-fn setup(mut commands: Commands, _next_state: ResMut<NextState<GameState>>) {
-    commands.spawn((
+fn setup(
+    mut commands: Commands,
+    _next_state: ResMut<NextState<GameState>>,
+    quality: Res<QualityTier>,
+) {
+    let bloom = match *quality {
+        QualityTier::Desktop => Bloom::default(),
+        QualityTier::Mobile => Bloom {
+            intensity: 0.2,
+            low_frequency_boost: 0.5,
+            ..default()
+        },
+    };
+
+    let crt = match *quality {
+        QualityTier::Desktop => CrtSettings::default(),
+        QualityTier::Mobile => CrtSettings {
+            scanline_intensity: 0.10,
+            scanline_count: 150.0,
+            vignette_intensity: 0.3,
+            vignette_radius: 0.75,
+            curvature_amount: 0.0,
+        },
+    };
+
+    let mut camera = commands.spawn((
         Camera2d,
         Transform::default(),
         GlobalTransform::default(),
@@ -274,10 +298,20 @@ fn setup(mut commands: Commands, _next_state: ResMut<NextState<GameState>>) {
             ..default()
         },
         Tonemapping::TonyMcMapface,
-        Bloom::default(),
+        bloom,
         DebandDither::Enabled,
-        CrtSettings::default(),
+        crt,
     ));
+
+    if *quality == QualityTier::Mobile {
+        camera.insert(Projection::Orthographic(OrthographicProjection {
+            scaling_mode: bevy::render::camera::ScalingMode::AutoMin {
+                min_width: 1500.0,
+                min_height: 620.0,
+            },
+            ..OrthographicProjection::default_2d()
+        }));
+    }
 }
 
 // ============ NEW GAME LOOP SYSTEMS ============
