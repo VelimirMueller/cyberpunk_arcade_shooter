@@ -1,10 +1,10 @@
 mod app;
 mod core;
+mod data;
+mod env;
 mod systems;
 mod ui;
-mod data;
 mod utils;
-mod env;
 
 fn main() {
     app::main();

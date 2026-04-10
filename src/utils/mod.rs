@@ -1,2 +1,2 @@
-mod loader;
 mod config;
+mod loader;

@@ -1,0 +1,158 @@
+<h2>Laser Beam: Full Lifecycle</h2>
+<p class="subtitle">Cyberpunk dual-layer beam with particle storm &mdash; the complete sequence</p>
+
+<div class="section">
+  <h3>Phase 1: Charge-Up (0.8s)</h3>
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">Early Charge (0.0-0.4s)</div>
+      <div class="mockup-body" style="background: #06060f; min-height: 250px; position: relative; display: flex; align-items: flex-end; justify-content: center; overflow: hidden;">
+        <!-- Player indicator -->
+        <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); width: 20px; height: 20px; background: #00ccff; clip-path: polygon(50% 0%, 100% 100%, 0% 100%); box-shadow: 0 0 10px #00ccff; z-index: 5;"></div>
+        <!-- Converging particles from edges -->
+        <div style="position: absolute; width: 4px; height: 4px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 8px #00ff88; top: 30px; left: 20px; animation: converge-1 0.8s ease-in infinite;"></div>
+        <div style="position: absolute; width: 3px; height: 3px; background: #ff00ff; border-radius: 50%; box-shadow: 0 0 6px #ff00ff; top: 50px; right: 25px; animation: converge-2 0.9s ease-in infinite;"></div>
+        <div style="position: absolute; width: 5px; height: 5px; background: #00ffcc; border-radius: 50%; box-shadow: 0 0 10px #00ffcc; top: 80px; left: 40px; animation: converge-3 0.7s ease-in infinite;"></div>
+        <div style="position: absolute; width: 3px; height: 3px; background: #ff44ff; border-radius: 50%; box-shadow: 0 0 6px #ff44ff; top: 20px; right: 50px; animation: converge-4 1s ease-in infinite;"></div>
+        <div style="position: absolute; width: 4px; height: 4px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 8px #00ff88; top: 100px; right: 15px; animation: converge-5 0.75s ease-in infinite;"></div>
+        <!-- Small growing orb at player -->
+        <div style="position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%); width: 12px; height: 12px; border-radius: 50%; background: radial-gradient(circle, #ffffff 20%, #00ffcc 50%, transparent 70%); box-shadow: 0 0 10px #00ffcc; animation: grow-orb 0.8s ease-in infinite;"></div>
+        <style>
+          @keyframes converge-1 { 0% { top: 30px; left: 20px; opacity: 1; } 100% { top: 195px; left: 50%; opacity: 0.3; } }
+          @keyframes converge-2 { 0% { top: 50px; right: 25px; opacity: 1; } 100% { top: 195px; right: 47%; opacity: 0.3; } }
+          @keyframes converge-3 { 0% { top: 80px; left: 40px; opacity: 1; } 100% { top: 195px; left: 50%; opacity: 0.3; } }
+          @keyframes converge-4 { 0% { top: 20px; right: 50px; opacity: 1; } 100% { top: 195px; right: 47%; opacity: 0.3; } }
+          @keyframes converge-5 { 0% { top: 100px; right: 15px; opacity: 1; } 100% { top: 195px; right: 47%; opacity: 0.3; } }
+          @keyframes grow-orb { 0% { width: 6px; height: 6px; opacity: 0.5; } 100% { width: 18px; height: 18px; opacity: 1; } }
+        </style>
+      </div>
+    </div>
+    <div class="mockup">
+      <div class="mockup-header">Peak Charge (0.4-0.8s)</div>
+      <div class="mockup-body" style="background: #06060f; min-height: 250px; position: relative; display: flex; align-items: flex-end; justify-content: center; overflow: hidden;">
+        <!-- Player -->
+        <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); width: 20px; height: 20px; background: #00ccff; clip-path: polygon(50% 0%, 100% 100%, 0% 100%); box-shadow: 0 0 10px #00ccff; z-index: 5;"></div>
+        <!-- Orbiting particles (tight circle) -->
+        <div style="position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px;">
+          <div style="position: absolute; width: 4px; height: 4px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 10px #00ff88, 0 0 3px #fff; animation: orbit-fast-1 0.4s linear infinite; top: 10px; left: 10px;"></div>
+          <div style="position: absolute; width: 5px; height: 5px; background: #ff00ff; border-radius: 50%; box-shadow: 0 0 12px #ff00ff, 0 0 3px #fff; animation: orbit-fast-2 0.35s linear infinite; top: 20px; left: 30px;"></div>
+          <div style="position: absolute; width: 3px; height: 3px; background: #00ffcc; border-radius: 50%; box-shadow: 0 0 8px #00ffcc; animation: orbit-fast-3 0.45s linear infinite; top: 30px; left: 15px;"></div>
+          <div style="position: absolute; width: 4px; height: 4px; background: #ff66ff; border-radius: 50%; box-shadow: 0 0 10px #ff66ff; animation: orbit-fast-4 0.3s linear infinite; top: 15px; left: 35px;"></div>
+        </div>
+        <!-- Large pulsing orb -->
+        <div style="position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%); width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle, #ffffff 30%, #00ffcc 55%, #ff00ff 75%, transparent 90%); box-shadow: 0 0 25px #00ffcc, 0 0 50px rgba(255,0,255,0.4), 0 0 80px rgba(0,255,136,0.2); animation: pulse-charge 0.3s ease-in-out infinite;"></div>
+        <!-- Screen vibration hint -->
+        <div style="position: absolute; inset: 0; border: 1px solid rgba(0,255,204,0.1); animation: vibrate 0.05s linear infinite;"></div>
+        <style>
+          @keyframes orbit-fast-1 { 0% { transform: rotate(0deg) translateX(20px); } 100% { transform: rotate(360deg) translateX(20px); } }
+          @keyframes orbit-fast-2 { 0% { transform: rotate(90deg) translateX(18px); } 100% { transform: rotate(450deg) translateX(18px); } }
+          @keyframes orbit-fast-3 { 0% { transform: rotate(180deg) translateX(22px); } 100% { transform: rotate(540deg) translateX(22px); } }
+          @keyframes orbit-fast-4 { 0% { transform: rotate(270deg) translateX(16px); } 100% { transform: rotate(630deg) translateX(16px); } }
+          @keyframes pulse-charge { 0%,100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.2); } }
+          @keyframes vibrate { 0% { transform: translate(0,0); } 25% { transform: translate(1px,-1px); } 50% { transform: translate(-1px,1px); } 75% { transform: translate(1px,1px); } }
+        </style>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Phase 2: Fire &amp; Sustain (0.8s &rarr; 6.0s)</h3>
+  <div class="mockup">
+    <div class="mockup-header">Active Beam &mdash; Dual Layer + Particle Stream</div>
+    <div class="mockup-body" style="background: #06060f; min-height: 300px; position: relative; display: flex; align-items: flex-end; justify-content: center; overflow: hidden;">
+      <!-- Player -->
+      <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 20px; height: 20px; background: #00ccff; clip-path: polygon(50% 0%, 100% 100%, 0% 100%); box-shadow: 0 0 10px #00ccff; z-index: 5;"></div>
+
+      <!-- OUTER SHELL - translucent wider beam -->
+      <div style="position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%); width: 32px; height: 220px; background: linear-gradient(to top, rgba(0,255,136,0.35), rgba(0,255,204,0.15) 40%, rgba(255,0,255,0.15) 70%, transparent 95%); border: 1px solid rgba(0,255,136,0.25); border-radius: 16px; box-shadow: 0 0 25px rgba(0,255,136,0.2), 0 0 50px rgba(255,0,255,0.1); animation: shell-pulse 0.6s ease-in-out infinite;"></div>
+
+      <!-- INNER CORE - bright narrow beam -->
+      <div style="position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%); width: 6px; height: 220px; background: linear-gradient(to top, #ffffff, #00ffcc 15%, #00ff88 50%, #ff88ff 80%, transparent 95%); box-shadow: 0 0 10px #00ffcc, 0 0 20px rgba(0,255,136,0.6); border-radius: 3px;"></div>
+
+      <!-- ELECTRIC ARCS between layers -->
+      <svg style="position: absolute; bottom: 35px; left: calc(50% - 20px); width: 40px; height: 220px;" viewBox="0 0 40 220">
+        <path d="M20 220 L14 200 L26 185 L12 165 L24 145 L16 125 L28 105 L14 85 L22 65 L18 45 L20 20" stroke="#00ffcc" stroke-width="1.5" fill="none" opacity="0.7" style="animation: arc-flicker 0.15s steps(2) infinite;">
+          <animate attributeName="d" dur="0.3s" repeatCount="indefinite" values="M20 220 L14 200 L26 185 L12 165 L24 145 L16 125 L28 105 L14 85 L22 65 L18 45 L20 20;M20 220 L25 195 L15 180 L27 160 L13 140 L25 120 L15 100 L26 80 L18 60 L24 40 L20 20;M20 220 L14 200 L26 185 L12 165 L24 145 L16 125 L28 105 L14 85 L22 65 L18 45 L20 20"/>
+        </path>
+        <path d="M20 220 L28 195 L14 175 L26 155 L16 135 L24 115 L12 95 L26 75 L18 55 L22 35 L20 15" stroke="#ff44ff" stroke-width="1" fill="none" opacity="0.4" style="animation: arc-flicker 0.2s steps(2) infinite 0.1s;">
+          <animate attributeName="d" dur="0.35s" repeatCount="indefinite" values="M20 220 L28 195 L14 175 L26 155 L16 135 L24 115 L12 95 L26 75 L18 55 L22 35 L20 15;M20 220 L13 198 L27 178 L15 158 L27 138 L13 118 L27 98 L15 78 L23 58 L17 38 L20 15;M20 220 L28 195 L14 175 L26 155 L16 135 L24 115 L12 95 L26 75 L18 55 L22 35 L20 15"/>
+        </path>
+      </svg>
+
+      <!-- STREAMING PARTICLES along beam edges -->
+      <div style="position: absolute; bottom: 80px; left: calc(50% - 22px); width: 3px; height: 3px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 8px #00ff88; animation: stream-up-l 0.8s linear infinite;"></div>
+      <div style="position: absolute; bottom: 120px; left: calc(50% + 18px); width: 4px; height: 4px; background: #ff66ff; border-radius: 50%; box-shadow: 0 0 10px #ff00ff; animation: stream-up-r 0.6s linear infinite 0.2s;"></div>
+      <div style="position: absolute; bottom: 60px; left: calc(50% + 20px); width: 3px; height: 3px; background: #00ffcc; border-radius: 50%; box-shadow: 0 0 6px #00ffcc; animation: stream-up-r 0.9s linear infinite 0.5s;"></div>
+      <div style="position: absolute; bottom: 150px; left: calc(50% - 24px); width: 2px; height: 2px; background: #ff88ff; border-radius: 50%; box-shadow: 0 0 6px #ff00ff; animation: stream-up-l 0.7s linear infinite 0.3s;"></div>
+      <div style="position: absolute; bottom: 100px; left: calc(50% - 18px); width: 3px; height: 3px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 8px #00ff88; animation: stream-up-l 1s linear infinite 0.7s;"></div>
+
+      <!-- MUZZLE FLARE at player -->
+      <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 40px; height: 20px; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,0.8), rgba(0,255,204,0.4) 40%, transparent 70%); box-shadow: 0 0 20px #00ffcc; animation: muzzle-pulse 0.3s ease-in-out infinite;"></div>
+
+      <!-- IMPACT BURST at boss -->
+      <div style="position: absolute; top: 15px; left: 50%; transform: translateX(-50%);">
+        <div style="width: 70px; height: 70px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.9) 10%, rgba(0,255,136,0.5) 30%, rgba(255,0,255,0.3) 55%, transparent 75%); box-shadow: 0 0 40px #00ffcc, 0 0 80px rgba(255,0,255,0.3); animation: impact-pulse 0.4s ease-in-out infinite;"></div>
+        <!-- Sparks flying off boss -->
+        <div style="position: absolute; width: 3px; height: 3px; background: #fff; border-radius: 50%; box-shadow: 0 0 6px #00ffcc; top: 25px; left: -5px; animation: spark-l 0.5s ease-out infinite;"></div>
+        <div style="position: absolute; width: 2px; height: 2px; background: #fff; border-radius: 50%; box-shadow: 0 0 4px #ff00ff; top: 20px; right: -8px; animation: spark-r 0.6s ease-out infinite 0.15s;"></div>
+        <div style="position: absolute; width: 3px; height: 3px; background: #fff; border-radius: 50%; box-shadow: 0 0 6px #00ff88; top: 35px; left: -10px; animation: spark-l 0.45s ease-out infinite 0.3s;"></div>
+      </div>
+
+      <style>
+        @keyframes shell-pulse { 0%,100% { opacity: 0.8; width: 30px; } 50% { opacity: 1; width: 36px; } }
+        @keyframes arc-flicker { 0%,100% { opacity: 0.7; } 50% { opacity: 0.3; } }
+        @keyframes stream-up-l { 0% { transform: translateY(0) translateX(0); opacity: 1; } 100% { transform: translateY(-120px) translateX(-8px); opacity: 0; } }
+        @keyframes stream-up-r { 0% { transform: translateY(0) translateX(0); opacity: 1; } 100% { transform: translateY(-120px) translateX(8px); opacity: 0; } }
+        @keyframes muzzle-pulse { 0%,100% { opacity: 0.7; transform: translateX(-50%) scale(1); } 50% { opacity: 1; transform: translateX(-50%) scale(1.15); } }
+        @keyframes impact-pulse { 0%,100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+        @keyframes spark-l { 0% { opacity: 1; transform: translate(0,0); } 100% { opacity: 0; transform: translate(-20px, -10px); } }
+        @keyframes spark-r { 0% { opacity: 1; transform: translate(0,0); } 100% { opacity: 0; transform: translate(20px, -12px); } }
+      </style>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Phase 3: Fade-Out (6.0s &rarr; 6.8s)</h3>
+  <div class="mockup">
+    <div class="mockup-header">Beam Dying &mdash; Flicker + Narrow + Disperse</div>
+    <div class="mockup-body" style="background: #06060f; min-height: 200px; position: relative; display: flex; align-items: flex-end; justify-content: center; overflow: hidden;">
+      <!-- Player -->
+      <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 20px; height: 20px; background: #00ccff; clip-path: polygon(50% 0%, 100% 100%, 0% 100%); box-shadow: 0 0 10px #00ccff; z-index: 5;"></div>
+
+      <!-- Flickering thin beam -->
+      <div style="position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%); width: 3px; height: 150px; background: linear-gradient(to top, rgba(0,255,204,0.6), rgba(0,255,136,0.3) 50%, transparent 80%); box-shadow: 0 0 5px rgba(0,255,136,0.3); animation: flicker-die 0.15s steps(2) infinite;"></div>
+
+      <!-- Dispersing particles flying outward -->
+      <div style="position: absolute; bottom: 100px; left: 50%; width: 3px; height: 3px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 6px #00ff88; animation: disperse-1 1.2s ease-out infinite;"></div>
+      <div style="position: absolute; bottom: 80px; left: 50%; width: 2px; height: 2px; background: #ff44ff; border-radius: 50%; box-shadow: 0 0 4px #ff00ff; animation: disperse-2 1s ease-out infinite 0.2s;"></div>
+      <div style="position: absolute; bottom: 120px; left: 50%; width: 4px; height: 4px; background: #00ffcc; border-radius: 50%; box-shadow: 0 0 8px #00ffcc; animation: disperse-3 1.4s ease-out infinite 0.4s;"></div>
+      <div style="position: absolute; bottom: 60px; left: 50%; width: 2px; height: 2px; background: #ff88ff; border-radius: 50%; box-shadow: 0 0 4px #ff00ff; animation: disperse-4 1.1s ease-out infinite 0.6s;"></div>
+
+      <!-- Fading muzzle -->
+      <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 20px; height: 10px; border-radius: 50%; background: radial-gradient(ellipse, rgba(0,255,204,0.3), transparent 70%); animation: flicker-die 0.2s steps(2) infinite;"></div>
+
+      <style>
+        @keyframes flicker-die { 0% { opacity: 0.7; } 30% { opacity: 0.1; } 60% { opacity: 0.5; } 100% { opacity: 0.2; } }
+        @keyframes disperse-1 { 0% { transform: translate(0,0); opacity: 1; } 100% { transform: translate(-40px, -30px); opacity: 0; } }
+        @keyframes disperse-2 { 0% { transform: translate(0,0); opacity: 1; } 100% { transform: translate(35px, -20px); opacity: 0; } }
+        @keyframes disperse-3 { 0% { transform: translate(0,0); opacity: 1; } 100% { transform: translate(-25px, 15px); opacity: 0; } }
+        @keyframes disperse-4 { 0% { transform: translate(0,0); opacity: 1; } 100% { transform: translate(30px, 25px); opacity: 0; } }
+      </style>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>ECS Entity Breakdown</h3>
+  <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 12px; line-height: 2;">
+    <div><span style="color: #00ffcc; font-weight: bold;">LaserCharge</span> &mdash; charge-up state (0.8s timer, particle spawn rate, orb scale)</div>
+    <div><span style="color: #00ff88; font-weight: bold;">LaserBeamCore</span> &mdash; inner bright beam sprite (narrow, high HDR)</div>
+    <div><span style="color: #00ff88; font-weight: bold;">LaserBeamShell</span> &mdash; outer translucent shell sprite (wider, lower alpha, pulsing)</div>
+    <div><span style="color: #ff44ff; font-weight: bold;">LaserArc</span> &mdash; electric arc segments between core/shell (randomized each frame)</div>
+    <div><span style="color: #ff88ff; font-weight: bold;">LaserStreamParticle</span> &mdash; small particles drifting along beam edges</div>
+    <div><span style="color: #ffffff; font-weight: bold;">LaserImpact</span> &mdash; burst effect at beam/boss intersection point</div>
+    <div><span style="color: #ffcc00; font-weight: bold;">LaserMuzzle</span> &mdash; glow at player origin point</div>
+  </div>
+</div>
