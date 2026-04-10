@@ -1,9 +1,11 @@
 use bevy::prelude::*;
-use kira::manager::{AudioManager, AudioManagerSettings, backend::DefaultBackend};
-use kira::sound::static_sound::StaticSoundData;
-use std::io::Cursor;
+use std::sync::Arc;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+// ---------------------------------------------------------------------------
+// Sound effect enum (unchanged — all callsites use this)
+// ---------------------------------------------------------------------------
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 #[allow(dead_code)]
 pub enum SoundEffect {
     PlayerShoot,
@@ -30,39 +32,113 @@ pub enum SoundEffect {
     LaserFadeOut,
 }
 
+const ALL_EFFECTS: &[SoundEffect] = &[
+    SoundEffect::PlayerShoot,
+    SoundEffect::PlayerHit,
+    SoundEffect::EnemyShoot,
+    SoundEffect::EnemyHit,
+    SoundEffect::Explosion,
+    SoundEffect::GameOver,
+    SoundEffect::GameWon,
+    SoundEffect::MenuSelect,
+    SoundEffect::BossSpawn,
+    SoundEffect::PhaseShift,
+    SoundEffect::RageBurst,
+    SoundEffect::DashTelegraph,
+    SoundEffect::BeamSweep,
+    SoundEffect::ChargeWindUp,
+    SoundEffect::HazardSpawn,
+    SoundEffect::HazardExplode,
+    SoundEffect::RoundClear,
+    SoundEffect::ShockwavePowerUp,
+    SoundEffect::LaserHum,
+    SoundEffect::LaserCharge,
+    SoundEffect::LaserFire,
+    SoundEffect::LaserFadeOut,
+];
+
+// ---------------------------------------------------------------------------
+// Event (unchanged)
+// ---------------------------------------------------------------------------
+
 #[derive(Event)]
 pub struct SoundEvent(pub SoundEffect);
 
-pub struct SynthAudio {
-    pub manager: AudioManager<DefaultBackend>,
+// ---------------------------------------------------------------------------
+// SoundLibrary resource (replaces kira's SynthAudio)
+// ---------------------------------------------------------------------------
+
+#[derive(Resource)]
+pub struct SoundLibrary {
+    sounds: std::collections::HashMap<SoundEffect, Handle<AudioSource>>,
     pub sound_enabled: bool,
-    pub volume: f32,
 }
 
-pub fn setup_synth_audio(world: &mut World) {
-    let manager = AudioManager::<DefaultBackend>::new(AudioManagerSettings::default())
-        .expect("Failed to initialize audio manager");
-    world.insert_non_send_resource(SynthAudio {
-        manager,
+// ---------------------------------------------------------------------------
+// Setup: pre-generate all sounds as AudioSource assets
+// ---------------------------------------------------------------------------
+
+pub fn setup_audio(
+    mut commands: Commands,
+    mut audio_assets: ResMut<Assets<AudioSource>>,
+) {
+    let mut sounds = std::collections::HashMap::new();
+
+    for &effect in ALL_EFFECTS {
+        let samples = generate_sound(effect, 0.7);
+        let wav_bytes = samples_to_wav_bytes(&samples, 44100);
+        let source = AudioSource {
+            bytes: Arc::from(wav_bytes),
+        };
+        let handle = audio_assets.add(source);
+        sounds.insert(effect, handle);
+    }
+
+    commands.insert_resource(SoundLibrary {
+        sounds,
         sound_enabled: true,
-        volume: 0.7,
     });
 }
 
-pub fn play_sounds(mut audio: NonSendMut<SynthAudio>, mut events: EventReader<SoundEvent>) {
-    if !audio.sound_enabled {
+// ---------------------------------------------------------------------------
+// Play system: spawn one-shot AudioPlayer entities from SoundEvents
+// ---------------------------------------------------------------------------
+
+pub fn play_sounds(
+    mut commands: Commands,
+    library: Res<SoundLibrary>,
+    mut events: EventReader<SoundEvent>,
+) {
+    if !library.sound_enabled {
         events.clear();
         return;
     }
 
     for event in events.read() {
-        let samples = generate_sound(event.0, audio.volume);
-        let data = samples_to_sound_data(samples, 44100);
-        if let Ok(data) = data {
-            let _ = audio.manager.play(data);
+        if let Some(handle) = library.sounds.get(&event.0) {
+            commands.spawn((
+                AudioPlayer::new(handle.clone()),
+                PlaybackSettings::DESPAWN,
+            ));
         }
     }
 }
+
+// ---------------------------------------------------------------------------
+// Toggle (called from pause menu)
+// ---------------------------------------------------------------------------
+
+pub fn toggle_sound(library: &mut SoundLibrary) {
+    library.sound_enabled = !library.sound_enabled;
+    info!(
+        "Sound toggled: {}",
+        if library.sound_enabled { "ON" } else { "OFF" }
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Procedural sound generation (unchanged math, baked into WAV bytes)
+// ---------------------------------------------------------------------------
 
 fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
     let sample_rate = 44100.0;
@@ -172,7 +248,6 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 .collect()
         }
         SoundEffect::BossSpawn => {
-            // Low rumble + rising tone: 80→200 Hz sweep, 500ms
             let duration = 0.5;
             let num_samples = (sample_rate * duration) as usize;
             (0..num_samples)
@@ -185,7 +260,6 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 .collect()
         }
         SoundEffect::PhaseShift => {
-            // White noise burst + 300→100 Hz sweep, 200ms
             let duration = 0.2;
             let num_samples = (sample_rate * duration) as usize;
             (0..num_samples)
@@ -200,7 +274,6 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 .collect()
         }
         SoundEffect::RageBurst => {
-            // Impact + bass drop: 50 Hz thump + noise, 300ms
             let duration = 0.3;
             let num_samples = (sample_rate * duration) as usize;
             (0..num_samples)
@@ -214,7 +287,6 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 .collect()
         }
         SoundEffect::DashTelegraph => {
-            // Rising whine: 200→800 Hz sweep, 800ms
             let duration = 0.8;
             let num_samples = (sample_rate * duration) as usize;
             (0..num_samples)
@@ -227,7 +299,6 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 .collect()
         }
         SoundEffect::BeamSweep => {
-            // Sustained mid-frequency: 400 Hz tone, 500ms
             let duration = 0.5;
             let num_samples = (sample_rate * duration) as usize;
             (0..num_samples)
@@ -239,7 +310,6 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 .collect()
         }
         SoundEffect::ChargeWindUp => {
-            // Accelerating rumble: 100→400 Hz, 800ms
             let duration = 0.8;
             let num_samples = (sample_rate * duration) as usize;
             (0..num_samples)
@@ -253,7 +323,6 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 .collect()
         }
         SoundEffect::HazardSpawn => {
-            // Bubble/pop: 600→200 Hz, 100ms
             let duration = 0.1;
             let num_samples = (sample_rate * duration) as usize;
             (0..num_samples)
@@ -266,7 +335,6 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 .collect()
         }
         SoundEffect::HazardExplode => {
-            // Sharp crack: noise + 200 Hz, 150ms
             let duration = 0.15;
             let num_samples = (sample_rate * duration) as usize;
             (0..num_samples)
@@ -280,7 +348,6 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 .collect()
         }
         SoundEffect::RoundClear => {
-            // Triumphant chord: 400+500+600 Hz, 800ms
             let duration = 0.8;
             let num_samples = (sample_rate * duration) as usize;
             (0..num_samples)
@@ -295,7 +362,6 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 .collect()
         }
         SoundEffect::ShockwavePowerUp => {
-            // Deep boom: 40→80 Hz sweep + noise, 400ms
             let duration = 0.4;
             let num_samples = (sample_rate * duration) as usize;
             (0..num_samples)
@@ -310,7 +376,6 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 .collect()
         }
         SoundEffect::LaserHum => {
-            // Sustained 300 Hz tone, 500ms
             let duration = 0.5;
             let num_samples = (sample_rate * duration) as usize;
             (0..num_samples)
@@ -322,7 +387,6 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 .collect()
         }
         SoundEffect::LaserCharge => {
-            // Ascending sweep: 100→800 Hz over 0.8s
             let duration = 0.8;
             let num_samples = (sample_rate * duration) as usize;
             (0..num_samples)
@@ -336,7 +400,6 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 .collect()
         }
         SoundEffect::LaserFire => {
-            // Short bright impact: 800→200 Hz, 0.15s
             let duration = 0.15;
             let num_samples = (sample_rate * duration) as usize;
             (0..num_samples)
@@ -351,7 +414,6 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 .collect()
         }
         SoundEffect::LaserFadeOut => {
-            // Descending sweep: 400→80 Hz over 0.5s
             let duration = 0.5;
             let num_samples = (sample_rate * duration) as usize;
             (0..num_samples)
@@ -366,35 +428,37 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
     }
 }
 
-fn samples_to_sound_data(
-    samples: Vec<f32>,
-    sample_rate: u32,
-) -> Result<StaticSoundData, Box<dyn std::error::Error>> {
-    let spec = hound::WavSpec {
-        channels: 1,
-        sample_rate,
-        bits_per_sample: 32,
-        sample_format: hound::SampleFormat::Float,
-    };
+// ---------------------------------------------------------------------------
+// WAV encoding: f32 samples -> WAV byte buffer for Bevy's AudioSource
+// ---------------------------------------------------------------------------
 
-    let mut buffer = Cursor::new(Vec::new());
-    {
-        let mut writer = hound::WavWriter::new(&mut buffer, spec)?;
-        for sample in &samples {
-            writer.write_sample(*sample)?;
-        }
-        writer.finalize()?;
+fn samples_to_wav_bytes(samples: &[f32], sample_rate: u32) -> Vec<u8> {
+    let data_size = (samples.len() * 4) as u32;
+    let file_size = 36 + data_size;
+
+    let mut buf = Vec::with_capacity(file_size as usize + 8);
+
+    // RIFF header
+    buf.extend_from_slice(b"RIFF");
+    buf.extend_from_slice(&file_size.to_le_bytes());
+    buf.extend_from_slice(b"WAVE");
+
+    // fmt chunk
+    buf.extend_from_slice(b"fmt ");
+    buf.extend_from_slice(&16u32.to_le_bytes());
+    buf.extend_from_slice(&3u16.to_le_bytes()); // IEEE float
+    buf.extend_from_slice(&1u16.to_le_bytes()); // mono
+    buf.extend_from_slice(&sample_rate.to_le_bytes());
+    buf.extend_from_slice(&(sample_rate * 4).to_le_bytes()); // byte rate
+    buf.extend_from_slice(&4u16.to_le_bytes()); // block align
+    buf.extend_from_slice(&32u16.to_le_bytes()); // bits per sample
+
+    // data chunk
+    buf.extend_from_slice(b"data");
+    buf.extend_from_slice(&data_size.to_le_bytes());
+    for &sample in samples {
+        buf.extend_from_slice(&sample.to_le_bytes());
     }
 
-    let data = StaticSoundData::from_cursor(Cursor::new(buffer.into_inner()))?;
-
-    Ok(data)
-}
-
-pub fn toggle_sound(audio: &mut SynthAudio) {
-    audio.sound_enabled = !audio.sound_enabled;
-    info!(
-        "Sound toggled: {}",
-        if audio.sound_enabled { "ON" } else { "OFF" }
-    );
+    buf
 }
