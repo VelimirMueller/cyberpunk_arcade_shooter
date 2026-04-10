@@ -529,7 +529,7 @@ pub fn laser_system(
                     .is_none_or(|t| t.elapsed().as_secs_f32() > 0.075)
                 {
                     boss.current_hp = boss.current_hp.saturating_sub(1);
-                    boss.last_laser_hit_time = Some(std::time::Instant::now());
+                    boss.last_laser_hit_time = Some(crate::utils::time_compat::Instant::now());
                     sound_events.write(SoundEvent(SoundEffect::EnemyHit));
 
                     // Spawn/update impact at boss position

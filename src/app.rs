@@ -41,7 +41,6 @@ use crate::ui::menus::{
     despawn_title_menu, spawn_game_over_screen, spawn_game_won_screen, spawn_pause_menu,
     spawn_title_menu,
 };
-use crate::utils::config::QualityTier;
 use bevy::core_pipeline::core_2d::Camera2d;
 use bevy::core_pipeline::{
     bloom::Bloom,
@@ -123,7 +122,6 @@ pub fn main() {
             CrtPostProcessPlugin,
         ))
         .init_state::<GameState>()
-        .init_resource::<QualityTier>()
         .init_resource::<GameData>()
         .init_resource::<ScreenShake>()
         .add_event::<SoundEvent>()
@@ -263,29 +261,21 @@ pub fn main() {
 }
 
 #[allow(dead_code)]
-fn setup(
-    mut commands: Commands,
-    _next_state: ResMut<NextState<GameState>>,
-    quality: Res<QualityTier>,
-) {
-    let use_effects = *quality == QualityTier::High;
-
-    let mut camera = commands.spawn((
+fn setup(mut commands: Commands, _next_state: ResMut<NextState<GameState>>) {
+    commands.spawn((
         Camera2d,
         Transform::default(),
         GlobalTransform::default(),
         Camera {
-            hdr: use_effects,
+            hdr: true,
             clear_color: ClearColorConfig::Custom(Color::BLACK),
             ..default()
         },
         Tonemapping::TonyMcMapface,
+        Bloom::default(),
         DebandDither::Enabled,
+        CrtSettings::default(),
     ));
-
-    if use_effects {
-        camera.insert((Bloom::default(), CrtSettings::default()));
-    }
 }
 
 // ============ NEW GAME LOOP SYSTEMS ============
