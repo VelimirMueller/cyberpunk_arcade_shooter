@@ -3,6 +3,7 @@
 use crate::app::{GameEntity, ScreenShake};
 use crate::core::boss::components::*;
 use crate::systems::audio::{SoundEffect, SoundEvent};
+use crate::utils::config::ENTITY_SCALE;
 use bevy::prelude::*;
 
 /// Grid Phantom attack pattern: dash + telegraph + trail
@@ -83,7 +84,7 @@ pub fn phantom_attack(
                     commands.spawn((
                         Sprite {
                             color: Color::srgba(0.0, 8.0, 8.0, 0.8),
-                            custom_size: Some(Vec2::new(20.0, 20.0)),
+                            custom_size: Some(Vec2::new(20.0 * ENTITY_SCALE, 20.0 * ENTITY_SCALE)),
                             ..default()
                         },
                         Transform::from_translation(boss_pos.extend(0.0)),
@@ -160,7 +161,7 @@ pub fn phantom_attack(
                         commands.spawn((
                             Sprite {
                                 color: Color::srgb(0.0, 6.0, 6.0),
-                                custom_size: Some(Vec2::new(8.0, 8.0)),
+                                custom_size: Some(Vec2::new(8.0 * ENTITY_SCALE, 8.0 * ENTITY_SCALE)),
                                 ..default()
                             },
                             Transform::from_translation(boss_pos.extend(0.0)),
@@ -329,7 +330,7 @@ pub fn sentinel_attack(
                             commands.spawn((
                                 Sprite {
                                     color: Color::srgb(8.0, 0.0, 8.0),
-                                    custom_size: Some(Vec2::new(4.0, 4.0)),
+                                    custom_size: Some(Vec2::new(4.0 * ENTITY_SCALE, 4.0 * ENTITY_SCALE)),
                                     ..default()
                                 },
                                 Transform::from_translation(seg_pos.extend(0.0)),
@@ -410,7 +411,7 @@ pub fn berserker_attack(
                     commands.spawn((
                         Sprite {
                             color: Color::srgba(8.0, 4.0, 0.0, 0.8),
-                            custom_size: Some(Vec2::new(80.0, 80.0)),
+                            custom_size: Some(Vec2::new(80.0 * ENTITY_SCALE, 80.0 * ENTITY_SCALE)),
                             ..default()
                         },
                         Transform::from_translation(boss_pos.extend(0.0)),
@@ -516,7 +517,7 @@ pub fn weaver_attack(
                     commands.spawn((
                         Sprite {
                             color: Color::srgba(0.5, 0.0, 1.0, 0.3),
-                            custom_size: Some(Vec2::new(60.0, 60.0)),
+                            custom_size: Some(Vec2::new(60.0 * ENTITY_SCALE, 60.0 * ENTITY_SCALE)),
                             ..default()
                         },
                         Transform::from_translation(Vec3::new(x, y, 0.0)),

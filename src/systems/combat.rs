@@ -3,6 +3,7 @@ use crate::core::boss::components::Boss;
 use crate::core::player::components::{Player, PlayerParticle, PlayerRotationTracker};
 use crate::systems::audio::{SoundEffect, SoundEvent};
 use crate::systems::powerups::LaserActive;
+use crate::utils::config::ENTITY_SCALE;
 use bevy::prelude::*;
 
 #[derive(Component)]
@@ -166,7 +167,7 @@ pub(crate) fn player_shoot_system(
                         commands.spawn((
                             Sprite {
                                 color: Color::srgb(1.0, 7.3, 0.7),
-                                custom_size: Some(Vec2::splat(3.0)),
+                                custom_size: Some(Vec2::splat(3.0 * ENTITY_SCALE)),
                                 ..default()
                             },
                             Transform::from_translation(pos),

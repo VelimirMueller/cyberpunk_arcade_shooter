@@ -41,7 +41,7 @@ use crate::ui::menus::{
     despawn_title_menu, spawn_game_over_screen, spawn_game_won_screen, spawn_pause_menu,
     spawn_title_menu,
 };
-use crate::utils::config::QualityTier;
+use crate::utils::config::{ENTITY_SCALE, QualityTier};
 use bevy::core_pipeline::core_2d::Camera2d;
 use bevy::core_pipeline::{
     bloom::Bloom,
@@ -345,7 +345,7 @@ pub fn menu_input_system(
             GlobalTransform::default(),
             Sprite {
                 color: Color::srgb(1.2, 2.8, 1.2),
-                custom_size: Some(Vec2::new(50.0, 50.0)),
+                custom_size: Some(Vec2::new(50.0 * ENTITY_SCALE, 50.0 * ENTITY_SCALE)),
                 ..default()
             },
         ));
