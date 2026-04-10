@@ -47,6 +47,7 @@ use bevy::core_pipeline::{
     tonemapping::{DebandDither, Tonemapping},
 };
 use bevy::prelude::*;
+use bevy::window::WindowPlugin;
 
 #[derive(Resource)]
 pub struct GameData {
@@ -107,7 +108,19 @@ pub struct GameEntity;
 
 pub fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, CrtPostProcessPlugin))
+        .add_plugins((
+            DefaultPlugins.set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "Cyberpunk: The Incredible Bloom Cube".to_string(),
+                    canvas: Some("#game-canvas".to_string()),
+                    fit_canvas_to_parent: true,
+                    prevent_default_event_handling: true,
+                    ..default()
+                }),
+                ..default()
+            }),
+            CrtPostProcessPlugin,
+        ))
         .init_state::<GameState>()
         .init_resource::<GameData>()
         .init_resource::<ScreenShake>()
@@ -119,7 +132,7 @@ pub fn main() {
             Startup,
             (setup, spawn_background_stars, setup_shockwave_assets),
         )
-        .add_systems(Startup, crate::systems::audio::setup_synth_audio)
+        .add_systems(Startup, crate::systems::audio::setup_audio)
         .add_systems(
             Update,
             (
@@ -319,7 +332,7 @@ pub fn pause_menu_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<GameState>>,
     mut commands: Commands,
-    mut audio: NonSendMut<crate::systems::audio::SynthAudio>,
+    mut library: ResMut<crate::systems::audio::SoundLibrary>,
     pause_query: Query<Entity, With<PauseEntity>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
@@ -331,13 +344,12 @@ pub fn pause_menu_system(
     }
 
     if keyboard_input.just_pressed(KeyCode::KeyM) {
-        crate::systems::audio::toggle_sound(&mut audio);
+        crate::systems::audio::toggle_sound(&mut library);
         // Respawn pause menu with updated sound status
         for entity in &pause_query {
             commands.entity(entity).despawn();
         }
-        // Re-spawn with updated status — use inline spawn since we can't call the OnEnter system directly
-        let sound_status = if audio.sound_enabled { "ON" } else { "OFF" };
+        let sound_status = if library.sound_enabled { "ON" } else { "OFF" };
         commands
             .spawn((
                 Node {
