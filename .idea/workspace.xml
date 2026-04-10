@@ -13,35 +13,6 @@
   <component name="ChangeListManager">
     <list default="true" id="c7bf7c83-c036-4727-b202-11f9ea52bec0" name="Changes" comment="overhaul and add juice">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/boss/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/boss/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/camera.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/camera.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/player/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/player/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/player/plugin.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/player/plugin.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/time.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/time.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/world/barriers/components.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/world/barriers/components.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/world/barriers/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/world/barriers/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/world/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/world/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/env.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/env.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/systems/background.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/background.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/systems/inventory.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/inventory.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/systems/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/systems/particles.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/particles.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/systems/post_processing.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/post_processing.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/announcement.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/announcement.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/inventory_ui.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/inventory_ui.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/market_ui.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/market_ui.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/menus.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/menus.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/config.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/config.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/loader.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/loader.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/boss_integration.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/boss_integration.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/helpers/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/helpers/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/laser_integration.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/laser_integration.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,6 +100,7 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.rust.reset.selective.auto.import&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;boss-phases-laser-tests&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
@@ -229,6 +201,7 @@
       <workItem from="1773842293505" duration="8262000" />
       <workItem from="1773859299011" duration="1477000" />
       <workItem from="1773931515502" duration="10137000" />
+      <workItem from="1775808472033" duration="149000" />
     </task>
     <task id="LOCAL-00001" summary="add basic game with a player, barriers and basic movements">
       <option name="closed" value="true" />
@@ -302,7 +275,15 @@
       <option name="project" value="LOCAL" />
       <updated>1773854682783</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="overhaul and add juice">
+      <option name="closed" value="true" />
+      <created>1775765608883</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1775765608883</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
