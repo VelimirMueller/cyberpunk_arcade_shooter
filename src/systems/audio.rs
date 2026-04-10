@@ -78,10 +78,7 @@ pub struct SoundLibrary {
 // Setup: pre-generate all sounds as AudioSource assets
 // ---------------------------------------------------------------------------
 
-pub fn setup_audio(
-    mut commands: Commands,
-    mut audio_assets: ResMut<Assets<AudioSource>>,
-) {
+pub fn setup_audio(mut commands: Commands, mut audio_assets: ResMut<Assets<AudioSource>>) {
     let mut sounds = std::collections::HashMap::new();
 
     for &effect in ALL_EFFECTS {
@@ -116,10 +113,7 @@ pub fn play_sounds(
 
     for event in events.read() {
         if let Some(handle) = library.sounds.get(&event.0) {
-            commands.spawn((
-                AudioPlayer::new(handle.clone()),
-                PlaybackSettings::DESPAWN,
-            ));
+            commands.spawn((AudioPlayer::new(handle.clone()), PlaybackSettings::DESPAWN));
         }
     }
 }
