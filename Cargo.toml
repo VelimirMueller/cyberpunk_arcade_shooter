@@ -3,8 +3,10 @@ name = "cyberpunk_rpg"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+default = []
+webgpu = ["bevy/webgpu"]
+
 [dependencies]
 bevy = "0.16.1"
 rand = "0.8"
-kira = "0.9"
-hound = "3.5"
