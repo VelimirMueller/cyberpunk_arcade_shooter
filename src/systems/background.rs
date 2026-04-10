@@ -1,4 +1,5 @@
 use crate::env::{CEILING_Y, GROUND_Y, LEFT_BOUND, RIGHT_BOUND};
+use crate::utils::config::STAR_COUNT;
 use bevy::prelude::*;
 use rand::Rng;
 
@@ -15,7 +16,7 @@ pub fn spawn_background_stars(mut commands: Commands) {
         Color::srgba(1.5, 0.5, 1.0, 0.15),
     ];
 
-    for _ in 0..40 {
+    for _ in 0..STAR_COUNT {
         let x = rng.gen_range(LEFT_BOUND..RIGHT_BOUND);
         let y = rng.gen_range(GROUND_Y..CEILING_Y);
         let size = rng.gen_range(1.0..3.0);
