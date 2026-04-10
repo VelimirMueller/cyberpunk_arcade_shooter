@@ -118,6 +118,7 @@ struct CrtPipeline {
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 struct CrtPipelineKey {
     texture_format: TextureFormat,
+    is_mobile: bool,
 }
 
 // ---------------------------------------------------------------------------
@@ -161,13 +162,18 @@ impl SpecializedRenderPipeline for CrtPipeline {
     type Key = CrtPipelineKey;
 
     fn specialize(&self, key: Self::Key) -> RenderPipelineDescriptor {
+        let mut shader_defs = vec![];
+        if key.is_mobile {
+            shader_defs.push("MOBILE".into());
+        }
+
         RenderPipelineDescriptor {
             label: Some("crt_post_process_pipeline".into()),
             layout: vec![self.bind_group_layout.clone()],
             vertex: fullscreen_shader_vertex_state(),
             fragment: Some(FragmentState {
                 shader: CRT_SHADER_HANDLE,
-                shader_defs: vec![],
+                shader_defs,
                 entry_point: "fragment".into(),
                 targets: vec![Some(ColorTargetState {
                     format: key.texture_format,
@@ -268,9 +274,9 @@ fn prepare_crt_pipelines(
     pipeline_cache: Res<PipelineCache>,
     mut pipelines: ResMut<SpecializedRenderPipelines<CrtPipeline>>,
     crt_pipeline: Res<CrtPipeline>,
-    views: Query<(Entity, &ExtractedView), With<CrtSettings>>,
+    views: Query<(Entity, &ExtractedView, &CrtSettings)>,
 ) {
-    for (entity, view) in views.iter() {
+    for (entity, view, settings) in views.iter() {
         let pipeline_id = pipelines.specialize(
             &pipeline_cache,
             &crt_pipeline,
@@ -280,6 +286,7 @@ fn prepare_crt_pipelines(
                 } else {
                     TextureFormat::bevy_default()
                 },
+                is_mobile: settings.curvature_amount == 0.0,
             },
         );
         commands.entity(entity).insert(CrtPipelineId(pipeline_id));
