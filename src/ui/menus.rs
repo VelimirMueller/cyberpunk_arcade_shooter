@@ -135,10 +135,7 @@ pub fn despawn_title_menu(mut commands: Commands, query: Query<Entity, With<Menu
 // 2. Pause Screen  (GameState::Paused)
 // ═════════════════════════════════════════════════════════════════
 
-pub fn spawn_pause_menu(
-    mut commands: Commands,
-    library: Res<crate::systems::audio::SoundLibrary>,
-) {
+pub fn spawn_pause_menu(mut commands: Commands, library: Res<crate::systems::audio::SoundLibrary>) {
     let sound_status = if library.sound_enabled { "ON" } else { "OFF" };
 
     commands
