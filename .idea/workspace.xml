@@ -13,6 +13,7 @@
   <component name="ChangeListManager">
     <list default="true" id="c7bf7c83-c036-4727-b202-11f9ea52bec0" name="Changes" comment="overhaul and add juice">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -202,6 +203,7 @@
       <workItem from="1773859299011" duration="1477000" />
       <workItem from="1773931515502" duration="10137000" />
       <workItem from="1775808472033" duration="149000" />
+      <workItem from="1775831607328" duration="4212000" />
     </task>
     <task id="LOCAL-00001" summary="add basic game with a player, barriers and basic movements">
       <option name="closed" value="true" />
@@ -283,7 +285,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775765608883</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="overhaul and add juice">
+      <option name="closed" value="true" />
+      <created>1775831738586</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1775831738586</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
