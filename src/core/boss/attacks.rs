@@ -161,7 +161,10 @@ pub fn phantom_attack(
                         commands.spawn((
                             Sprite {
                                 color: Color::srgb(0.0, 6.0, 6.0),
-                                custom_size: Some(Vec2::new(8.0 * ENTITY_SCALE, 8.0 * ENTITY_SCALE)),
+                                custom_size: Some(Vec2::new(
+                                    8.0 * ENTITY_SCALE,
+                                    8.0 * ENTITY_SCALE,
+                                )),
                                 ..default()
                             },
                             Transform::from_translation(boss_pos.extend(0.0)),
@@ -330,7 +333,10 @@ pub fn sentinel_attack(
                             commands.spawn((
                                 Sprite {
                                     color: Color::srgb(8.0, 0.0, 8.0),
-                                    custom_size: Some(Vec2::new(4.0 * ENTITY_SCALE, 4.0 * ENTITY_SCALE)),
+                                    custom_size: Some(Vec2::new(
+                                        4.0 * ENTITY_SCALE,
+                                        4.0 * ENTITY_SCALE,
+                                    )),
                                     ..default()
                                 },
                                 Transform::from_translation(seg_pos.extend(0.0)),
