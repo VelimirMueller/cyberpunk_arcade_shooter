@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, add-boss-stages, boss-phases-laser-tests]
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -14,6 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libudev-dev pkg-config
 
       - uses: dtolnay/rust-toolchain@stable
         with:
