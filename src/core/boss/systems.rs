@@ -442,6 +442,7 @@ pub fn boss_projectile_system(
     }
 }
 
+#[allow(clippy::collapsible_if)]
 pub fn hazard_zone_system(
     time: Res<Time>,
     mut commands: Commands,
