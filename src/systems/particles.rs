@@ -116,6 +116,7 @@ pub fn animate_shatter(
     }
 }
 
+#[allow(clippy::collapsible_if)]
 pub fn animate_shockwave(
     time: Res<Time>,
     mut commands: Commands,
