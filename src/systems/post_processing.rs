@@ -82,6 +82,7 @@ impl ExtractComponent for CrtSettings {
 // GPU uniform (must be 16-byte aligned to match WGSL struct)
 // ---------------------------------------------------------------------------
 
+#[allow(dead_code)]
 #[derive(Clone, Copy, ShaderType)]
 struct CrtSettingsUniform {
     scanline_intensity: f32,
