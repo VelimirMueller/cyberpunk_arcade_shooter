@@ -1,5 +1,8 @@
 use crate::app::GameEntity;
 use crate::systems::collision::DeathEvent;
+use crate::utils::config::{
+    AFTERIMAGE_INTERVAL, AMBIENT_PARTICLE_INTERVAL, DEATH_PARTICLE_MAX, DEATH_PARTICLE_MIN,
+};
 use bevy::prelude::*;
 use rand::Rng;
 
@@ -46,7 +49,7 @@ pub fn handle_death_events(
         // Despawn the enemy entity
         commands.entity(event.entity).despawn();
 
-        let particle_count = rng.gen_range(12..=20);
+        let particle_count = rng.gen_range(DEATH_PARTICLE_MIN..=DEATH_PARTICLE_MAX);
         for _ in 0..particle_count {
             let angle = rng.gen_range(0.0..std::f32::consts::TAU);
             let speed = rng.gen_range(200.0..400.0);
@@ -163,7 +166,7 @@ pub struct AfterimageTimer {
 impl Default for AfterimageTimer {
     fn default() -> Self {
         Self {
-            timer: Timer::from_seconds(0.05, TimerMode::Repeating),
+            timer: Timer::from_seconds(AFTERIMAGE_INTERVAL, TimerMode::Repeating),
         }
     }
 }
@@ -244,7 +247,7 @@ pub struct AmbientParticleTimer {
 impl Default for AmbientParticleTimer {
     fn default() -> Self {
         Self {
-            timer: Timer::from_seconds(0.4, TimerMode::Repeating), // ~2.5 per second
+            timer: Timer::from_seconds(AMBIENT_PARTICLE_INTERVAL, TimerMode::Repeating),
         }
     }
 }

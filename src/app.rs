@@ -41,6 +41,7 @@ use crate::ui::menus::{
     despawn_title_menu, spawn_game_over_screen, spawn_game_won_screen, spawn_pause_menu,
     spawn_title_menu,
 };
+use crate::utils::config::{ENTITY_SCALE, QualityTier};
 use bevy::core_pipeline::core_2d::Camera2d;
 use bevy::core_pipeline::{
     bloom::Bloom,
@@ -122,6 +123,7 @@ pub fn main() {
             CrtPostProcessPlugin,
         ))
         .init_state::<GameState>()
+        .init_resource::<QualityTier>()
         .init_resource::<GameData>()
         .init_resource::<ScreenShake>()
         .add_event::<SoundEvent>()
@@ -261,8 +263,32 @@ pub fn main() {
 }
 
 #[allow(dead_code)]
-fn setup(mut commands: Commands, _next_state: ResMut<NextState<GameState>>) {
-    commands.spawn((
+fn setup(
+    mut commands: Commands,
+    _next_state: ResMut<NextState<GameState>>,
+    quality: Res<QualityTier>,
+) {
+    let bloom = match *quality {
+        QualityTier::Desktop => Bloom::default(),
+        QualityTier::Mobile => Bloom {
+            intensity: 0.2,
+            low_frequency_boost: 0.5,
+            ..default()
+        },
+    };
+
+    let crt = match *quality {
+        QualityTier::Desktop => CrtSettings::default(),
+        QualityTier::Mobile => CrtSettings {
+            scanline_intensity: 0.10,
+            scanline_count: 150.0,
+            vignette_intensity: 0.3,
+            vignette_radius: 0.75,
+            curvature_amount: 0.0,
+        },
+    };
+
+    let mut camera = commands.spawn((
         Camera2d,
         Transform::default(),
         GlobalTransform::default(),
@@ -272,10 +298,20 @@ fn setup(mut commands: Commands, _next_state: ResMut<NextState<GameState>>) {
             ..default()
         },
         Tonemapping::TonyMcMapface,
-        Bloom::default(),
+        bloom,
         DebandDither::Enabled,
-        CrtSettings::default(),
+        crt,
     ));
+
+    if *quality == QualityTier::Mobile {
+        camera.insert(Projection::Orthographic(OrthographicProjection {
+            scaling_mode: bevy::render::camera::ScalingMode::AutoMin {
+                min_width: 1500.0,
+                min_height: 620.0,
+            },
+            ..OrthographicProjection::default_2d()
+        }));
+    }
 }
 
 // ============ NEW GAME LOOP SYSTEMS ============
@@ -309,7 +345,7 @@ pub fn menu_input_system(
             GlobalTransform::default(),
             Sprite {
                 color: Color::srgb(1.2, 2.8, 1.2),
-                custom_size: Some(Vec2::new(50.0, 50.0)),
+                custom_size: Some(Vec2::new(50.0 * ENTITY_SCALE, 50.0 * ENTITY_SCALE)),
                 ..default()
             },
         ));
