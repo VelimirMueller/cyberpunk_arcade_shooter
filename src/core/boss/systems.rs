@@ -5,6 +5,7 @@ use crate::core::boss::components::*;
 use crate::core::player::components::Player;
 use crate::systems::audio::{SoundEffect, SoundEvent};
 use crate::systems::collision::DeathEvent;
+use crate::utils::config::ENTITY_SCALE;
 use bevy::prelude::*;
 
 pub fn score_multiplier(round: u32) -> f32 {
@@ -77,7 +78,7 @@ fn boss_config(boss_type: BossType) -> (u32, TransitionStyle, Color, f32) {
 pub fn spawn_boss(commands: &mut Commands, round: u32) {
     let boss_type = boss_type_for_round(round);
     let (max_hp, transition_style, color, size_mult) = boss_config(boss_type);
-    let base_size = 50.0;
+    let base_size = 50.0 * ENTITY_SCALE;
     let size = base_size * size_mult;
 
     let primary_timer = match boss_type {
