@@ -116,11 +116,18 @@ pub struct ChargeTelegraph {
     pub lifetime: Timer,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ProjectileOwner {
+    Boss,
+    Player,
+}
+
 #[derive(Component)]
 pub struct BossProjectile {
     pub velocity: Vec2,
     #[allow(dead_code)]
     pub damage: u32,
+    pub owner: ProjectileOwner,
 }
 
 #[derive(Component)]

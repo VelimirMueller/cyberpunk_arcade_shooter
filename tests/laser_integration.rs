@@ -98,6 +98,7 @@ fn test_shockwave_clears_projectiles() {
             BossProjectile {
                 velocity: Vec2::new(1.0, 0.0),
                 damage: 5,
+                owner: ProjectileOwner::Boss,
             },
             GameEntity,
         ));

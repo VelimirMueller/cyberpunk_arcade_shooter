@@ -171,6 +171,7 @@ pub fn phantom_attack(
                             BossProjectile {
                                 velocity,
                                 damage: 5,
+                                owner: ProjectileOwner::Boss,
                             },
                             GameEntity,
                         ));
@@ -343,6 +344,7 @@ pub fn sentinel_attack(
                                 BossProjectile {
                                     velocity: direction * 200.0,
                                     damage: 5,
+                                    owner: ProjectileOwner::Boss,
                                 },
                                 GameEntity,
                             ));
