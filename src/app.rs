@@ -236,6 +236,7 @@ pub fn main() {
                 laser_charge_orb_system,
                 laser_stream_particle_system,
                 laser_impact_system,
+                crate::systems::powerups::effects::phase_shift::phase_shift_tick_system,
             )
                 .run_if(in_state(GameState::RoundActive)),
         )
@@ -243,7 +244,13 @@ pub fn main() {
             Update,
             (boss_defeated_check, score_tally_system).run_if(in_state(GameState::RoundActive)),
         )
-        .add_systems(OnExit(GameState::RoundActive), despawn_round_clear)
+        .add_systems(
+            OnExit(GameState::RoundActive),
+            (
+                despawn_round_clear,
+                crate::systems::powerups::cleanup_player_buffs_on_round_exit,
+            ),
+        )
         .add_systems(OnEnter(GameState::GameOver), spawn_game_over_screen)
         .add_systems(OnExit(GameState::GameOver), despawn_game_over_screen)
         .add_systems(
