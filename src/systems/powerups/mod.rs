@@ -21,6 +21,17 @@ pub use effects::laser::{
 };
 pub use effects::shockwave::{PowerUpShockwave, powerup_shockwave_system};
 
+pub fn cleanup_player_buffs_on_round_exit(
+    mut commands: Commands,
+    player_query: Query<Entity, With<crate::core::player::components::Player>>,
+) {
+    for entity in player_query.iter() {
+        commands
+            .entity(entity)
+            .remove::<crate::systems::powerups::effects::phase_shift::PhaseShiftActive>();
+    }
+}
+
 #[derive(Component)]
 pub struct PowerUp {
     pub kind: PowerUpKind,
@@ -134,7 +145,13 @@ pub fn powerup_lifetime_system(
 #[allow(clippy::too_many_arguments)]
 pub fn powerup_pickup_system(
     mut commands: Commands,
-    mut player_query: Query<(Entity, &Transform, &Sprite, &mut Player)>,
+    mut player_query: Query<(
+        Entity,
+        &Transform,
+        &Sprite,
+        &mut Player,
+        Option<&mut crate::systems::powerups::effects::phase_shift::PhaseShiftActive>,
+    )>,
     powerup_query: Query<(Entity, &Transform, &Sprite, &PowerUp)>,
     mut boss_query: Query<&mut Boss>,
     enemy_particle_query: Query<Entity, With<EnemyParticle>>,
@@ -145,11 +162,12 @@ pub fn powerup_pickup_system(
     mut screen_shake: ResMut<ScreenShake>,
     mut sound_events: EventWriter<SoundEvent>,
 ) {
-    let Ok((player_entity, player_transform, player_sprite, mut player)) =
+    let Ok((player_entity, player_transform, player_sprite, mut player, existing_phase_shift)) =
         player_query.single_mut()
     else {
         return;
     };
+    let mut existing_phase_shift = existing_phase_shift;
     let player_pos = player_transform.translation;
     let player_size = player_sprite.custom_size.unwrap_or(Vec2::ONE);
 
@@ -200,8 +218,16 @@ pub fn powerup_pickup_system(
                     &mut sound_events,
                 );
             }
-            PowerUpKind::PhaseShift | PowerUpKind::GlitchBlink => {
-                // Implemented in Tasks 9 and 10
+            PowerUpKind::PhaseShift => {
+                crate::systems::powerups::effects::phase_shift::apply_phase_shift(
+                    &mut commands,
+                    player_entity,
+                    existing_phase_shift.as_deref_mut(),
+                    &mut sound_events,
+                );
+            }
+            PowerUpKind::GlitchBlink => {
+                // Implemented in Task 10
             }
         }
     }

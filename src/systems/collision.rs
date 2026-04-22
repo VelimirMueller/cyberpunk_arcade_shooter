@@ -24,11 +24,13 @@ pub fn detect_collisions(
     boss_projectile_query: Query<(&Transform, &BossProjectile)>,
     dash_trail_query: Query<(&Transform, &Sprite), With<DashTrail>>,
     hazard_zone_query: Query<(&Transform, &HazardZone)>,
+    phase_shift_query: Query<(), With<crate::systems::powerups::effects::phase_shift::PhaseShiftActive>>,
     mut next_state: ResMut<NextState<GameState>>,
     mut game_data: ResMut<GameData>,
     mut screen_shake: ResMut<crate::app::ScreenShake>,
     mut sound_events: EventWriter<SoundEvent>,
 ) {
+    let phase_shifting = !phase_shift_query.is_empty();
     for (player_entity, mut player, player_transform, player_sprite) in &mut player_query {
         let player_size = player_sprite.custom_size.unwrap_or(Vec2::ONE);
         let player_pos = player_transform.translation;
@@ -62,6 +64,9 @@ pub fn detect_collisions(
 
         // EnemyParticle vs Player
         for particle_transform in &particle_query {
+            if phase_shifting {
+                continue;
+            }
             let particle_size = Vec2::new(2.0, 2.0);
             let particle_pos = particle_transform.translation;
 
@@ -85,6 +90,9 @@ pub fn detect_collisions(
 
         // BossProjectile vs Player — only Boss-owned projectiles damage the player
         for (projectile_transform, projectile) in boss_projectile_query.iter() {
+            if phase_shifting {
+                continue;
+            }
             if projectile.owner != ProjectileOwner::Boss {
                 continue;
             }
