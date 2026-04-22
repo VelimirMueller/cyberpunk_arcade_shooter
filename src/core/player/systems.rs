@@ -6,9 +6,10 @@ use crate::env::{
 use crate::utils::config::ENTITY_SCALE;
 use bevy::prelude::*;
 
-#[allow(dead_code)]
 fn add_energy(player: &mut Player) {
-    player.energy += 1;
+    if player.energy < player.max_energy {
+        player.energy += 1;
+    }
 }
 pub fn player_movement(
     keyboard_input: Res<ButtonInput<KeyCode>>,
@@ -79,6 +80,7 @@ pub fn spawn_player(mut commands: Commands) {
             max: 100,
             last_collision_time: None,
             energy: 100,
+            max_energy: 100,
             last_shot_time: None,
         },
         PlayerRotationTracker {
