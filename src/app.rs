@@ -247,6 +247,11 @@ pub fn main() {
         )
         .add_systems(
             Update,
+            crate::systems::powerups::hud::sync_buff_hud_system
+                .run_if(in_state(GameState::RoundActive)),
+        )
+        .add_systems(
+            Update,
             (boss_defeated_check, score_tally_system).run_if(in_state(GameState::RoundActive)),
         )
         .add_systems(

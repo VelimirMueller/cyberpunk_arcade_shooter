@@ -11,6 +11,7 @@ use bevy::prelude::*;
 
 pub mod catalog;
 pub mod effects;
+pub mod hud;
 pub use catalog::{PowerUpKind, PowerUpTier, meta};
 #[allow(unused_imports)]
 pub use effects::laser::{
