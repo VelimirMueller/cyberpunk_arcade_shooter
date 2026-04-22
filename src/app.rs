@@ -335,6 +335,7 @@ pub fn menu_input_system(
                 max: 100,
                 last_collision_time: None,
                 energy: 100,
+                max_energy: 100,
                 last_shot_time: None,
             },
             PlayerRotationTracker {

@@ -49,6 +49,7 @@ pub fn spawn_test_player(app: &mut App, position: Vec2) -> Entity {
                 current: 100,
                 max: 100,
                 energy: 100,
+                max_energy: 100,
                 last_collision_time: None,
                 last_shot_time: None,
             },

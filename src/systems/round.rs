@@ -237,7 +237,7 @@ pub fn score_tally_system(
             if player.current < half_max {
                 player.current = half_max;
             }
-            player.energy = 100;
+            player.energy = player.max_energy;
         }
 
         // Increment round, reset kills
