@@ -100,7 +100,6 @@ pub fn powerup_spawn_system(
                 // z offset behind the main diamond
                 Transform::from_xyz(0.0, 0.0, -0.05),
                 PowerUpGlow,
-                GameEntity,
             ));
         });
     }
