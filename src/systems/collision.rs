@@ -24,7 +24,7 @@ pub fn detect_collisions(
     boss_projectile_query: Query<(&Transform, &BossProjectile)>,
     dash_trail_query: Query<(&Transform, &Sprite), With<DashTrail>>,
     hazard_zone_query: Query<(&Transform, &HazardZone)>,
-    phase_shift_query: Query<(), With<crate::systems::powerups::effects::phase_shift::PhaseShiftActive>>,
+    phase_shift_query: Query<(), (With<crate::core::player::components::Player>, With<crate::systems::powerups::effects::phase_shift::PhaseShiftActive>)>,
     mut next_state: ResMut<NextState<GameState>>,
     mut game_data: ResMut<GameData>,
     mut screen_shake: ResMut<crate::app::ScreenShake>,

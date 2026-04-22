@@ -18,6 +18,7 @@ pub enum SoundEffect {
     MenuSelect,
     BossSpawn,
     PhaseShift,
+    PhaseShiftPickup,
     RageBurst,
     DashTelegraph,
     BeamSweep,
@@ -45,6 +46,7 @@ const ALL_EFFECTS: &[SoundEffect] = &[
     SoundEffect::MenuSelect,
     SoundEffect::BossSpawn,
     SoundEffect::PhaseShift,
+    SoundEffect::PhaseShiftPickup,
     SoundEffect::RageBurst,
     SoundEffect::DashTelegraph,
     SoundEffect::BeamSweep,
@@ -258,6 +260,20 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                 .collect()
         }
         SoundEffect::PhaseShift => {
+            let duration = 0.2;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples)
+                .map(|i| {
+                    let t = i as f32 / sample_rate;
+                    let freq = 300.0 - (200.0 * t / duration);
+                    let envelope = 1.0 - (t / duration);
+                    let noise = (rand::random::<f32>() * 2.0 - 1.0) * 0.5;
+                    let sweep = (t * freq * std::f32::consts::TAU).sin() * 0.5;
+                    (noise + sweep) * envelope * volume * 0.4
+                })
+                .collect()
+        }
+        SoundEffect::PhaseShiftPickup => {
             // Reverse-shimmer: pitched-up ascending with noise, 0.2s
             let duration = 0.2;
             let num_samples = (sample_rate * duration) as usize;
