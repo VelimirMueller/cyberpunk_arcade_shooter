@@ -27,6 +27,9 @@ pub struct PowerUp {
     pub lifetime: Timer,
 }
 
+#[derive(Component)]
+pub struct PowerUpGlow;
+
 #[derive(Resource)]
 pub struct PowerUpTimer {
     pub timer: Timer,
@@ -62,22 +65,45 @@ pub fn powerup_spawn_system(
     let y = (rand::random::<f32>() - 0.5) * 400.0;
 
     let kind = catalog::roll_random_kind();
-    let color = meta(kind).color;
+    let meta = meta(kind);
+    let color = meta.color;
+    let base_size = meta.tier.base_size_px();
 
-    commands.spawn((
-        Sprite {
-            color,
-            custom_size: Some(Vec2::new(16.0 * ENTITY_SCALE, 16.0 * ENTITY_SCALE)),
-            ..default()
-        },
-        Transform::from_xyz(x, y, 0.5)
-            .with_rotation(Quat::from_rotation_z(std::f32::consts::FRAC_PI_4)),
-        PowerUp {
-            kind,
-            lifetime: Timer::from_seconds(10.0, TimerMode::Once),
-        },
-        GameEntity,
-    ));
+    let pickup_entity = commands
+        .spawn((
+            Sprite {
+                color,
+                custom_size: Some(Vec2::new(base_size * ENTITY_SCALE, base_size * ENTITY_SCALE)),
+                ..default()
+            },
+            Transform::from_xyz(x, y, 0.5)
+                .with_rotation(Quat::from_rotation_z(std::f32::consts::FRAC_PI_4)),
+            PowerUp {
+                kind,
+                lifetime: Timer::from_seconds(10.0, TimerMode::Once),
+            },
+            GameEntity,
+        ))
+        .id();
+
+    if let Some((scale, _alpha, glow_color)) = meta.tier.glow() {
+        commands.entity(pickup_entity).with_children(|children| {
+            children.spawn((
+                Sprite {
+                    color: glow_color,
+                    custom_size: Some(Vec2::new(
+                        base_size * ENTITY_SCALE * scale,
+                        base_size * ENTITY_SCALE * scale,
+                    )),
+                    ..default()
+                },
+                // z offset behind the main diamond
+                Transform::from_xyz(0.0, 0.0, -0.05),
+                PowerUpGlow,
+                GameEntity,
+            ));
+        });
+    }
 
     // Reset timer for next spawn
     let duration = 15.0 + rand::random::<f32>() * 5.0;
@@ -93,11 +119,12 @@ pub fn powerup_lifetime_system(
     for (entity, mut powerup, mut sprite) in query.iter_mut() {
         powerup.lifetime.tick(time.delta());
 
-        // Gentle pulse animation
-        let pulse = 0.6 + 0.4 * (t * 4.0).sin();
-        let base_color = meta(powerup.kind).color;
-        let base_rgba = base_color.to_srgba();
-        sprite.color = Color::srgba(base_rgba.red, base_rgba.green, base_rgba.blue, pulse);
+        let hz = meta(powerup.kind).tier.pulse_hz();
+        let pulse = 0.6 + 0.4 * (t * hz).sin();
+        let base = meta(powerup.kind).color;
+        // Preserve original HDR RGB; pulse modulates alpha only
+        let [r, g, b, _a] = base.to_srgba().to_f32_array();
+        sprite.color = Color::srgba(r, g, b, pulse);
 
         if powerup.lifetime.finished() {
             commands.entity(entity).despawn();

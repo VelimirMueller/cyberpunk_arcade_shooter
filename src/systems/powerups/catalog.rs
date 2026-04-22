@@ -101,6 +101,34 @@ pub fn roll_random_kind() -> PowerUpKind {
     kinds[rng.gen_range(0..kinds.len())]
 }
 
+impl PowerUpTier {
+    pub fn base_size_px(&self) -> f32 {
+        match self {
+            PowerUpTier::Common => 14.0,
+            PowerUpTier::Rare => 18.0,
+            PowerUpTier::UltraRare => 22.0,
+        }
+    }
+
+    pub fn pulse_hz(&self) -> f32 {
+        match self {
+            PowerUpTier::Common => 4.0,
+            PowerUpTier::Rare => 6.0,
+            PowerUpTier::UltraRare => 9.0,
+        }
+    }
+
+    /// (glow_scale_factor, glow_alpha, glow_color).
+    /// glow_color is None for Common (no glow).
+    pub fn glow(&self) -> Option<(f32, f32, Color)> {
+        match self {
+            PowerUpTier::Common => None,
+            PowerUpTier::Rare => Some((1.5, 0.35, Color::srgba(8.0, 8.0, 8.0, 0.35))),
+            PowerUpTier::UltraRare => Some((1.8, 0.45, Color::srgba(8.0, 6.0, 0.0, 0.45))),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
