@@ -8,7 +8,9 @@ use crate::systems::combat::EnemyParticle;
 use crate::utils::config::ENTITY_SCALE;
 use bevy::prelude::*;
 
+pub mod catalog;
 pub mod effects;
+pub use catalog::{PowerUpKind, PowerUpTier, meta};
 #[allow(unused_imports)]
 pub use effects::laser::{
     LASER_ACTIVE_DURATION, LASER_CHARGE_DURATION, LASER_FADE_DURATION, LASER_TOTAL_DURATION,
@@ -18,12 +20,6 @@ pub use effects::laser::{
     laser_stream_particle_system, laser_system,
 };
 pub use effects::shockwave::{PowerUpShockwave, powerup_shockwave_system};
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PowerUpKind {
-    Shockwave,
-    Laser,
-}
 
 #[derive(Component)]
 pub struct PowerUp {
@@ -65,17 +61,8 @@ pub fn powerup_spawn_system(
     let x = (rand::random::<f32>() - 0.5) * 1000.0;
     let y = (rand::random::<f32>() - 0.5) * 400.0;
 
-    // Random 50/50 choice
-    let kind = if rand::random::<bool>() {
-        PowerUpKind::Shockwave
-    } else {
-        PowerUpKind::Laser
-    };
-
-    let color = match kind {
-        PowerUpKind::Shockwave => Color::srgb(0.0, 8.0, 8.0),
-        PowerUpKind::Laser => Color::srgb(8.0, 0.0, 8.0),
-    };
+    let kind = catalog::roll_random_kind();
+    let color = meta(kind).color;
 
     commands.spawn((
         Sprite {
@@ -108,11 +95,9 @@ pub fn powerup_lifetime_system(
 
         // Gentle pulse animation
         let pulse = 0.6 + 0.4 * (t * 4.0).sin();
-        let base = match powerup.kind {
-            PowerUpKind::Shockwave => Color::srgba(0.0, 8.0, 8.0, pulse),
-            PowerUpKind::Laser => Color::srgba(8.0, 0.0, 8.0, pulse),
-        };
-        sprite.color = base;
+        let base_color = meta(powerup.kind).color;
+        let base_rgba = base_color.to_srgba();
+        sprite.color = Color::srgba(base_rgba.red, base_rgba.green, base_rgba.blue, pulse);
 
         if powerup.lifetime.finished() {
             commands.entity(entity).despawn();
@@ -174,6 +159,12 @@ pub fn powerup_pickup_system(
                     &mut screen_shake,
                     &mut sound_events,
                 );
+            }
+            PowerUpKind::RepairKit
+            | PowerUpKind::EnergyCell
+            | PowerUpKind::PhaseShift
+            | PowerUpKind::GlitchBlink => {
+                // TODO(Task 8+): implement
             }
         }
     }
