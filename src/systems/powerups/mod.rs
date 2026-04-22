@@ -5,7 +5,8 @@ use crate::core::player::components::Player;
 use crate::systems::audio::SoundEvent;
 use crate::systems::collision::collide;
 use crate::systems::combat::EnemyParticle;
-use crate::utils::config::ENTITY_SCALE;
+use crate::utils::config::{ENTITY_SCALE, QualityTier};
+use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 
 pub mod catalog;
@@ -36,6 +37,21 @@ pub fn cleanup_player_buffs_on_round_exit(
 pub struct PowerUp {
     pub kind: PowerUpKind,
     pub lifetime: Timer,
+}
+
+/// Bundled threat-position queries for Glitch Blink safe-spot computation.
+/// Packaging these as a SystemParam keeps `powerup_pickup_system` under
+/// Bevy's 16-parameter system limit.
+#[derive(SystemParam)]
+#[allow(clippy::type_complexity)]
+pub struct BlinkThreatQueries<'w, 's> {
+    pub boss: Query<'w, 's, &'static Transform, (With<Boss>, Without<Player>, Without<PowerUp>)>,
+    pub enemy_particles:
+        Query<'w, 's, &'static Transform, (With<EnemyParticle>, Without<Player>)>,
+    pub boss_projectiles:
+        Query<'w, 's, &'static Transform, (With<BossProjectile>, Without<Player>)>,
+    pub hazards: Query<'w, 's, &'static Transform, (With<HazardZone>, Without<Player>)>,
+    pub dash_trails: Query<'w, 's, &'static Transform, (With<DashTrail>, Without<Player>)>,
 }
 
 #[derive(Component)]
@@ -159,6 +175,8 @@ pub fn powerup_pickup_system(
     dash_trail_query: Query<Entity, With<DashTrail>>,
     hazard_zone_query: Query<Entity, With<HazardZone>>,
     telegraph_query: Query<Entity, With<ChargeTelegraph>>,
+    blink_threats: BlinkThreatQueries,
+    quality: Res<QualityTier>,
     mut screen_shake: ResMut<ScreenShake>,
     mut sound_events: EventWriter<SoundEvent>,
 ) {
@@ -227,7 +245,44 @@ pub fn powerup_pickup_system(
                 );
             }
             PowerUpKind::GlitchBlink => {
-                // Implemented in Task 10
+                use crate::systems::powerups::effects::blink;
+
+                // Collect threat positions
+                let mut threats: Vec<Vec2> = Vec::new();
+                for t in blink_threats.enemy_particles.iter() {
+                    threats.push(t.translation.truncate());
+                }
+                for t in blink_threats.boss_projectiles.iter() {
+                    threats.push(t.translation.truncate());
+                }
+                for t in blink_threats.hazards.iter() {
+                    threats.push(t.translation.truncate());
+                }
+                for t in blink_threats.dash_trails.iter() {
+                    threats.push(t.translation.truncate());
+                }
+
+                let boss_pos = blink_threats
+                    .boss
+                    .single()
+                    .map(|t| t.translation.truncate())
+                    .unwrap_or(Vec2::ZERO);
+
+                let candidates = blink::sample_candidates(blink::BLINK_BOUNDS, blink::BLINK_CANDIDATES);
+                let destination = blink::pick_safe_spot(boss_pos, &threats, blink::BLINK_BOUNDS, &candidates);
+
+                // Burst at old position + new
+                let particles = blink::blink_particle_count(&quality);
+                blink::spawn_blink_burst(&mut commands, player_pos, particles);
+
+                // Teleport
+                commands
+                    .entity(player_entity)
+                    .insert(Transform::from_translation(destination.extend(0.0))
+                        .with_rotation(player_transform.rotation));
+
+                blink::spawn_blink_burst(&mut commands, destination.extend(0.0), particles);
+                blink::play_blink_sound(&mut sound_events);
             }
         }
     }
