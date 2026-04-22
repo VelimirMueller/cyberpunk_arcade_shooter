@@ -242,6 +242,11 @@ pub fn main() {
         )
         .add_systems(
             Update,
+            crate::systems::powerups::effects::blink::blink_particle_system
+                .run_if(in_state(GameState::RoundActive)),
+        )
+        .add_systems(
+            Update,
             (boss_defeated_check, score_tally_system).run_if(in_state(GameState::RoundActive)),
         )
         .add_systems(
