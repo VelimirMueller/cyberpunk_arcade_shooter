@@ -173,6 +173,17 @@ pub fn spawn_hud(mut commands: Commands, existing: Query<&HudRoot>, game_data: R
                         ));
                     }
                 });
+
+                // Active-buff indicator row
+                top.spawn((
+                    Node {
+                        flex_direction: FlexDirection::Row,
+                        margin: UiRect::top(Val::Px(6.0)),
+                        column_gap: Val::Px(6.0),
+                        ..default()
+                    },
+                    crate::systems::powerups::hud::BuffHudRoot,
+                ));
             });
 
             // ─── BOTTOM LEFT: Player stats ──────────────────────────
