@@ -1,5 +1,5 @@
 use crate::app::{GameData, trigger_damage_flash, trigger_screen_shake};
-use crate::core::boss::components::{Boss, BossProjectile, DashTrail, HazardZone};
+use crate::core::boss::components::{Boss, BossProjectile, DashTrail, HazardZone, ProjectileOwner};
 use crate::core::boss::systems::score_multiplier;
 use crate::core::player::components::{Player, PlayerParticle};
 use crate::data::game_state::GameState;
@@ -21,7 +21,7 @@ pub fn detect_collisions(
     mut boss_query: Query<(Entity, &mut Boss, &Transform, &Sprite), With<Boss>>,
     particle_query: Query<&Transform, With<EnemyParticle>>,
     player_particle_query: Query<(Entity, &Transform), With<PlayerParticle>>,
-    boss_projectile_query: Query<&Transform, With<BossProjectile>>,
+    boss_projectile_query: Query<(&Transform, &BossProjectile)>,
     dash_trail_query: Query<(&Transform, &Sprite), With<DashTrail>>,
     hazard_zone_query: Query<(&Transform, &HazardZone)>,
     mut next_state: ResMut<NextState<GameState>>,
@@ -83,8 +83,11 @@ pub fn detect_collisions(
             }
         }
 
-        // BossProjectile vs Player
-        for projectile_transform in &boss_projectile_query {
+        // BossProjectile vs Player — only Boss-owned projectiles damage the player
+        for (projectile_transform, projectile) in boss_projectile_query.iter() {
+            if projectile.owner != ProjectileOwner::Boss {
+                continue;
+            }
             let projectile_size = Vec2::new(6.0, 6.0);
             let projectile_pos = projectile_transform.translation;
 
@@ -151,6 +154,42 @@ pub fn detect_collisions(
 
                 if player.current == 0 {
                     next_state.set(GameState::GameOver);
+                }
+            }
+        }
+
+        // Player-owned BossProjectile vs Boss (for reflected/hacked projectiles)
+        for (_boss_entity, mut boss, boss_transform, boss_sprite) in &mut boss_query {
+            let boss_size = boss_sprite.custom_size.unwrap_or(Vec2::ONE);
+            let boss_pos = boss_transform.translation;
+            for (projectile_transform, projectile) in boss_projectile_query.iter() {
+                if projectile.owner != ProjectileOwner::Player {
+                    continue;
+                }
+                let projectile_size = Vec2::new(6.0, 6.0);
+                if collide(
+                    projectile_transform.translation,
+                    projectile_size,
+                    boss_pos,
+                    boss_size,
+                ) {
+                    if boss.is_invulnerable {
+                        continue;
+                    }
+                    if boss
+                        .last_hit_time
+                        .is_some_and(|t| t.elapsed().as_secs_f32() < 0.075)
+                    {
+                        continue;
+                    }
+                    if boss.current_hp > 0 {
+                        let dmg = projectile.damage.max(1);
+                        boss.current_hp = boss.current_hp.saturating_sub(dmg);
+                        boss.last_hit_time = Some(crate::utils::time_compat::Instant::now());
+                        let mult = score_multiplier(game_data.round);
+                        game_data.score += (10.0 * mult) as u32;
+                        sound_events.write(SoundEvent(SoundEffect::EnemyHit));
+                    }
                 }
             }
         }
@@ -240,5 +279,12 @@ mod tests {
         let pos_b = Vec3::new(0.0, 0.0, 0.0);
         let size_b = Vec2::new(10.0, 10.0);
         assert!(collide(pos_a, size_a, pos_b, size_b));
+    }
+
+    #[test]
+    fn projectile_owner_enum_equality() {
+        use crate::core::boss::components::ProjectileOwner;
+        assert_eq!(ProjectileOwner::Boss, ProjectileOwner::Boss);
+        assert_ne!(ProjectileOwner::Boss, ProjectileOwner::Player);
     }
 }
