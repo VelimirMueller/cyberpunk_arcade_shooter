@@ -30,6 +30,8 @@ pub enum SoundEffect {
     LaserCharge,
     LaserFire,
     LaserFadeOut,
+    RepairKitPickup,
+    EnergyCellPickup,
 }
 
 const ALL_EFFECTS: &[SoundEffect] = &[
@@ -55,6 +57,8 @@ const ALL_EFFECTS: &[SoundEffect] = &[
     SoundEffect::LaserCharge,
     SoundEffect::LaserFire,
     SoundEffect::LaserFadeOut,
+    SoundEffect::RepairKitPickup,
+    SoundEffect::EnergyCellPickup,
 ];
 
 // ---------------------------------------------------------------------------
@@ -416,6 +420,37 @@ fn generate_sound(effect: SoundEffect, volume: f32) -> Vec<f32> {
                     let freq = 400.0 - (320.0 * t / duration);
                     let envelope = 1.0 - (t / duration);
                     (t * freq * std::f32::consts::TAU).sin() * envelope * volume * 0.3
+                })
+                .collect()
+        }
+        SoundEffect::RepairKitPickup => {
+            // Quick ascending chime: three notes C5 E5 G5 over 0.15s
+            let duration = 0.15;
+            let num_samples = (sample_rate * duration) as usize;
+            let notes = [523.25_f32, 659.25, 783.99];
+            (0..num_samples)
+                .map(|i| {
+                    let t = i as f32 / sample_rate;
+                    let note_idx = ((t / duration) * 3.0) as usize;
+                    let note_idx = note_idx.min(2);
+                    let freq = notes[note_idx];
+                    let local_t = t - (note_idx as f32 * duration / 3.0);
+                    let envelope = (1.0 - (local_t / (duration / 3.0)).min(1.0)) * 0.9;
+                    (t * freq * std::f32::consts::TAU).sin() * envelope * volume * 0.3
+                })
+                .collect()
+        }
+        SoundEffect::EnergyCellPickup => {
+            // Electric zap: high-freq saw + noise, 0.1s
+            let duration = 0.1;
+            let num_samples = (sample_rate * duration) as usize;
+            (0..num_samples)
+                .map(|i| {
+                    let t = i as f32 / sample_rate;
+                    let envelope = 1.0 - (t / duration);
+                    let saw = (t * 1800.0 * std::f32::consts::TAU).sin().signum() * 0.3;
+                    let noise = (rand::random::<f32>() * 2.0 - 1.0) * 0.2;
+                    (saw + noise) * envelope * volume * 0.3
                 })
                 .collect()
         }

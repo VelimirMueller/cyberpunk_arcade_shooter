@@ -134,7 +134,7 @@ pub fn powerup_lifetime_system(
 #[allow(clippy::too_many_arguments)]
 pub fn powerup_pickup_system(
     mut commands: Commands,
-    player_query: Query<(&Transform, &Sprite, Entity), With<Player>>,
+    mut player_query: Query<(Entity, &Transform, &Sprite, &mut Player)>,
     powerup_query: Query<(Entity, &Transform, &Sprite, &PowerUp)>,
     mut boss_query: Query<&mut Boss>,
     enemy_particle_query: Query<Entity, With<EnemyParticle>>,
@@ -145,7 +145,9 @@ pub fn powerup_pickup_system(
     mut screen_shake: ResMut<ScreenShake>,
     mut sound_events: EventWriter<SoundEvent>,
 ) {
-    let Ok((player_transform, player_sprite, player_entity)) = player_query.single() else {
+    let Ok((player_entity, player_transform, player_sprite, mut player)) =
+        player_query.single_mut()
+    else {
         return;
     };
     let player_pos = player_transform.translation;
@@ -186,11 +188,20 @@ pub fn powerup_pickup_system(
                     &mut sound_events,
                 );
             }
-            PowerUpKind::RepairKit
-            | PowerUpKind::EnergyCell
-            | PowerUpKind::PhaseShift
-            | PowerUpKind::GlitchBlink => {
-                // TODO(Task 8+): implement
+            PowerUpKind::RepairKit => {
+                crate::systems::powerups::effects::instant::apply_repair_kit(
+                    &mut player,
+                    &mut sound_events,
+                );
+            }
+            PowerUpKind::EnergyCell => {
+                crate::systems::powerups::effects::instant::apply_energy_cell(
+                    &mut player,
+                    &mut sound_events,
+                );
+            }
+            PowerUpKind::PhaseShift | PowerUpKind::GlitchBlink => {
+                // Implemented in Tasks 9 and 10
             }
         }
     }
