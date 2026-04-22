@@ -21,7 +21,7 @@ pub fn apply_phase_shift(
     } else {
         commands.entity(player_entity).insert(PhaseShiftActive(fresh));
     }
-    sound_events.write(SoundEvent(SoundEffect::PhaseShift));
+    sound_events.write(SoundEvent(SoundEffect::PhaseShiftPickup));
 }
 
 /// Tick timer and remove component when done. Also drives sprite alpha flicker.
