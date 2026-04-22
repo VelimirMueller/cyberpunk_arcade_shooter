@@ -11,24 +11,16 @@
     </cargoProject>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c7bf7c83-c036-4727-b202-11f9ea52bec0" name="Changes" comment="overhaul and add juice">
+    <list default="true" id="c7bf7c83-c036-4727-b202-11f9ea52bec0" name="Changes" comment="fix game and add command to compile to wasm targets">
+      <change afterPath="$PROJECT_DIR$/src/systems/powerups/effects/laser.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_10_04_26,_19_35_[Changes]1/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_10_04_26__19_35__Changes_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_10_04_26,_19_36_[Changes]/cyberpunk_rpg-1c0d190656baae66_bg.wasm" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_10_04_26,_19_36_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_10_04_26__19_36__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/cyberpunk_rpg-4f9567271ae71dc5.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/cyberpunk_rpg-4f9567271ae71dc5_bg.wasm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/dist/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/boss/components.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/boss/components.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/player/components.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/player/components.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/systems/audio.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/audio.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/systems/collision.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/collision.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/systems/combat.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/combat.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/systems/particles.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/particles.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/systems/powerups.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/powerups.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/config.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/config.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/systems/powerups/effects/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/powerups/effects/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/systems/powerups/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/powerups/mod.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,7 +56,7 @@
     </excluded-from-favorite>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="boss-phases-laser-tests" />
+        <entry key="$PROJECT_DIR$" value="mobile_optimized" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -83,6 +75,10 @@
             <RecentBranchesForRepo>
               <option name="branches">
                 <list>
+                  <RecentBranch>
+                    <option name="branchName" value="feat/more-powerups-phase1" />
+                    <option name="lastUsedInstant" value="1776843846" />
+                  </RecentBranch>
                   <RecentBranch>
                     <option name="branchName" value="boss-phases-laser-tests" />
                     <option name="lastUsedInstant" value="1775763161" />
@@ -131,7 +127,7 @@
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
     &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feat/more-powerups-phase1&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/home/velimir/dev/cyberpunk_the_incedible_bloom_cube&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -233,6 +229,7 @@
       <workItem from="1775808472033" duration="149000" />
       <workItem from="1775831607328" duration="4212000" />
       <workItem from="1775853043727" duration="1085000" />
+      <workItem from="1776843272809" duration="1907000" />
     </task>
     <task id="LOCAL-00001" summary="add basic game with a player, barriers and basic movements">
       <option name="closed" value="true" />
