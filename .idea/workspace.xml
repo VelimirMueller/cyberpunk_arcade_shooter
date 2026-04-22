@@ -11,16 +11,8 @@
     </cargoProject>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c7bf7c83-c036-4727-b202-11f9ea52bec0" name="Changes" comment="fix game and add command to compile to wasm targets">
-      <change afterPath="$PROJECT_DIR$/src/systems/powerups/effects/laser.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_10_04_26,_19_35_[Changes]1/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_10_04_26__19_35__Changes_1.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_10_04_26,_19_36_[Changes]/cyberpunk_rpg-1c0d190656baae66_bg.wasm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_10_04_26,_19_36_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_10_04_26__19_36__Changes_.xml" beforeDir="false" />
+    <list default="true" id="c7bf7c83-c036-4727-b202-11f9ea52bec0" name="Changes" comment="improve visuals and add powerups">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/systems/powerups/effects/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/powerups/effects/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/systems/powerups/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/systems/powerups/mod.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,7 +69,7 @@
                 <list>
                   <RecentBranch>
                     <option name="branchName" value="feat/more-powerups-phase1" />
-                    <option name="lastUsedInstant" value="1776843846" />
+                    <option name="lastUsedInstant" value="1776851083" />
                   </RecentBranch>
                   <RecentBranch>
                     <option name="branchName" value="boss-phases-laser-tests" />
@@ -229,7 +221,7 @@
       <workItem from="1775808472033" duration="149000" />
       <workItem from="1775831607328" duration="4212000" />
       <workItem from="1775853043727" duration="1085000" />
-      <workItem from="1776843272809" duration="1907000" />
+      <workItem from="1776843272809" duration="3797000" />
     </task>
     <task id="LOCAL-00001" summary="add basic game with a player, barriers and basic movements">
       <option name="closed" value="true" />
@@ -327,7 +319,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775842608361</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="improve visuals and add powerups">
+      <option name="closed" value="true" />
+      <created>1776849121272</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1776849121272</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -343,7 +343,8 @@
     <MESSAGE value="tweak current systems and improve game experience by shooting particles on space enter" />
     <MESSAGE value="add energy system to make game more fun and ad restore energy on movement" />
     <MESSAGE value="overhaul and add juice" />
-    <option name="LAST_COMMIT_MESSAGE" value="overhaul and add juice" />
+    <MESSAGE value="improve visuals and add powerups" />
+    <option name="LAST_COMMIT_MESSAGE" value="improve visuals and add powerups" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
