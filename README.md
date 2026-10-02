@@ -26,14 +26,18 @@ Cyberpunk Arcade Shooter is a fast-paced, bloom-soaked geometry shooter where sl
 - **Multi-stage boss fights** — evolving mechanics and unique attack patterns per phase
 - **CRT post-processing** — scanlines, vignette, and barrel distortion for that retro feel
 - **Tight arcade controls** — responsive movement and shooting that feels just right
-- **WASM support** — play directly in the browser via WebAssembly
+- **WASM support** — runs in the browser via WebAssembly (keyboard required; there are no touch controls yet)
 
 ## Controls
 
 | Action | Key |
 | --- | --- |
+| Start game | `Enter` |
 | Move | `W` / `A` / `S` / `D` |
 | Shoot | `Space` |
+| Pause / resume | `Esc` |
+| Toggle sound (paused) | `M` |
+| Quit to menu (paused) | `Q` |
 
 ## Getting Started
 
@@ -52,14 +56,16 @@ cargo run --release
 
 ### WASM (Browser)
 
-To build for the web, install the WASM target and use the included build tooling:
+The web build uses [Trunk](https://trunkrs.dev/):
 
 ```bash
 rustup target add wasm32-unknown-unknown
-cargo build --release --target wasm32-unknown-unknown
+cargo install trunk
+trunk build --release   # output lands in dist/
+trunk serve --release   # local dev server
 ```
 
-See [WASM_BUILD.md](WASM_BUILD.md) for full instructions on building and serving the web version.
+In the browser the game picks a lighter quality tier (less bloom, flat CRT). See [WASM_BUILD.md](WASM_BUILD.md) for the browser-specific fixes and pitfalls.
 
 ### Platform Notes
 
@@ -73,14 +79,21 @@ See [WASM_BUILD.md](WASM_BUILD.md) for full instructions on building and serving
 
 ```
 cyberpunk_arcade_shooter/
-├── src/             # Game source code
-├── assets/          # Sprites, shaders, and audio
-├── tests/           # Integration tests
-├── dist/            # WASM distribution files
-├── .github/         # CI workflows
-├── Cargo.toml       # Rust dependencies and metadata
-└── index.html       # Web entrypoint for WASM builds
+├── src/               # Game source code
+├── assets/shaders/    # WGSL CRT post-process shader (sprites are shapes, audio is synthesized)
+├── tests/             # Headless integration tests (boss phases, laser, round transition)
+├── docs/superpowers/  # Design specs and implementation plans per feature
+├── .github/           # CI workflows
+├── Cargo.toml         # Rust dependencies and metadata
+└── index.html         # Web entrypoint for WASM builds
 ```
+
+## What I Learned
+
+- **ECS over one big loop** — small systems gated on game states and connected by events (`SoundEvent`, `DeathEvent`) keep features independent.
+- **Custom post-processing** — a hand-written WGSL shader (scanlines, vignette, barrel distortion) with quality tiers per platform.
+- **WASM is not free** — `Instant::now()` panics in the browser, WebGPU is not ready everywhere, and audio needs the right decoder. Details in [WASM_BUILD.md](WASM_BUILD.md).
+- **Headless game tests** — a `MinimalPlugins` app can run real boss and laser systems in `cargo test`, without a window.
 
 ## Contributing
 

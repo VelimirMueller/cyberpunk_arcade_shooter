@@ -1,5 +1,6 @@
-//! Reproducer: simulates round-1 boss death + round-2 boss spawn + round-2 combat systems.
-//! Intent: find which system panics after the first boss is killed.
+//! Regression test for the crash after the first boss dies ("fix after phase crash bug").
+//! Runs round-1 boss death, then round-2 boss spawn and round-2 combat systems.
+//! The systems read real elapsed time, so the loops sleep between updates.
 mod helpers;
 
 use bevy::prelude::*;
@@ -23,7 +24,7 @@ use cyberpunk_rpg::systems::powerups::{
     laser_stream_particle_system, laser_system, powerup_shockwave_system,
 };
 
-fn repro_app() -> App {
+fn round_app() -> App {
     let mut app = App::new();
     app.add_plugins(MinimalPlugins)
         .add_plugins(AssetPlugin::default());
@@ -107,8 +108,8 @@ fn spawn_player(app: &mut App) {
 }
 
 #[test]
-fn repro_round1_death_then_round2_boss() {
-    let mut app = repro_app();
+fn round2_boss_survives_round1_boss_death() {
+    let mut app = round_app();
     app.update(); // startup
 
     spawn_player(&mut app);
@@ -123,30 +124,37 @@ fn repro_round1_death_then_round2_boss() {
         app.update();
     }
 
+    assert_eq!(
+        app.world().resource::<GameData>().enemies_killed,
+        1,
+        "round-1 boss death was not registered"
+    );
+
     // Now spawn round-2 boss directly via the real helper
-    app.world_mut()
-        .commands()
-        .queue(|world: &mut World| {
-            let mut commands_state =
-                bevy::ecs::system::SystemState::<Commands>::new(world);
-            let mut commands = commands_state.get_mut(world);
-            spawn_boss(&mut commands, 2);
-            commands_state.apply(world);
-        });
+    app.world_mut().commands().queue(|world: &mut World| {
+        let mut commands_state = bevy::ecs::system::SystemState::<Commands>::new(world);
+        let mut commands = commands_state.get_mut(world);
+        spawn_boss(&mut commands, 2);
+        commands_state.apply(world);
+    });
     app.update();
 
-    // Run round 2 combat for 5 seconds of wall clock
-    for i in 0..600 {
+    // Run round 2 combat for about 5 seconds of wall clock
+    for _ in 0..600 {
         std::thread::sleep(std::time::Duration::from_millis(8));
         app.update();
-        if i % 100 == 0 {
-            let bosses: Vec<(u32, u32, bool)> = app
-                .world_mut()
-                .query::<&Boss>()
-                .iter(app.world())
-                .map(|b| (b.current_hp, b.max_hp, b.is_invulnerable))
-                .collect();
-            println!("tick {i}: bosses = {:?}", bosses);
-        }
     }
+
+    let round2_bosses: Vec<u32> = app
+        .world_mut()
+        .query::<(Entity, &Boss)>()
+        .iter(app.world())
+        .filter(|(entity, _)| *entity != boss1)
+        .map(|(_, boss)| boss.current_hp)
+        .collect();
+    assert_eq!(round2_bosses.len(), 1, "expected exactly one round-2 boss");
+    assert!(
+        round2_bosses[0] > 0,
+        "round-2 boss died without taking hits"
+    );
 }
