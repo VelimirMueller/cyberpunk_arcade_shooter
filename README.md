@@ -79,13 +79,13 @@ In the browser the game picks a lighter quality tier (less bloom, flat CRT). See
 
 ```
 cyberpunk_arcade_shooter/
-├── src/             # Game source code
-├── assets/shaders/  # WGSL CRT post-process shader (sprites are shapes, audio is synthesized)
-├── tests/           # Headless integration tests (boss phases, laser, round transition)
-├── docs/superpowers/ # Design specs and implementation plans per feature
-├── .github/         # CI workflows
-├── Cargo.toml       # Rust dependencies and metadata
-└── index.html       # Web entrypoint for WASM builds
+├── src/               # Game source code
+├── assets/shaders/    # WGSL CRT post-process shader (sprites are shapes, audio is synthesized)
+├── tests/             # Headless integration tests (boss phases, laser, round transition)
+├── docs/superpowers/  # Design specs and implementation plans per feature
+├── .github/           # CI workflows
+├── Cargo.toml         # Rust dependencies and metadata
+└── index.html         # Web entrypoint for WASM builds
 ```
 
 ## What I Learned
