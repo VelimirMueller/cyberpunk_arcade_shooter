@@ -153,5 +153,8 @@ fn round2_boss_survives_round1_boss_death() {
         .map(|(_, boss)| boss.current_hp)
         .collect();
     assert_eq!(round2_bosses.len(), 1, "expected exactly one round-2 boss");
-    assert!(round2_bosses[0] > 0, "round-2 boss died without taking hits");
+    assert!(
+        round2_bosses[0] > 0,
+        "round-2 boss died without taking hits"
+    );
 }
