@@ -1,0 +1,43 @@
+{
+  "group": "lab",
+  "version": "v2",
+  "dividers": [
+    {"key": "what",   "index": "01", "title": "WHAT IT DOES", "caption": "GEOMETRY TRIES TO KILL YOU.", "art": "strip-lab-1"},
+    {"key": "start",  "index": "02", "title": "QUICK START",  "caption": "COPY. PASTE. SHOOT.",          "art": "strip-lab-2"},
+    {"key": "how",    "index": "03", "title": "HOW IT WORKS", "caption": "SMALL SYSTEMS. ONE LOOP.",     "art": "strip-lab-3"},
+    {"key": "usage",  "index": "04", "title": "USAGE",        "caption": "BUTTONS AND LESSONS.",         "art": "strip-lab-4"},
+    {"key": "status", "index": "05", "title": "STATUS",       "caption": "HONEST NUMBERS ONLY.",         "art": "strip-lab-5"}
+  ],
+  "panels": [
+    {"key": "stats", "type": "stats", "title": "THE SHOOTER IN NUMBERS", "items": [
+      {"value": "0", "label": "TEXTURE FILES"},
+      {"value": "0", "label": "AUDIO FILES"},
+      {"value": "1", "label": "WGSL CRT SHADER"},
+      {"value": "6253", "label": "LINES OF RUST"}
+    ]},
+    {"key": "features", "type": "cards", "title": "THREE THINGS IT DOES WELL", "items": [
+      {"title": "NEON ARENA", "text": "A bloom-soaked geometry shooter. Multi-stage boss fights, bullet hells, arcade pace."},
+      {"title": "CRT LOOK", "text": "One hand-written WGSL shader: scanlines, vignette, barrel distortion. A quality tier per platform."},
+      {"title": "RUNS ANYWHERE", "text": "Native on Vulkan, Metal or DirectX 12. In the browser via WASM. Keyboard only."}
+    ]},
+    {"key": "start", "type": "terminal", "title": "QUICK START", "lines": [
+      "$ git clone https://github.com/VelimirMueller/lab-arcade-shooter.git",
+      "$ cd lab-arcade-shooter",
+      "$ cargo run --release",
+      "# browser build: trunk build --release"
+    ]},
+    {"key": "flow", "type": "flow", "title": "ONE FRAME, LEFT TO RIGHT", "nodes": [
+      {"title": "INPUT", "sub": "WASD, Space, Esc"},
+      {"title": "BEVY ECS", "sub": "systems gated on GameState", "hot": true},
+      {"title": "EVENTS", "sub": "SoundEvent, DeathEvent"},
+      {"title": "RENDER", "sub": "shapes, bloom, CRT WGSL"}
+    ], "caption": "Sprites are shapes. Audio is synthesized. Nothing to load."},
+    {"key": "status", "type": "status", "title": "WHAT WORKS TODAY", "rows": [
+      {"label": "native build", "value": "playable, v0.1.0", "state": "ok"},
+      {"label": "browser build", "value": "wasm, webgl2, lighter tier", "state": "ok"},
+      {"label": "headless tests", "value": "boss, laser, round transition", "state": "ok"},
+      {"label": "touch controls", "value": "keyboard only", "state": "off"},
+      {"label": "webgpu backend", "value": "cargo feature, off by default", "state": "off"}
+    ]}
+  ]
+}
