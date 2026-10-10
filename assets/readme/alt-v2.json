@@ -1,0 +1,17 @@
+{
+  "divider-what-v2.svg": "01 WHAT IT DOES. GEOMETRY TRIES TO KILL YOU.",
+  "divider-start-v2.svg": "02 QUICK START. COPY. PASTE. SHOOT.",
+  "divider-how-v2.svg": "03 HOW IT WORKS. SMALL SYSTEMS. ONE LOOP.",
+  "divider-usage-v2.svg": "04 USAGE. BUTTONS AND LESSONS.",
+  "divider-status-v2.svg": "05 STATUS. HONEST NUMBERS ONLY.",
+  "stats-v2-dark.svg": "0 TEXTURE FILES. 0 AUDIO FILES. 1 WGSL CRT SHADER. 6253 LINES OF RUST",
+  "stats-v2-light.svg": "0 TEXTURE FILES. 0 AUDIO FILES. 1 WGSL CRT SHADER. 6253 LINES OF RUST",
+  "features-v2-dark.svg": "NEON ARENA: A bloom-soaked geometry shooter. Multi-stage boss fights, bullet hells, arcade pace. CRT LOOK: One hand-written WGSL shader: scanlines, vignette, barrel distortion. A quality tier per platform. RUNS ANYWHERE: Native on Vulkan, Metal or DirectX 12. In the browser via WASM. Keyboard only",
+  "features-v2-light.svg": "NEON ARENA: A bloom-soaked geometry shooter. Multi-stage boss fights, bullet hells, arcade pace. CRT LOOK: One hand-written WGSL shader: scanlines, vignette, barrel distortion. A quality tier per platform. RUNS ANYWHERE: Native on Vulkan, Metal or DirectX 12. In the browser via WASM. Keyboard only",
+  "start-v2-dark.svg": "Terminal: $ git clone https://github.com/VelimirMueller/lab-arcade-shooter.git | $ cd lab-arcade-shooter | $ cargo run --release | # browser build: trunk build --release",
+  "start-v2-light.svg": "Terminal: $ git clone https://github.com/VelimirMueller/lab-arcade-shooter.git | $ cd lab-arcade-shooter | $ cargo run --release | # browser build: trunk build --release",
+  "flow-v2-dark.svg": "INPUT -> BEVY ECS -> EVENTS -> RENDER. Sprites are shapes. Audio is synthesized. Nothing to load.",
+  "flow-v2-light.svg": "INPUT -> BEVY ECS -> EVENTS -> RENDER. Sprites are shapes. Audio is synthesized. Nothing to load.",
+  "status-v2-dark.svg": "native build: playable, v0.1.0. browser build: wasm, webgl2, lighter tier. headless tests: boss, laser, round transition. touch controls: keyboard only. webgpu backend: cargo feature, off by default",
+  "status-v2-light.svg": "native build: playable, v0.1.0. browser build: wasm, webgl2, lighter tier. headless tests: boss, laser, round transition. touch controls: keyboard only. webgpu backend: cargo feature, off by default"
+}
