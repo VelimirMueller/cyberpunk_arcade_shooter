@@ -1,0 +1,11 @@
+{
+  "$comment": "VM. studio brand manifest (vm-brand playbook §7). art.file is the source art in the external vm-brand repo (assets/art/); this repo ships only the composed banners in assets/banner/.",
+  "group": "vlm",
+  "tagline": "Neon in, zero GC out.",
+  "sublabel": "RUST · BEVY · ECS · WASM",
+  "bannerVersion": "v1",
+  "art": {
+    "file": "vlm/vlm-v1-seed203.png",
+    "seed": 203
+  }
+}
